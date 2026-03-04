@@ -32,8 +32,7 @@ trap cleanup EXIT
 # ---------------------------------------------------------------------------
 STEP="clone"
 echo "Cloning ${REPO_URL} (branch: ${BASE_BRANCH:-main})..."
-gh repo clone "${REPO_URL}" /workspace -- --branch "${BASE_BRANCH:-main}"
-cd /workspace
+gh repo clone "${REPO_URL}" . -- --branch "${BASE_BRANCH:-main}"
 
 # ---------------------------------------------------------------------------
 # Step 2: Install dependencies
