@@ -17,35 +17,40 @@
      ======================================================================== */
 
   /* Deep Space — Foundation */
-  --void: #060A14;
-  --deep-space: #0B1628;
-  --nebula: #0E2040;
-  --orbit: #1A3A6E;
+  --void: #060a14;
+  --deep-space: #0b1628;
+  --nebula: #0e2040;
+  --orbit: #1a3a6e;
 
   /* Launch Fire — Energy */
-  --launchfire: #FF5C1A;
-  --ignition: #FF8C42;
-  --afterburn: #FFB347;
-  --red-planet: #C1440E;
+  --launchfire: #ff5c1a;
+  --ignition: #ff8c42;
+  --afterburn: #ffb347;
+  --red-planet: #c1440e;
 
   /* Metallic Silver — Trust & Finish */
-  --chrome: #E8EDF5;
-  --silver: #C8D0DC;
-  --stardust: #8A96A8;
-  --white: #F5F8FF;
+  --chrome: #e8edf5;
+  --silver: #c8d0dc;
+  --stardust: #8a96a8;
+  --white: #f5f8ff;
 
   /* Mission Outcomes */
-  --success: #2FE8A2;
-  --success-deep: #1AB878;
-  --signal-blue: #5B8FD8;
+  --success: #2fe8a2;
+  --success-deep: #1ab878;
+  --signal-blue: #5b8fd8;
 
   /* Gradient Identity Tokens */
-  --grad-launch-sequence: linear-gradient(135deg, #FF5C1A, #FF8C42, #FFB347);
-  --grad-deep-field: linear-gradient(135deg, #060A14, #0E2040, #1A3A6E);
-  --grad-metallic-sheen: linear-gradient(135deg, #E8EDF5, #C8D0DC, #8A96A8);
-  --grad-mars-atmosphere: linear-gradient(135deg, #C1440E, #FF5C1A, #FF8C42);
-  --grad-night-launch: linear-gradient(135deg, #060A14 0%, #0B1628 50%, rgba(255, 92, 26, 0.15) 100%);
-  --grad-mission-success: linear-gradient(135deg, #0B1628, rgba(47, 232, 162, 0.2), #0B1628);
+  --grad-launch-sequence: linear-gradient(135deg, #ff5c1a, #ff8c42, #ffb347);
+  --grad-deep-field: linear-gradient(135deg, #060a14, #0e2040, #1a3a6e);
+  --grad-metallic-sheen: linear-gradient(135deg, #e8edf5, #c8d0dc, #8a96a8);
+  --grad-mars-atmosphere: linear-gradient(135deg, #c1440e, #ff5c1a, #ff8c42);
+  --grad-night-launch: linear-gradient(
+    135deg,
+    #060a14 0%,
+    #0b1628 50%,
+    rgba(255, 92, 26, 0.15) 100%
+  );
+  --grad-mission-success: linear-gradient(135deg, #0b1628, rgba(47, 232, 162, 0.2), #0b1628);
 
   /* Typography Identity Tokens */
   --font-display: 'Bebas Neue', sans-serif;

@@ -29,12 +29,12 @@
   // Horizontal rule style: dashes
   "MD035": { "style": "---" },
 
-  // No inline HTML
-  "MD033": true,
+  // No inline HTML — allow img/div for README badges/layout
+  "MD033": { "allowed_elements": ["img", "div", "br", "p", "a"] },
 
   // Heading trailing punctuation — allow question marks
   "MD026": { "punctuation": ".,;:!" },
 
   // Table separator style: padded (spaces around dashes)
-  "MD060": { "style": "padded" }
+  "MD060": { "style": "padded" },
 }

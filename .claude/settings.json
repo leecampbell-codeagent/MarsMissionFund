@@ -58,7 +58,7 @@
       "Bash(git shortlog:*)",
       "Bash(git show:*)",
       "Bash(git status:*)",
-      
+
       "Bash(gh api:*)",
       "Bash(gh issue close:*)",
       "Bash(gh issue create:*)",
@@ -76,7 +76,7 @@
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
       "Bash(gh variable list:*)",
-      
+
       "Bash(npm audit:*)",
       "Bash(npm install:*)",
       "Bash(npm run lint:*)",
@@ -88,7 +88,7 @@
       "Bash(npm test:*)",
       "Bash(npm update:*)",
       "Bash(npm view:*)",
-      
+
       "Bash(npx eslint:*)",
       "Bash(npx next lint:*)",
       "Bash(npx prettier:*)",
@@ -101,12 +101,7 @@
       "Bash(terraform validate:*)",
       "Bash(tflint:*)"
     ],
-    "deny": [
-      "Bash(git branch -D:*)",
-      "Bash(gh pr merge:*)",
-      "Bash(git -C *)",
-      "Bash(cd *)"
-    ],
+    "deny": ["Bash(git branch -D:*)", "Bash(gh pr merge:*)", "Bash(git -C *)", "Bash(cd *)"],
     "ask": []
   }
 }

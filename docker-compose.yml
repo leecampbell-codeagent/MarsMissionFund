@@ -6,20 +6,20 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mmf}
       POSTGRES_DB: ${POSTGRES_DB:-mmf_dev}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
       - mmf-pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mmf} -d ${POSTGRES_DB:-mmf_dev}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-mmf} -d ${POSTGRES_DB:-mmf_dev}']
       interval: 2s
       timeout: 5s
       retries: 10
 
   dbmate:
     image: ghcr.io/amacneil/dbmate
-    command: ["--wait", "up"]
+    command: ['--wait', 'up']
     environment:
-      DATABASE_URL: "postgres://${POSTGRES_USER:-mmf}:${POSTGRES_PASSWORD:-mmf}@postgres:5432/${POSTGRES_DB:-mmf_dev}?sslmode=disable"
+      DATABASE_URL: 'postgres://${POSTGRES_USER:-mmf}:${POSTGRES_PASSWORD:-mmf}@postgres:5432/${POSTGRES_DB:-mmf_dev}?sslmode=disable'
     volumes:
       - ./db/migrations:/db/migrations
     depends_on:
@@ -35,9 +35,9 @@ services:
       PORT: ${PORT:-3001}
       NODE_ENV: development
       LOG_LEVEL: ${LOG_LEVEL:-debug}
-      DATABASE_URL: "postgres://${POSTGRES_USER:-mmf}:${POSTGRES_PASSWORD:-mmf}@postgres:5432/${POSTGRES_DB:-mmf_dev}?sslmode=disable"
+      DATABASE_URL: 'postgres://${POSTGRES_USER:-mmf}:${POSTGRES_PASSWORD:-mmf}@postgres:5432/${POSTGRES_DB:-mmf_dev}?sslmode=disable'
     ports:
-      - "${PORT:-3001}:3001"
+      - '${PORT:-3001}:3001'
     volumes:
       - ./packages/backend/src:/app/src
       - /app/node_modules
@@ -45,7 +45,8 @@ services:
       dbmate:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1"]
+      test:
+        ['CMD-SHELL', 'wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -54,11 +55,11 @@ services:
   frontend:
     image: node:22-bookworm-slim
     working_dir: /app
-    command: ["npm", "run", "dev", "--", "--host"]
+    command: ['npm', 'run', 'dev', '--', '--host']
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
     ports:
-      - "${FRONTEND_PORT:-5173}:5173"
+      - '${FRONTEND_PORT:-5173}:5173'
     volumes:
       - ./packages/frontend:/app
       - /app/node_modules

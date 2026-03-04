@@ -14,9 +14,7 @@ describe('LandingPlaceholder', () => {
   it('renders the subtitle text', () => {
     render(<LandingPlaceholder />);
 
-    expect(
-      screen.getByText('Crowdfunding the Next Giant Leap'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Crowdfunding the Next Giant Leap')).toBeInTheDocument();
   });
 
   it('has a single h1 element on the page', () => {

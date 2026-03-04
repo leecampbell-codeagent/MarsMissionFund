@@ -76,8 +76,6 @@ describe('PageShell', () => {
     );
 
     const year = new Date().getFullYear();
-    expect(
-      screen.getByText(`\u00A9 ${year} Mars Mission Fund`),
-    ).toBeInTheDocument();
+    expect(screen.getByText(`\u00A9 ${year} Mars Mission Fund`)).toBeInTheDocument();
   });
 });

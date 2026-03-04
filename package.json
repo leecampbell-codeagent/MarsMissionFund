@@ -8,7 +8,7 @@
     "dev": "docker compose up --build",
     "dev:frontend": "npm run dev --workspace=packages/frontend",
     "dev:backend": "npm run dev --workspace=packages/backend",
-    "lint": "eslint . && markdownlint-cli2 '**/*.md' '#node_modules'",
+    "lint": "eslint . && markdownlint-cli2 '**/*.md'",
     "lint:fix": "eslint . --fix && prettier --write .",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",

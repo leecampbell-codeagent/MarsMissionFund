@@ -4,9 +4,7 @@ export function LandingPlaceholder(): ReactElement {
   return (
     <section className="landing-placeholder">
       <h1 className="landing-placeholder__title">MARS MISSION FUND</h1>
-      <p className="landing-placeholder__subtitle">
-        Crowdfunding the Next Giant Leap
-      </p>
+      <p className="landing-placeholder__subtitle">Crowdfunding the Next Giant Leap</p>
       <style>{`
         .landing-placeholder {
           display: flex;

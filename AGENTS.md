@@ -4,12 +4,12 @@
 
 ## Patterns Discovered
 
-_To be populated as implementation begins._
+*To be populated as implementation begins.*
 
 ## Common Pitfalls
 
-_To be populated as implementation begins._
+*To be populated as implementation begins.*
 
 ## Performance Notes
 
-_To be populated as implementation begins._
+*To be populated as implementation begins.*

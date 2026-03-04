@@ -20,9 +20,7 @@ export function PageShell({ children }: PageShellProps): ReactElement {
       </main>
       <footer className="page-footer">
         <div className="page-footer__inner">
-          <p className="page-footer__text">
-            &copy; {new Date().getFullYear()} Mars Mission Fund
-          </p>
+          <p className="page-footer__text">&copy; {new Date().getFullYear()} Mars Mission Fund</p>
         </div>
       </footer>
       <style>{`
