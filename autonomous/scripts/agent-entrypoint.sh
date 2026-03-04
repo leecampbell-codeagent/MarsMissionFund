@@ -37,9 +37,13 @@ gh repo clone "${REPO_URL}" . -- --branch "${BASE_BRANCH:-main}"
 # ---------------------------------------------------------------------------
 # Step 2: Install dependencies
 # ---------------------------------------------------------------------------
-STEP="npm_ci"
+STEP="npm_install"
 echo "Installing dependencies..."
-npm ci
+if [ -f package-lock.json ]; then
+    npm ci
+else
+    npm install
+fi
 
 # ---------------------------------------------------------------------------
 # Step 2b: Configure prek pre-commit hooks
