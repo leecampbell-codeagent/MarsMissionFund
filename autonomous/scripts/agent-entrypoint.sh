@@ -43,6 +43,14 @@ echo "Installing dependencies..."
 npm ci
 
 # ---------------------------------------------------------------------------
+# Step 2b: Configure prek pre-commit hooks
+# ---------------------------------------------------------------------------
+STEP="prek"
+echo "Installing prek pre-commit hooks..."
+cp /opt/agent/scripts/.pre-commit-config.yaml /workspace/.pre-commit-config.yaml
+prek install
+
+# ---------------------------------------------------------------------------
 # Step 3: Lock down outbound network
 # ---------------------------------------------------------------------------
 STEP="firewall"

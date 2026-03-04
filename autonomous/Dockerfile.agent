@@ -18,6 +18,7 @@ ARG DBMATE_VERSION=2.22.0
 ARG CLAUDE_CODE_VERSION=latest
 ARG BIOME_VERSION=latest
 ARG PREK_VERSION=latest
+ARG GITLEAKS_VERSION=8.24.3
 
 # ---------------------------------------------------------------------------
 # System packages
@@ -46,6 +47,13 @@ RUN curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_$
 RUN curl -fsSL "https://github.com/amacneil/dbmate/releases/download/v${DBMATE_VERSION}/dbmate-linux-amd64" \
         -o /usr/local/bin/dbmate \
     && chmod +x /usr/local/bin/dbmate
+
+# ---------------------------------------------------------------------------
+# gitleaks (required by prek gitleaks hook)
+# ---------------------------------------------------------------------------
+RUN curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_amd64.tar.gz" \
+        | tar xz -C /usr/local/bin gitleaks \
+    && chmod +x /usr/local/bin/gitleaks
 
 # ---------------------------------------------------------------------------
 # Global npm tools
