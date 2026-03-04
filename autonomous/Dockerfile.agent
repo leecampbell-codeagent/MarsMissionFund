@@ -64,7 +64,7 @@ RUN ARCH=$(uname -m) && [ "$ARCH" = "aarch64" ] && ARCH="arm64" || ARCH="amd64" 
 RUN npm install -g \
         "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
         "@biomejs/biome@${BIOME_VERSION}" \
-        "prek@${PREK_VERSION}"
+        "@j178/prek@${PREK_VERSION}"
 
 # ---------------------------------------------------------------------------
 # Playwright (Chromium only — saves ~1 GB vs all browsers)
