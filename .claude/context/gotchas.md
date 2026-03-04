@@ -54,6 +54,25 @@
 - `BIGINT` max value is ~9.2 quintillion cents — overflow is not a practical concern but validate business-meaningful bounds at the application layer.
 - JSONB payloads have no size constraint at the DB level — enforce max payload size at the application layer.
 
+## Clerk SDK Gotchas
+
+- `requireAuth()` from `@clerk/express` **redirects** unauthenticated users (HTTP 302).
+Do NOT use it for JSON API endpoints — use `clerkMiddleware()` + `getAuth(req)` + manual 401 response.
+- `clerkMiddleware()` does NOT block unauthenticated requests.
+It silently attaches a "signed-out" auth object (with `userId: null`).
+You must explicitly check `userId` in your own middleware.
+- Clerk's `getAuth(req)` requires `clerkMiddleware()` to have run first.
+If called without it, it will return undefined or throw.
+- For Vite/React, the env var must be `VITE_CLERK_PUBLISHABLE_KEY` (with `VITE_` prefix).
+Without the prefix, Vite will not expose it to client code.
+- `@clerk/clerk-react` and `@clerk/react-router` are separate packages.
+If using React Router, evaluate whether `@clerk/react-router` gives better integration (router-aware `ClerkProvider`).
+- Clerk webhooks require a publicly accessible URL.
+For local dev, use ngrok or skip webhooks entirely and rely on JIT account creation.
+- Webhook payloads use at-least-once delivery (Svix).
+Always use `INSERT ... ON CONFLICT` or upsert patterns in webhook handlers.
+- CORS: When frontend and backend run on different ports, the backend must allow `Authorization` in `Access-Control-Allow-Headers` for Bearer token requests to work.
+
 ## npm Workspaces Hoisting
 
 - npm hoists the most common version of a shared dependency to the root.

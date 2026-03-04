@@ -56,6 +56,20 @@
 - One logical escrow account per campaign (segregated)
 - `amount_cents` is always positive; sign determined by entry_type in queries
 
+## Authentication (Clerk)
+
+- **Identity provider**: Clerk (OAuth 2.0 / OIDC), per L3-002 and L3-008
+- **Clerk user ID**: Opaque string (`user_xxxx`) — maps to `accounts.clerk_user_id`
+- **Internal identity**: `accounts.id` (UUID) — all domain operations use this, never the Clerk user ID directly
+- **Frontend SDK**: `@clerk/clerk-react` — `ClerkProvider`, `SignIn`, `SignUp`, `useAuth()`, `useUser()`
+- **Backend SDK**: `@clerk/express` — `clerkMiddleware()`, `getAuth(req)`, `clerkClient`
+- **Token flow**: Frontend gets JWT via `useAuth().getToken()`, sends as `Authorization: Bearer <token>`, backend validates via `clerkMiddleware()`
+- **Auth object**: `getAuth(req)` returns `{ userId, sessionId, sessionClaims, has(), getToken() }` — `userId` is null when unauthenticated
+- **`requireAuth()` is for page redirects, NOT API routes** — use `clerkMiddleware()` + manual 401 check for APIs
+- **Account sync**: JIT (just-in-time) creation on first authenticated request as primary path; webhooks (`user.created`, `user.updated`, `user.deleted`) for production reliability
+- **Webhook verification**: Svix HMAC-SHA256 signature, at-least-once delivery, handlers must be idempotent
+- **Environment variables**: `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` (backend), `VITE_CLERK_PUBLISHABLE_KEY` (frontend), `CLERK_WEBHOOK_SIGNING_SECRET` (webhooks)
+
 ## Infrastructure Conventions
 
 - **Local dev**: Docker Compose stack with PostgreSQL 16, backend, frontend, dbmate

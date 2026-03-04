@@ -64,7 +64,7 @@ These groups can be built concurrently by separate agents:
 |---|---------|-----------|----------|--------|-------------|------------|
 | 001 | [Monorepo Scaffold & Dev Environment](prds/feat-001-monorepo-scaffold.md) | Cross-cutting | P0 | SHIPPED | None | M |
 | 002 | [Database Schema Foundation](prds/feat-002-database-schema-foundation.md) | Cross-cutting | P0 | SHIPPED | 001 | M |
-| 003 | [Authentication with Clerk](prds/feat-003-authentication.md) | Account | P0 | TODO | 001 | M |
+| 003 | [Authentication with Clerk](prds/feat-003-authentication.md) | Account | P0 | SPECCED | 001 | M |
 | 004 | [Account Registration & Onboarding](prds/feat-004-account-registration-onboarding.md) | Account | P0 | TODO | 002, 003 | M |
 | 005 | [Campaign Creation (Draft & Submit)](prds/feat-005-campaign-creation.md) | Campaign, Account | P1 | TODO | 004, 013 | L |
 | 006 | [Campaign Review Pipeline](prds/feat-006-campaign-review-pipeline.md) | Campaign, Account | P1 | TODO | 005 | M |
