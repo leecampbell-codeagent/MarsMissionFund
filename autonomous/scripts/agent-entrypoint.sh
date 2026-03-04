@@ -89,9 +89,12 @@ STEP="claude"
 MAX_RUNTIME="${MAX_RUNTIME:-43200}"
 echo "Starting Claude Code (timeout: ${MAX_RUNTIME}s)..."
 
+PROMPT=$(cat /opt/agent/scripts/prompt-template.md)
+
 timeout --signal=SIGINT --kill-after=60 "${MAX_RUNTIME}" \
     claude --dangerously-skip-permissions --print \
-    < /opt/agent/scripts/prompt-template.md
+    --output-format stream-json --verbose \
+    "$PROMPT"
 
 STEP="complete"
 echo "Agent run finished successfully."
