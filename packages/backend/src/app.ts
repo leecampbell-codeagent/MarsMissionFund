@@ -24,7 +24,7 @@ function createApp(): express.Express {
   );
 
   // Parse JSON request bodies
-  app.use(express.json());
+  app.use(express.json({ limit: '1mb' }));
 
   // Routes
   app.use(healthRouter);
