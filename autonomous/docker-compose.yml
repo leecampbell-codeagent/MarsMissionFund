@@ -2,6 +2,7 @@
 # MarsMissionFund Autonomous Agent Stack
 # =============================================================================
 # Usage:
+#   cd autonomous/
 #   cp .env.agent.example .env.agent   # fill in real credentials
 #   docker compose build
 #   docker compose up
