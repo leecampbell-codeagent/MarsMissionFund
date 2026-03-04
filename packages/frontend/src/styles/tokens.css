@@ -1,0 +1,209 @@
+/* ==========================================================================
+   Mars Mission Fund — Design Tokens
+   Source of truth: specs/standards/brand.md (L2-001 v1.2)
+
+   ARCHITECTURE:
+   - Tier 1 (Identity): Raw brand palette. Internal to this file only.
+   - Tier 2 (Semantic): Purpose-named tokens. The ONLY tokens components consume.
+
+   RULE: Component code must NEVER reference Tier 1 tokens directly.
+   ========================================================================== */
+
+:root {
+  /* ========================================================================
+     TIER 1 — Identity Tokens (Brand Reference Only)
+     These exist here to provide the mapping chain.
+     DO NOT reference these in component code.
+     ======================================================================== */
+
+  /* Deep Space — Foundation */
+  --void: #060A14;
+  --deep-space: #0B1628;
+  --nebula: #0E2040;
+  --orbit: #1A3A6E;
+
+  /* Launch Fire — Energy */
+  --launchfire: #FF5C1A;
+  --ignition: #FF8C42;
+  --afterburn: #FFB347;
+  --red-planet: #C1440E;
+
+  /* Metallic Silver — Trust & Finish */
+  --chrome: #E8EDF5;
+  --silver: #C8D0DC;
+  --stardust: #8A96A8;
+  --white: #F5F8FF;
+
+  /* Mission Outcomes */
+  --success: #2FE8A2;
+  --success-deep: #1AB878;
+  --signal-blue: #5B8FD8;
+
+  /* Gradient Identity Tokens */
+  --grad-launch-sequence: linear-gradient(135deg, #FF5C1A, #FF8C42, #FFB347);
+  --grad-deep-field: linear-gradient(135deg, #060A14, #0E2040, #1A3A6E);
+  --grad-metallic-sheen: linear-gradient(135deg, #E8EDF5, #C8D0DC, #8A96A8);
+  --grad-mars-atmosphere: linear-gradient(135deg, #C1440E, #FF5C1A, #FF8C42);
+  --grad-night-launch: linear-gradient(135deg, #060A14 0%, #0B1628 50%, rgba(255, 92, 26, 0.15) 100%);
+  --grad-mission-success: linear-gradient(135deg, #0B1628, rgba(47, 232, 162, 0.2), #0B1628);
+
+  /* Typography Identity Tokens */
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-data: 'Space Mono', monospace;
+
+  /* Motion Identity Tokens */
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-medium: 500ms;
+  --duration-slow: 800ms;
+  --easing-out: cubic-bezier(0.25, 1, 0.5, 1);
+  --easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Radius Identity Tokens */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 100px;
+
+  /* ========================================================================
+     TIER 2 — Semantic Tokens (Component Consumption Layer)
+     Components reference ONLY these tokens.
+     ======================================================================== */
+
+  /* ------------------------------------------------------------------
+     2.1 Colour — Actions
+     ------------------------------------------------------------------ */
+  --color-action-primary: var(--launchfire);
+  --color-action-primary-hover: var(--ignition);
+  --color-action-primary-text: var(--white);
+  --color-action-primary-shadow: rgba(255, 92, 26, 0.35);
+  --color-action-secondary-bg: rgba(245, 248, 255, 0.06);
+  --color-action-secondary-text: var(--silver);
+  --color-action-secondary-border: rgba(245, 248, 255, 0.12);
+  --color-action-ghost-text: var(--ignition);
+  --color-action-ghost-border: rgba(255, 92, 26, 0.3);
+  --color-action-disabled: rgba(138, 150, 168, 0.5);
+
+  /* ------------------------------------------------------------------
+     2.2 Colour — Status
+     ------------------------------------------------------------------ */
+  --color-status-success: var(--success);
+  --color-status-success-bg: rgba(47, 232, 162, 0.12);
+  --color-status-success-border: rgba(47, 232, 162, 0.2);
+  --color-status-error: var(--red-planet);
+  --color-status-warning: var(--afterburn);
+  --color-status-info: var(--orbit);
+  --color-status-active: var(--launchfire);
+  --color-status-active-bg: rgba(255, 92, 26, 0.12);
+  --color-status-active-border: rgba(255, 92, 26, 0.2);
+  --color-status-new: var(--signal-blue);
+  --color-status-new-bg: rgba(26, 58, 110, 0.4);
+  --color-status-new-border: rgba(26, 58, 110, 0.6);
+
+  /* ------------------------------------------------------------------
+     2.3 Colour — Surfaces
+     ------------------------------------------------------------------ */
+  --color-bg-page: var(--void);
+  --color-bg-surface: var(--deep-space);
+  --color-bg-elevated: var(--nebula);
+  --color-bg-overlay: rgba(6, 10, 20, 0.9);
+  --color-bg-input: rgba(245, 248, 255, 0.04);
+  --color-bg-accent: var(--orbit);
+
+  /* ------------------------------------------------------------------
+     2.4 Colour — Text
+     ------------------------------------------------------------------ */
+  --color-text-primary: var(--chrome);
+  --color-text-secondary: var(--silver);
+  --color-text-tertiary: var(--stardust);
+  --color-text-accent: var(--launchfire);
+  --color-text-on-action: var(--white);
+  --color-text-success: var(--success);
+  --color-text-error: var(--red-planet);
+  --color-text-warning: var(--afterburn);
+
+  /* ------------------------------------------------------------------
+     2.5 Colour — Borders & Dividers
+     ------------------------------------------------------------------ */
+  --color-border-subtle: rgba(245, 248, 255, 0.06);
+  --color-border-emphasis: var(--orbit);
+  --color-border-input: rgba(245, 248, 255, 0.1);
+  --color-border-accent: var(--launchfire);
+
+  /* ------------------------------------------------------------------
+     2.6 Colour — Progress & Data Visualisation
+     ------------------------------------------------------------------ */
+  --color-progress-fill: linear-gradient(90deg, var(--launchfire), var(--afterburn));
+  --color-progress-complete: linear-gradient(90deg, var(--success), var(--success-deep));
+  --color-progress-track: rgba(245, 248, 255, 0.06);
+  --color-progress-indicator: var(--afterburn);
+  --color-data-positive: var(--success);
+  --color-data-neutral: var(--stardust);
+
+  /* ------------------------------------------------------------------
+     2.7 Gradients — Semantic
+     ------------------------------------------------------------------ */
+  --gradient-action-primary: var(--grad-launch-sequence);
+  --gradient-surface-card: var(--grad-deep-field);
+  --gradient-surface-stat: linear-gradient(135deg, var(--nebula), var(--deep-space));
+  --gradient-hero: var(--grad-night-launch);
+  --gradient-campaign-hero: var(--grad-mars-atmosphere);
+  --gradient-celebration: var(--grad-mission-success);
+  --gradient-achievement: var(--grad-metallic-sheen);
+
+  /* ------------------------------------------------------------------
+     2.9 Motion — Semantic
+     ------------------------------------------------------------------ */
+  --motion-enter-duration: var(--duration-base);
+  --motion-enter-easing: var(--easing-out);
+  --motion-enter-emphasis-duration: var(--duration-medium);
+  --motion-enter-emphasis-easing: var(--easing-spring);
+  --motion-hover-duration: var(--duration-fast);
+  --motion-hover-easing: var(--easing-out);
+  --motion-panel-duration: var(--duration-medium);
+  --motion-panel-easing: var(--easing-out);
+  --motion-page-duration: var(--duration-slow);
+  --motion-page-easing: var(--easing-out);
+
+  /* ------------------------------------------------------------------
+     2.10 Layout — Semantic Radii
+     ------------------------------------------------------------------ */
+  --radius-button: var(--radius-full);
+  --radius-badge: var(--radius-sm);
+  --radius-input: var(--radius-md);
+  --radius-card: var(--radius-xl);
+  --radius-card-large: var(--radius-2xl);
+  --radius-stat: var(--radius-lg);
+  --radius-progress: var(--radius-full);
+
+  /* ------------------------------------------------------------------
+     Breakpoints (reference values — used in media queries, not var())
+     ------------------------------------------------------------------ */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+}
+
+/* ==========================================================================
+   Reduced Motion Overrides
+   All animations respect prefers-reduced-motion per L2-001 Section 5.2.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-enter-duration: 0ms;
+    --motion-enter-easing: linear;
+    --motion-enter-emphasis-duration: var(--duration-fast);
+    --motion-enter-emphasis-easing: linear;
+    --motion-hover-duration: 0ms;
+    --motion-hover-easing: linear;
+    --motion-panel-duration: 0ms;
+    --motion-panel-easing: linear;
+    --motion-page-duration: 0ms;
+    --motion-page-easing: linear;
+  }
+}

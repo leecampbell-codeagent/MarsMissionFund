@@ -25,3 +25,12 @@
 - **Reviewer**: Reviews campaign proposals against curation criteria before campaigns go live
 - **Administrator**: Platform management, campaign moderation
 - **Super Administrator**: Full system access, disbursement final approval
+
+## Infrastructure Conventions
+
+- **Local dev**: Docker Compose stack with PostgreSQL 16, backend, frontend, dbmate
+- **Database migrations**: dbmate (`ghcr.io/amacneil/dbmate`), files in `db/migrations/` at repo root
+- **Logging**: Pino (structured JSON) with pino-http middleware, pino-pretty for dev only
+- **Environment variables**: `.env` never committed; `.env.example` documents all vars with placeholders
+- **Mock adapters**: `MOCK_[SERVICE]=true/false` env vars to toggle mock/real adapters
+- **Package naming**: `@mmf/backend`, `@mmf/frontend` (npm workspace namespace)
