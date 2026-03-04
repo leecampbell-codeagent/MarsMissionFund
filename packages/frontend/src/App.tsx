@@ -1,12 +1,53 @@
 import { type ReactElement } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import './App.css';
 import { PageShell } from './components/layout/page-shell';
 import { LandingPlaceholder } from './components/layout/landing-placeholder';
+import { ProtectedRoute } from './components/auth/protected-route';
+import { PublicOnlyRoute } from './components/auth/public-only-route';
+import SignInPage from './pages/sign-in';
+import SignUpPage from './pages/sign-up';
+import DashboardPlaceholder from './pages/dashboard';
+import OnboardingPlaceholder from './pages/onboarding';
 
 export function App(): ReactElement {
   return (
     <PageShell>
-      <LandingPlaceholder />
+      <Routes>
+        <Route path="/" element={<LandingPlaceholder />} />
+        <Route
+          path="/sign-in/*"
+          element={
+            <PublicOnlyRoute>
+              <SignInPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/sign-up/*"
+          element={
+            <PublicOnlyRoute>
+              <SignUpPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPlaceholder />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/onboarding"
+          element={
+            <ProtectedRoute>
+              <OnboardingPlaceholder />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
     </PageShell>
   );
 }

@@ -1,4 +1,5 @@
 import { type ReactElement, type ReactNode } from 'react';
+import { HeaderAuthSection } from './header-auth-section';
 
 interface PageShellProps {
   readonly children: ReactNode;
@@ -13,6 +14,7 @@ export function PageShell({ children }: PageShellProps): ReactElement {
       <header className="page-header">
         <div className="page-header__inner">
           <span className="page-header__logo">MMF</span>
+          <HeaderAuthSection />
         </div>
       </header>
       <main id="main-content" className="page-main">
@@ -41,6 +43,9 @@ export function PageShell({ children }: PageShellProps): ReactElement {
           max-width: 1280px;
           margin: 0 auto;
           padding: 0 16px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
         }
 
         @media (min-width: 640px) {

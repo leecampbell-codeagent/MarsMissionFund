@@ -1,6 +1,12 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { PageShell } from './page-shell';
+
+// Mock @clerk/clerk-react — PageShell now includes HeaderAuthSection which uses useAuth
+vi.mock('@clerk/clerk-react', () => ({
+  useAuth: () => ({ isLoaded: true, isSignedIn: false }),
+  UserButton: () => <div data-testid="clerk-user-button">UserButton</div>,
+}));
 
 describe('PageShell', () => {
   it('renders children in the main content area', () => {
