@@ -59,6 +59,43 @@
 - API proxy configured in `vite.config.ts` under `server.proxy`.
 - `server.host: true` for Docker compatibility.
 
+## Database Migration Patterns
+
+### dbmate Migration Structure
+
+- Files in `db/migrations/` at repo root (NOT inside any package).
+- Naming: `YYYYMMDDHHMMSS_description.sql` (dbmate default format).
+- Each file has `-- migrate:up` and `-- migrate:down` sections.
+- Both sections wrapped in `BEGIN; ... COMMIT;` for transactional DDL.
+- Append-only — never modify existing migrations.
+- One concern per migration file (one table per migration for foundational schema).
+- Rollback order: reverse of creation order (drop dependents first).
+
+### Reusable Trigger Pattern
+
+- A single `update_updated_at_column()` function is created in the first migration.
+- Applied to all tables that have `updated_at` via `CREATE TRIGGER ... BEFORE UPDATE`.
+- NOT applied to append-only tables (`events`, `escrow_ledger`).
+
+### Append-Only Table Pattern
+
+- No `updated_at` column.
+- Application layer exposes only `insert`, never `update` or `delete`.
+- Defence in depth: BEFORE UPDATE/DELETE trigger that raises an exception.
+- Used for: `events` table, `escrow_ledger` table.
+
+### FK Convention
+
+- `ON DELETE RESTRICT`: when the parent entity has a lifecycle that must be respected (accounts with campaigns, campaigns with contributions).
+- `ON DELETE CASCADE`: when child entities are owned by and inseparable from the parent (milestones owned by campaigns).
+- Every FK column gets an explicit index.
+
+### Status Column Pattern
+
+- `TEXT NOT NULL DEFAULT '<initial_state>'` with a CHECK constraint listing all valid values.
+- Not PostgreSQL ENUM types (ENUMs are hard to modify in migrations).
+- State machine transition validation is enforced at the domain layer, not the database.
+
 ## Testing Patterns
 
 ### Backend Tests

@@ -41,6 +41,19 @@
 - Use `projects` option in root `vitest.config.ts` instead.
 - Per-package configs can use `extends` to inherit shared settings.
 
+## PostgreSQL Migration Gotchas
+
+- PostgreSQL supports transactional DDL — wrap migrations in `BEGIN; ... COMMIT;` for atomicity.
+- Rollback order must reverse creation order (drop dependent tables first, then parent tables).
+- `gen_random_uuid()` is built-in since PostgreSQL 13 — do NOT create the `uuid-ossp` extension.
+- ENUM types are awkward to modify in migrations (`ALTER TYPE ... ADD VALUE` cannot run inside a transaction in older PG versions). Use `TEXT` with `CHECK` constraints instead.
+- `TEXT[]` array type does not validate array contents at the DB level. Use application-layer validation for role values, or a custom CHECK with `array_position`.
+- CHECK constraints validate individual values but cannot enforce state machine transitions (e.g., `draft` -> `live` skipping `submitted`). Transition logic lives in the domain layer.
+- Composite PK `(aggregate_id, sequence_number)` on events table means `event_id` needs a separate UNIQUE constraint if global uniqueness is required.
+- Append-only tables should have a BEFORE UPDATE/DELETE trigger that raises an exception as defence in depth.
+- `BIGINT` max value is ~9.2 quintillion cents — overflow is not a practical concern but validate business-meaningful bounds at the application layer.
+- JSONB payloads have no size constraint at the DB level — enforce max payload size at the application layer.
+
 ## npm Workspaces Hoisting
 
 - npm hoists the most common version of a shared dependency to the root.

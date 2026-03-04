@@ -26,6 +26,36 @@
 - **Administrator**: Platform management, campaign moderation
 - **Super Administrator**: Full system access, disbursement final approval
 
+## Event Sourcing / CQRS
+
+- **Event store**: Single `events` table in PostgreSQL, shared by domain events and audit events
+- **Event envelope**: `event_id`, `event_type`, `aggregate_id`, `aggregate_type`, `sequence_number`, `timestamp`, `correlation_id`, `source_service`, `payload` (JSONB)
+- **Primary key**: Composite `(aggregate_id, sequence_number)` — NOT `event_id`
+- **Consumption model**: Pull-based with stored checkpoints; at-least-once delivery; all consumers must be idempotent
+- **Read models**: Aggregate tables (`accounts`, `campaigns`, etc.) are materialised projections of the event stream
+- **Write path**: Event insert + aggregate table update in the same transaction (transactional outbox within single DB)
+- **Schema evolution**: Backward-compatible only — new payload fields may be added, existing fields never removed or changed
+
+## Database Schema Conventions
+
+- All PKs: `UUID DEFAULT gen_random_uuid()` (built-in since PostgreSQL 13, no extension needed)
+- All monetary columns: `BIGINT` (integer cents) — never FLOAT/DOUBLE/NUMERIC
+- All date columns: `TIMESTAMPTZ` — never TIMESTAMP without timezone
+- Status columns: `TEXT` with `CHECK` constraint (not ENUM types — ENUMs are hard to alter in migrations)
+- Roles: `TEXT[]` array type on accounts table (small fixed set, avoids join table)
+- Event payloads: `JSONB` (not JSON) — supports indexing and efficient querying
+- Every FK column must have an index
+- Reusable `update_updated_at_column()` trigger function applied to all mutable tables
+- Append-only tables (`events`, `escrow_ledger`): no `updated_at` column
+
+## Escrow Ledger
+
+- Append-only, immutable — no UPDATE or DELETE operations
+- Entry types: `contribution`, `disbursement`, `refund`, `interest_credit`, `interest_debit`
+- Balance is computed via SUM, not stored — sign convention derived from entry_type
+- One logical escrow account per campaign (segregated)
+- `amount_cents` is always positive; sign determined by entry_type in queries
+
 ## Infrastructure Conventions
 
 - **Local dev**: Docker Compose stack with PostgreSQL 16, backend, frontend, dbmate
