@@ -1,6 +1,6 @@
 export interface WebhookUserData {
   readonly id: string;
-  readonly email_addresses: ReadonlyArray<{ readonly email_address: string }>;
+  readonly email_addresses: readonly { readonly email_address: string }[];
   readonly first_name: string | null;
   readonly last_name: string | null;
 }

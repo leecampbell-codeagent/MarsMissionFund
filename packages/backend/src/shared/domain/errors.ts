@@ -10,21 +10,21 @@ export class DomainError extends Error {
 }
 
 export class AuthenticationError extends DomainError {
-  constructor(message: string = 'Authentication required.') {
+  constructor(message = 'Authentication required.') {
     super('UNAUTHENTICATED', message);
     this.name = 'AuthenticationError';
   }
 }
 
 export class AccountSuspendedError extends DomainError {
-  constructor(message: string = 'Your account has been suspended. Please contact support.') {
+  constructor(message = 'Your account has been suspended. Please contact support.') {
     super('ACCOUNT_SUSPENDED', message);
     this.name = 'AccountSuspendedError';
   }
 }
 
 export class AccountDeletedError extends DomainError {
-  constructor(message: string = 'This account has been deleted.') {
+  constructor(message = 'This account has been deleted.') {
     super('ACCOUNT_DELETED', message);
     this.name = 'AccountDeletedError';
   }

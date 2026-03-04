@@ -16,18 +16,19 @@ export function createWebhookRouter(
   router.post(
     '/api/webhooks/clerk',
     express.raw({ type: 'application/json' }),
-    async (req, res, _next) => {
+    async (req, res) => {
       try {
-        const payload = typeof req.body === 'string'
-          ? req.body
-          : Buffer.isBuffer(req.body)
-            ? req.body.toString('utf8')
-            : JSON.stringify(req.body);
+        const payload =
+          typeof req.body === 'string'
+            ? req.body
+            : Buffer.isBuffer(req.body)
+              ? req.body.toString('utf8')
+              : JSON.stringify(req.body);
 
         const headers: Record<string, string> = {
-          'svix-id': req.headers['svix-id'] as string ?? '',
-          'svix-timestamp': req.headers['svix-timestamp'] as string ?? '',
-          'svix-signature': req.headers['svix-signature'] as string ?? '',
+          'svix-id': (req.headers['svix-id'] as string | undefined) ?? '',
+          'svix-timestamp': (req.headers['svix-timestamp'] as string | undefined) ?? '',
+          'svix-signature': (req.headers['svix-signature'] as string | undefined) ?? '',
         };
 
         const event = webhookVerifier.verifyWebhookSignature(payload, headers);

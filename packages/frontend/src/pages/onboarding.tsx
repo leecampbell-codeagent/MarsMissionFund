@@ -9,7 +9,7 @@ export default function OnboardingPlaceholder(): ReactElement {
   const navigate = useNavigate();
 
   function handleSkip(): void {
-    navigate('/dashboard');
+    void navigate('/dashboard');
   }
 
   return (
@@ -18,11 +18,7 @@ export default function OnboardingPlaceholder(): ReactElement {
       <p className="onboarding-placeholder__body">
         Onboarding coming soon. We&apos;re building your mission profile.
       </p>
-      <button
-        type="button"
-        className="onboarding-placeholder__skip"
-        onClick={handleSkip}
-      >
+      <button type="button" className="onboarding-placeholder__skip" onClick={handleSkip}>
         Skip for now
       </button>
       <style>{`

@@ -6,11 +6,7 @@ import { type ReactElement } from 'react';
  */
 export function AuthLoadingScreen(): ReactElement {
   return (
-    <div
-      className="auth-loading-screen"
-      role="status"
-      aria-label="Checking authentication"
-    >
+    <div className="auth-loading-screen" role="status" aria-label="Checking authentication">
       <div className="auth-loading-screen__spinner" />
       <p className="auth-loading-screen__text">Preparing your mission...</p>
       <style>{`

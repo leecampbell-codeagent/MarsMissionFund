@@ -1,6 +1,9 @@
 import { Webhook } from 'svix';
 import { AuthenticationError } from '../../../shared/domain/errors.js';
-import type { WebhookVerificationPort, WebhookEvent } from '../../ports/webhook-verification-port.js';
+import type {
+  WebhookVerificationPort,
+  WebhookEvent,
+} from '../../ports/webhook-verification-port.js';
 
 export class ClerkWebhookVerificationAdapter implements WebhookVerificationPort {
   private readonly webhook: Webhook;

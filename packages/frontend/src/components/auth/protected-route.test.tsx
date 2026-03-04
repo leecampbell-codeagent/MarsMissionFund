@@ -6,7 +6,7 @@ import { ProtectedRoute } from './protected-route';
 // Mock @clerk/clerk-react
 const mockUseAuth = vi.fn();
 vi.mock('@clerk/clerk-react', () => ({
-  useAuth: () => mockUseAuth(),
+  useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
 }));
 
 function renderWithRouter(ui: React.ReactElement, initialEntries = ['/dashboard']) {

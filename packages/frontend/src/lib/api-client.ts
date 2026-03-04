@@ -15,7 +15,7 @@ export class ApiError extends Error {
 }
 
 export class UnauthenticatedError extends ApiError {
-  constructor(message: string = 'Authentication required.') {
+  constructor(message = 'Authentication required.') {
     super(401, 'UNAUTHENTICATED', message);
     this.name = 'UnauthenticatedError';
   }
@@ -39,8 +39,8 @@ async function makeRequest<T>(
   getToken: () => Promise<string | null>,
   { method, path, body, params }: ApiClientRequestOptions,
 ): Promise<T> {
-  const baseUrl = import.meta.env.VITE_API_URL ?? '';
-  const url = new URL(path, baseUrl || window.location.origin);
+  const baseUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
+  const url = new URL(path, baseUrl.length > 0 ? baseUrl : window.location.origin);
 
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
@@ -55,7 +55,7 @@ async function makeRequest<T>(
   };
 
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
 
   const response = await fetch(url.toString(), {
@@ -64,17 +64,21 @@ async function makeRequest<T>(
     body: body ? JSON.stringify(body) : undefined,
   });
 
+  interface ErrorResponseBody {
+    error?: { code?: string; message?: string };
+  }
+
   if (response.status === 401) {
-    const errorBody = await response.json().catch(() => ({
+    const errorBody = (await response.json().catch(() => ({
       error: { code: 'UNAUTHENTICATED', message: 'Authentication required.' },
-    }));
+    }))) as ErrorResponseBody;
     throw new UnauthenticatedError(errorBody.error?.message ?? 'Authentication required.');
   }
 
   if (!response.ok) {
-    const errorBody = await response.json().catch(() => ({
+    const errorBody = (await response.json().catch(() => ({
       error: { code: 'UNKNOWN_ERROR', message: 'An unexpected error occurred.' },
-    }));
+    }))) as ErrorResponseBody;
     throw new ApiError(
       response.status,
       errorBody.error?.code ?? 'UNKNOWN_ERROR',
@@ -96,7 +100,6 @@ export function createApiClient(getToken: () => Promise<string | null>): ApiClie
       makeRequest<T>(getToken, { method: 'POST', path, body }),
     put: <T>(path: string, body?: unknown) =>
       makeRequest<T>(getToken, { method: 'PUT', path, body }),
-    del: <T>(path: string) =>
-      makeRequest<T>(getToken, { method: 'DELETE', path }),
+    del: <T>(path: string) => makeRequest<T>(getToken, { method: 'DELETE', path }),
   };
 }

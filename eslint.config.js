@@ -34,6 +34,7 @@ export default tseslint.config(
     rules: {
       'no-console': 'error',
       '@typescript-eslint/dot-notation': ['error', { allowIndexSignaturePropertyAccess: true }],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   },
 

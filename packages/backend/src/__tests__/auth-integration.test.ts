@@ -3,8 +3,14 @@ import request from 'supertest';
 import express from 'express';
 import pinoHttp from 'pino-http';
 import pino from 'pino';
-import { createRequireAuthentication, type AuthExtractor } from '../shared/middleware/require-authentication.js';
-import { createEnrichAuthContext, type AuthClaimsExtractor } from '../shared/middleware/enrich-auth-context.js';
+import {
+  createRequireAuthentication,
+  type AuthExtractor,
+} from '../shared/middleware/require-authentication.js';
+import {
+  createEnrichAuthContext,
+  type AuthClaimsExtractor,
+} from '../shared/middleware/enrich-auth-context.js';
 import { AccountAppService } from '../account/application/account-app-service.js';
 import { InMemoryAccountRepository } from '../account/adapters/mock/in-memory-account-repository.js';
 import { Account } from '../account/domain/account.js';
@@ -13,7 +19,9 @@ import type { Request } from 'express';
 const testLogger = pino({ level: 'silent' });
 
 // Helper: create a mock auth extractor that reads from req.auth
-function createTestAuthExtractor(userId: string | null = 'user_test_001'): AuthExtractor & AuthClaimsExtractor {
+function createTestAuthExtractor(
+  userId: string | null = 'user_test_001',
+): AuthExtractor & AuthClaimsExtractor {
   return {
     getUserId(_req: Request): string | null {
       return userId;
@@ -135,7 +143,9 @@ describe('enrichAuthContext middleware', () => {
 
     expect(response.status).toBe(403);
     expect(response.body.error.code).toBe('ACCOUNT_SUSPENDED');
-    expect(response.body.error.message).toBe('Your account has been suspended. Please contact support.');
+    expect(response.body.error.message).toBe(
+      'Your account has been suspended. Please contact support.',
+    );
   });
 
   it('returns 403 for deactivated account', async () => {

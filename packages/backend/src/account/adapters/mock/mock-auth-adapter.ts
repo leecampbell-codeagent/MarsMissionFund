@@ -5,11 +5,11 @@ const MOCK_USER_ID = 'user_mock_001';
 const MOCK_SESSION_ID = 'sess_mock_001';
 
 export class MockAuthAdapter implements AuthPort {
-  async verifyToken(_token: string): Promise<AuthPayload | null> {
-    return {
+  verifyToken(_token: string): Promise<AuthPayload | null> {
+    return Promise.resolve({
       clerkUserId: MOCK_USER_ID,
       sessionId: MOCK_SESSION_ID,
-    };
+    });
   }
 
   getMiddleware(): RequestHandler {

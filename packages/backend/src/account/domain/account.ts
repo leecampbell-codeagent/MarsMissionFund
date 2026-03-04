@@ -1,6 +1,11 @@
 import { DomainError } from '../../shared/domain/errors.js';
 
-export type AccountStatus = 'pending_verification' | 'active' | 'suspended' | 'deactivated' | 'deleted';
+export type AccountStatus =
+  | 'pending_verification'
+  | 'active'
+  | 'suspended'
+  | 'deactivated'
+  | 'deleted';
 
 interface AccountProps {
   readonly id: string;

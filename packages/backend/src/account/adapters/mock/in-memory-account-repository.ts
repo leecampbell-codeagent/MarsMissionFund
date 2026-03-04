@@ -2,15 +2,15 @@ import { Account, type AccountStatus } from '../../domain/account.js';
 import type { AccountRepository, WebhookAccountInput } from '../../ports/account-repository.js';
 
 export class InMemoryAccountRepository implements AccountRepository {
-  private readonly accounts: Map<string, Account> = new Map();
+  private readonly accounts = new Map<string, Account>();
 
-  async findByClerkUserId(clerkUserId: string): Promise<Account | null> {
+  findByClerkUserId(clerkUserId: string): Promise<Account | null> {
     for (const account of this.accounts.values()) {
       if (account.clerkUserId === clerkUserId) {
-        return account;
+        return Promise.resolve(account);
       }
     }
-    return null;
+    return Promise.resolve(null);
   }
 
   async save(account: Account): Promise<void> {

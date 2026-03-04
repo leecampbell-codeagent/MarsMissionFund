@@ -6,7 +6,7 @@ import { HeaderAuthSection } from './header-auth-section';
 // Mock @clerk/clerk-react
 const mockUseAuth = vi.fn();
 vi.mock('@clerk/clerk-react', () => ({
-  useAuth: () => mockUseAuth(),
+  useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
   UserButton: () => <div data-testid="clerk-user-button">UserButton</div>,
 }));
 

@@ -110,9 +110,8 @@ export async function createDependencies(): Promise<AppDependencies> {
   }
 
   const { ClerkAuthAdapter } = await import('./account/adapters/clerk/clerk-auth-adapter.js');
-  const { ClerkWebhookVerificationAdapter } = await import(
-    './account/adapters/clerk/clerk-webhook-verification-adapter.js'
-  );
+  const { ClerkWebhookVerificationAdapter } =
+    await import('./account/adapters/clerk/clerk-webhook-verification-adapter.js');
   const { PgAccountRepository } = await import('./account/adapters/pg/pg-account-repository.js');
   const { Pool } = await import('pg');
 

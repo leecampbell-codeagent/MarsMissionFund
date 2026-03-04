@@ -15,7 +15,11 @@ export function createEnrichAuthContext(
   accountAppService: AccountAppService,
   claimsExtractor: AuthClaimsExtractor,
 ) {
-  return async function enrichAuthContext(req: Request, res: Response, next: NextFunction): Promise<void> {
+  return async function enrichAuthContext(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     const clerkUserId = claimsExtractor.getUserId(req);
     if (!clerkUserId) {
       // Should not happen if requireAuthentication middleware ran first
