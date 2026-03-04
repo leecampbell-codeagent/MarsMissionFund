@@ -1,0 +1,81 @@
+# =============================================================================
+# MarsMissionFund Autonomous Agent Container
+# =============================================================================
+# Isolated environment for running Claude Code with --dangerously-skip-permissions.
+# Docker is the security boundary — not the permission model.
+#
+# Writable paths (required for toolchain):
+#   /tmp, /workspace, /home/agent/.cache, /home/agent/.npm
+# =============================================================================
+
+FROM node:22-bookworm
+
+# ---------------------------------------------------------------------------
+# Pinned tool versions — override at build time with --build-arg
+# ---------------------------------------------------------------------------
+ARG GH_VERSION=2.65.0
+ARG DBMATE_VERSION=2.22.0
+ARG CLAUDE_CODE_VERSION=latest
+ARG BIOME_VERSION=latest
+ARG PREK_VERSION=latest
+
+# ---------------------------------------------------------------------------
+# System packages
+# ---------------------------------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        iptables \
+        ipset \
+        dnsutils \
+        curl \
+        jq \
+        sudo \
+        postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---------------------------------------------------------------------------
+# GitHub CLI (pinned .deb)
+# ---------------------------------------------------------------------------
+RUN curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_amd64.deb" \
+        -o /tmp/gh.deb \
+    && dpkg -i /tmp/gh.deb \
+    && rm /tmp/gh.deb
+
+# ---------------------------------------------------------------------------
+# dbmate (pinned binary)
+# ---------------------------------------------------------------------------
+RUN curl -fsSL "https://github.com/amacneil/dbmate/releases/download/v${DBMATE_VERSION}/dbmate-linux-amd64" \
+        -o /usr/local/bin/dbmate \
+    && chmod +x /usr/local/bin/dbmate
+
+# ---------------------------------------------------------------------------
+# Global npm tools
+# ---------------------------------------------------------------------------
+RUN npm install -g \
+        "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
+        "@biomejs/biome@${BIOME_VERSION}" \
+        "prek@${PREK_VERSION}"
+
+# ---------------------------------------------------------------------------
+# Playwright (Chromium only — saves ~1 GB vs all browsers)
+# ---------------------------------------------------------------------------
+RUN npx playwright install --with-deps chromium
+
+# ---------------------------------------------------------------------------
+# Non-root agent user
+# ---------------------------------------------------------------------------
+RUN useradd -m -s /bin/bash agent \
+    && mkdir -p /workspace /home/agent/.cache /home/agent/.npm \
+    && chown -R agent:agent /workspace /home/agent \
+    && echo "agent ALL=(root) NOPASSWD: /opt/agent/scripts/init-firewall.sh" > /etc/sudoers.d/agent-firewall \
+    && chmod 0440 /etc/sudoers.d/agent-firewall
+
+# ---------------------------------------------------------------------------
+# Scripts
+# ---------------------------------------------------------------------------
+COPY scripts/ /opt/agent/scripts/
+RUN chmod +x /opt/agent/scripts/*.sh
+
+WORKDIR /workspace
+USER agent
+
+ENTRYPOINT ["/opt/agent/scripts/agent-entrypoint.sh"]

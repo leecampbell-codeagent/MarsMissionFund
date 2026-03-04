@@ -1,0 +1,45 @@
+# =============================================================================
+# MarsMissionFund Autonomous Agent Stack
+# =============================================================================
+# Usage:
+#   cp .env.agent.example .env.agent   # fill in real credentials
+#   docker compose build
+#   docker compose up
+#   docker compose logs -f agent       # monitor the agent
+# =============================================================================
+
+services:
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    cap_add:
+      - NET_ADMIN
+    env_file:
+      - .env.agent
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - agent-artifacts:/workspace/test-results
+    healthcheck:
+      test: ["CMD-SHELL", "test $$(( $$(date +%s) - $$(stat -c %Y /tmp/agent-alive 2>/dev/null || echo 0) )) -lt 360"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: mmf
+      POSTGRES_PASSWORD: mmf
+      POSTGRES_DB: mmf
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mmf -d mmf"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  agent-artifacts:

@@ -9,6 +9,7 @@ build/
 .env
 .env.*
 !.env.example
+!.env.agent.example
 
 # TypeScript
 *.tsbuildinfo

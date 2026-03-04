@@ -1,0 +1,13 @@
+.git
+node_modules
+.env*
+!.env.agent.example
+prompts/
+*.log
+test-results/
+coverage/
+playwright-report/
+.terraform/
+*.tfstate
+*.tfstate.backup
+.DS_Store
