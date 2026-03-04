@@ -38,11 +38,15 @@ gh repo clone "${REPO_URL}" . -- --branch "${BASE_BRANCH:-main}"
 # Step 2: Install dependencies
 # ---------------------------------------------------------------------------
 STEP="npm_install"
-echo "Installing dependencies..."
-if [ -f package-lock.json ]; then
-    npm ci
+if [ -f package.json ]; then
+    echo "Installing dependencies..."
+    if [ -f package-lock.json ]; then
+        npm ci
+    else
+        npm install
+    fi
 else
-    npm install
+    echo "No package.json found, skipping npm install."
 fi
 
 # ---------------------------------------------------------------------------
@@ -74,8 +78,12 @@ sudo /opt/agent/scripts/init-firewall.sh
 # Step 4: Reset database
 # ---------------------------------------------------------------------------
 STEP="db_reset"
-echo "Resetting database..."
-/opt/agent/scripts/reset-db.sh
+if [ -d db/migrations ]; then
+    echo "Resetting database..."
+    /opt/agent/scripts/reset-db.sh
+else
+    echo "No migrations found, skipping database reset."
+fi
 
 # ---------------------------------------------------------------------------
 # Step 5: Create working branch
