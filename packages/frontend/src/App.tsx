@@ -5,6 +5,9 @@ import { ProtectedRoute } from './components/auth/protected-route';
 import { PublicOnlyRoute } from './components/auth/public-only-route';
 import { LandingPlaceholder } from './components/layout/landing-placeholder';
 import { PageShell } from './components/layout/page-shell';
+import EditCampaignPage from './pages/campaigns-edit';
+import MyCampaignsPage from './pages/campaigns-mine';
+import NewCampaignPage from './pages/campaigns-new';
 import DashboardPlaceholder from './pages/dashboard';
 import OnboardingPage from './pages/onboarding';
 import PreferencesSettingsPage from './pages/settings-preferences';
@@ -71,6 +74,30 @@ export function App(): ReactElement {
           element={
             <ProtectedRoute>
               <VerificationSettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/campaigns/new"
+          element={
+            <ProtectedRoute>
+              <NewCampaignPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/campaigns/mine"
+          element={
+            <ProtectedRoute>
+              <MyCampaignsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/campaigns/:id/edit"
+          element={
+            <ProtectedRoute>
+              <EditCampaignPage />
             </ProtectedRoute>
           }
         />

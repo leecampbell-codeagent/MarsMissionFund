@@ -6,6 +6,8 @@ import { createWebhookRouter } from './account/api/webhook-router.js';
 import type { AccountAppService } from './account/application/account-app-service.js';
 import type { AuthPort } from './account/ports/auth-port.js';
 import type { WebhookVerificationPort } from './account/ports/webhook-verification-port.js';
+import { createCampaignRouter } from './campaign/api/campaign-router.js';
+import type { CampaignAppService } from './campaign/application/campaign-app-service.js';
 import { createKycRouter } from './kyc/api/kyc-router.js';
 import type { KycAppService } from './kyc/application/kyc-app-service.js';
 import { healthRouter } from './health/health.router.js';
@@ -20,6 +22,7 @@ export interface AppDependencies {
   readonly webhookVerifier: WebhookVerificationPort;
   readonly accountAppService: AccountAppService;
   readonly kycAppService?: KycAppService;
+  readonly campaignAppService?: CampaignAppService;
   readonly authExtractor: AuthExtractor;
   readonly claimsExtractor: AuthClaimsExtractor;
 }
@@ -75,6 +78,12 @@ function createApp(deps?: AppDependencies): express.Express {
     if (deps.kycAppService) {
       const kycRouter = createKycRouter(deps.kycAppService);
       app.use(requireAuth, enrichContext, kycRouter);
+    }
+
+    // Campaign routes (feat-005)
+    if (deps.campaignAppService) {
+      const campaignRouter = createCampaignRouter(deps.campaignAppService);
+      app.use(requireAuth, enrichContext, campaignRouter);
     }
   } else {
     // No deps = simple mode (e.g., health-only tests)

@@ -4,6 +4,9 @@ import { MockAuthAdapter } from './account/adapters/mock/mock-auth-adapter.js';
 import { MockWebhookVerificationAdapter } from './account/adapters/mock/mock-webhook-verification-adapter.js';
 import { AccountAppService } from './account/application/account-app-service.js';
 import type { AppDependencies } from './app.js';
+import { InMemoryCampaignRepository } from './campaign/adapters/mock/in-memory-campaign-repository.js';
+import { MockKycStatusAdapter } from './campaign/adapters/mock/mock-kyc-status-adapter.js';
+import { CampaignAppService } from './campaign/application/campaign-app-service.js';
 import { InMemoryKycRepository } from './kyc/adapters/mock/in-memory-kyc-repository.js';
 import { MockKycAdapter } from './kyc/adapters/mock/mock-kyc-adapter.js';
 import { KycAppService } from './kyc/application/kyc-app-service.js';
@@ -103,11 +106,21 @@ export async function createDependencies(): Promise<AppDependencies> {
     );
     const extractor = createMockAuthExtractor();
 
+    const campaignRepository = new InMemoryCampaignRepository();
+    const kycStatusAdapter = new MockKycStatusAdapter();
+    const campaignAppService = new CampaignAppService(
+      campaignRepository,
+      kycStatusAdapter,
+      eventStore,
+      logger,
+    );
+
     return {
       authPort,
       webhookVerifier,
       accountAppService,
       kycAppService,
+      campaignAppService,
       authExtractor: extractor,
       claimsExtractor: extractor,
     };
@@ -141,6 +154,8 @@ export async function createDependencies(): Promise<AppDependencies> {
   });
 
   const { PgKycRepository } = await import('./kyc/adapters/pg/pg-kyc-repository.js');
+  const { PgCampaignRepository } = await import('./campaign/adapters/pg/pg-campaign-repository.js');
+  const { PgKycStatusAdapter } = await import('./campaign/adapters/pg/pg-kyc-status-adapter.js');
 
   const authPort = new ClerkAuthAdapter();
   const webhookVerifier = new ClerkWebhookVerificationAdapter(webhookSigningSecret);
@@ -166,6 +181,15 @@ export async function createDependencies(): Promise<AppDependencies> {
     isMockKyc,
   );
 
+  const campaignRepository = new PgCampaignRepository(pool);
+  const kycStatusAdapter = new PgKycStatusAdapter(pool);
+  const campaignAppService = new CampaignAppService(
+    campaignRepository,
+    kycStatusAdapter,
+    eventStore,
+    logger,
+  );
+
   const extractor = await createClerkAuthExtractor();
 
   return {
@@ -173,6 +197,7 @@ export async function createDependencies(): Promise<AppDependencies> {
     webhookVerifier,
     accountAppService,
     kycAppService,
+    campaignAppService,
     authExtractor: extractor,
     claimsExtractor: extractor,
   };
