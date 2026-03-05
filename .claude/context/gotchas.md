@@ -247,9 +247,36 @@ If `clerkMiddleware()` or `requireAuth()` is applied globally at the top level b
 
 **Detected in:** feat-001 research
 
+---
 
+## Pre-commit Hook Gotchas
 
+### G-016: Hooks With `-r` Flag Scan Everything When Called With No Files
 
+**Problem:** When pre-commit calls a hook and no staged files match the hook's `types` filter, pre-commit passes an empty filenames list. A hook using `grep -rn "pattern" -- "$@"` with `$@` empty will have `grep` scan the current directory recursively (GNU grep default when no files given with `-r`), matching `node_modules/`, `autonomous/`, and other directories.
+
+This causes false positives for `check-merge-conflict` (lines ending with `=====...====` in HISTORY.md files match `=======$`), `detect-private-key` (test fixtures in `node_modules/@clerk/backend`), and `trailing-whitespace` (`sed: no input files`).
+
+**Fix:** Add an early exit when no filenames are passed:
+```sh
+sh -c 'if [ $# -eq 0 ]; then exit 0; fi; if grep -n "pattern" -- "$@"; then exit 1; fi; exit 0'
+```
+
+Remove the `-r` flag from grep (not needed when pre-commit passes explicit filenames).
+
+**Note:** `.pre-commit-config.yaml` is in `.gitignore` (runtime-injected). Edits apply for the current session but are not committed. If this keeps happening across sessions, the `autonomous/scripts/.pre-commit-config.yaml` source file needs to be updated.
+
+**Detected in:** feat-001 pipeline
+
+---
+
+### G-017: `=======$` Grep Pattern Matches `=====...=====` Section Dividers
+
+**Problem:** The regex `=======$` (without `^`) matches any line that *ends* with 7+ `=` characters, including `# =============================================` comment dividers common in shell scripts.
+
+**Fix:** Always anchor with `^`: use `^=======$` to match only a line that is *exactly* `=======` (a genuine merge conflict marker).
+
+**Detected in:** feat-001 pipeline
 
 
 
