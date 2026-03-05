@@ -5,12 +5,14 @@ import { type Milestone } from '../../../types/campaign';
 
 const mockMilestones: Milestone[] = [
   {
+    id: '550e8400-e29b-41d4-a716-446655440030',
     title: 'Prototype Complete',
     description: 'Initial working prototype delivered',
     fundingBasisPoints: 2500,
-    targetDate: '2026-06-01T00:00:00.000Z',
+    targetDate: '2026-06-01',
   },
   {
+    id: '550e8400-e29b-41d4-a716-446655440031',
     title: 'Flight Test',
     description: 'First atmospheric test flight',
     fundingBasisPoints: 7500,

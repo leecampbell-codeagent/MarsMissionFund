@@ -53,6 +53,7 @@ export function MilestonesSection({ campaign, onChange }: MilestonesSectionProps
 
   const addMilestone = () => {
     const newMilestone: Milestone = {
+      id: crypto.randomUUID(),
       title: '',
       description: '',
       fundingBasisPoints: 0,
@@ -197,7 +198,7 @@ export function MilestonesSection({ campaign, onChange }: MilestonesSectionProps
               value={milestone.targetDate ? milestone.targetDate.substring(0, 10) : ''}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 const val = e.target.value;
-                updateMilestone(index, 'targetDate', val ? `${val}T00:00:00.000Z` : null);
+                updateMilestone(index, 'targetDate', val || null);
               }}
               style={inputStyle}
             />

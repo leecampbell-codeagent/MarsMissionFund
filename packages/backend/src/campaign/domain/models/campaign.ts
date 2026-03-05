@@ -21,14 +21,14 @@ export interface Milestone {
   readonly title: string;
   readonly description: string;
   readonly fundingBasisPoints: number;
-  readonly targetDate: string;
+  readonly targetDate: string | null;
 }
 
 export interface TeamMember {
   readonly id: string;
   readonly name: string;
   readonly role: string;
-  readonly bio: string;
+  readonly bio: string | null;
 }
 
 export interface RiskDisclosure {

@@ -33,8 +33,8 @@ const mockCampaign: Campaign = {
   fundingCapCents: '200000000',
   deadline: '2027-01-15T00:00:00.000Z',
   milestones: [
-    { title: 'Design Phase', description: 'Complete engineering design', fundingBasisPoints: 3000, targetDate: null },
-    { title: 'Prototype', description: 'Build working prototype', fundingBasisPoints: 7000, targetDate: null },
+    { id: '550e8400-e29b-41d4-a716-446655440011', title: 'Design Phase', description: 'Complete engineering design', fundingBasisPoints: 3000, targetDate: null },
+    { id: '550e8400-e29b-41d4-a716-446655440012', title: 'Prototype', description: 'Build working prototype', fundingBasisPoints: 7000, targetDate: null },
   ],
   teamMembers: [{ id: '550e8400-e29b-41d4-a716-446655440003', name: 'Alice', role: 'Chief Engineer', bio: null, linkedInUrl: null }],
   riskDisclosures: [{ id: '550e8400-e29b-41d4-a716-446655440099', risk: 'Tech Risk', mitigation: 'Mitigation plan in place' }],

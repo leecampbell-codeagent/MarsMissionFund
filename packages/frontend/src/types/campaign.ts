@@ -45,10 +45,11 @@ export const CAMPAIGN_CATEGORY_LABELS: Record<CampaignCategory, string> = {
 };
 
 export interface Milestone {
+  readonly id: string;
   readonly title: string;
   readonly description: string;
   readonly fundingBasisPoints: number; // integer, sum must = 10000 at submission
-  readonly targetDate: string | null;  // ISO 8601 UTC string
+  readonly targetDate: string | null;  // YYYY-MM-DD date string or null
 }
 
 export interface TeamMember {

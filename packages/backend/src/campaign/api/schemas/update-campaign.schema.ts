@@ -6,14 +6,14 @@ const milestoneSchema = z.object({
   title: z.string().trim().min(1).max(200),
   description: z.string().max(1000),
   fundingBasisPoints: z.number().int().min(1).max(10000),
-  targetDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  targetDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
 });
 
 const teamMemberSchema = z.object({
   id: z.string().uuid(),
   name: z.string().trim().min(1).max(200),
   role: z.string().trim().min(1).max(200),
-  bio: z.string().max(500),
+  bio: z.string().max(500).nullable(),
 });
 
 const riskDisclosureSchema = z.object({
