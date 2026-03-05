@@ -31,6 +31,8 @@ trap cleanup EXIT
 # Step 1: Clone the repo
 # ---------------------------------------------------------------------------
 STEP="clone"
+# Clean workspace so clone succeeds on container restart (idempotent)
+rm -rf /workspace/{*,.[!.]*}
 echo "Cloning ${REPO_URL} (branch: ${BASE_BRANCH:-main})..."
 gh repo clone "${REPO_URL}" . -- --branch "${BASE_BRANCH:-main}"
 
