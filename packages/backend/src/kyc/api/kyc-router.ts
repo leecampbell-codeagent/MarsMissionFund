@@ -16,8 +16,8 @@ import type { KycAppService } from '../application/kyc-app-service.js';
 const submitKycSchema = z
   .object({
     document_type: z.enum(['passport', 'national_id', 'drivers_licence']),
-    front_document_ref: z.string().min(1).nullish(),
-    back_document_ref: z.string().min(1).nullish(),
+    front_document_ref: z.string().min(1).max(512).nullish(),
+    back_document_ref: z.string().min(1).max(512).nullish(),
   })
   .strict();
 
