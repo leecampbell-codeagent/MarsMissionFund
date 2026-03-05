@@ -1,0 +1,202 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --------------------------------------------------------
+   TIER 1 — IDENTITY TOKENS (Brand Reference)
+   Do NOT reference these in component code. Use Tier 2 only.
+   -------------------------------------------------------- */
+
+:root {
+  /* Deep Space */
+  --void: #060a14;
+  --deep-space: #0b1628;
+  --nebula: #0e2040;
+  --orbit: #1a3a6e;
+
+  /* Launch Fire */
+  --launchfire: #ff5c1a;
+  --ignition: #ff8c42;
+  --afterburn: #ffb347;
+  --red-planet: #c1440e;
+
+  /* Metallic Silver */
+  --chrome: #e8edf5;
+  --silver: #c8d0dc;
+  --stardust: #8a96a8;
+  --white: #f5f8ff;
+
+  /* Mission Outcomes */
+  --success: #2fe8a2;
+  --success-deep: #1ab878;
+  --signal-blue: #5b8fd8;
+
+  /* Radius Identity */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 100px;
+
+  /* Motion Identity */
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-medium: 500ms;
+  --duration-slow: 800ms;
+  --easing-out: cubic-bezier(0.25, 1, 0.5, 1);
+  --easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* --------------------------------------------------------
+     TIER 2 — SEMANTIC TOKENS (Component Consumption Layer)
+     Components ONLY reference these.
+     -------------------------------------------------------- */
+
+  /* Actions */
+  --color-action-primary: #ff5c1a;
+  --color-action-primary-hover: #ff8c42;
+  --color-action-primary-text: #f5f8ff;
+  --color-action-primary-shadow: rgba(255, 92, 26, 0.35);
+  --color-action-secondary-bg: rgba(245, 248, 255, 0.06);
+  --color-action-secondary-text: #c8d0dc;
+  --color-action-secondary-border: rgba(245, 248, 255, 0.12);
+  --color-action-ghost-text: #ff8c42;
+  --color-action-ghost-border: rgba(255, 92, 26, 0.3);
+  --color-action-disabled: rgba(138, 150, 168, 0.5);
+
+  /* Status */
+  --color-status-success: #2fe8a2;
+  --color-status-success-bg: rgba(47, 232, 162, 0.12);
+  --color-status-success-border: rgba(47, 232, 162, 0.2);
+  --color-status-error: #c1440e;
+  --color-status-warning: #ffb347;
+  --color-status-info: #1a3a6e;
+  --color-status-active: #ff5c1a;
+  --color-status-active-bg: rgba(255, 92, 26, 0.12);
+  --color-status-active-border: rgba(255, 92, 26, 0.2);
+  --color-status-new: #5b8fd8;
+  --color-status-new-bg: rgba(26, 58, 110, 0.4);
+  --color-status-new-border: rgba(26, 58, 110, 0.6);
+
+  /* Surfaces */
+  --color-bg-page: #060a14;
+  --color-bg-surface: #0b1628;
+  --color-bg-elevated: #0e2040;
+  --color-bg-overlay: rgba(6, 10, 20, 0.9);
+  --color-bg-input: rgba(245, 248, 255, 0.04);
+  --color-bg-accent: #1a3a6e;
+
+  /* Text */
+  --color-text-primary: #e8edf5;
+  --color-text-secondary: #c8d0dc;
+  --color-text-tertiary: #8a96a8;
+  --color-text-accent: #ff5c1a;
+  --color-text-on-action: #f5f8ff;
+  --color-text-success: #2fe8a2;
+  --color-text-error: #c1440e;
+  --color-text-warning: #ffb347;
+
+  /* Borders */
+  --color-border-subtle: rgba(245, 248, 255, 0.06);
+  --color-border-emphasis: #1a3a6e;
+  --color-border-input: rgba(245, 248, 255, 0.1);
+  --color-border-accent: #ff5c1a;
+
+  /* Progress */
+  --color-progress-fill: linear-gradient(90deg, #ff5c1a, #ffb347);
+  --color-progress-complete: linear-gradient(90deg, #2fe8a2, #1ab878);
+  --color-progress-track: rgba(245, 248, 255, 0.06);
+  --color-progress-indicator: #ffb347;
+  --color-data-positive: #2fe8a2;
+  --color-data-neutral: #8a96a8;
+
+  /* Gradients */
+  --gradient-action-primary: linear-gradient(135deg, #ff5c1a, #ff8c42, #ffb347);
+  --gradient-surface-card: linear-gradient(135deg, #060a14, #0e2040, #1a3a6e);
+  --gradient-surface-stat: linear-gradient(135deg, #0e2040, #0b1628);
+  --gradient-hero: linear-gradient(135deg, #060a14 0%, #0b1628 50%, rgba(255, 92, 26, 0.15) 100%);
+  --gradient-campaign-hero: linear-gradient(135deg, #c1440e, #ff5c1a, #ff8c42);
+  --gradient-celebration: linear-gradient(135deg, #0b1628, rgba(47, 232, 162, 0.2), #0b1628);
+  --gradient-achievement: linear-gradient(135deg, #e8edf5, #c8d0dc, #8a96a8);
+
+  /* Typography (font families defined in Tailwind config) */
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-data: 'Space Mono', monospace;
+
+  /* Layout */
+  --radius-button: var(--radius-full);
+  --radius-badge: var(--radius-sm);
+  --radius-input: var(--radius-md);
+  --radius-card: var(--radius-xl);
+  --radius-card-large: var(--radius-2xl);
+  --radius-stat: var(--radius-lg);
+  --radius-progress: var(--radius-full);
+
+  /* Motion */
+  --motion-enter: var(--duration-base) var(--easing-out);
+  --motion-enter-emphasis: var(--duration-medium) var(--easing-spring);
+  --motion-hover: var(--duration-fast) var(--easing-out);
+  --motion-panel: var(--duration-medium) var(--easing-out);
+  --motion-page: var(--duration-slow) var(--easing-out);
+}
+
+/* Reduced motion overrides */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Base styles */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--color-bg-page);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--color-action-primary-hover);
+  outline-offset: 2px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

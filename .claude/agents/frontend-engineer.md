@@ -427,3 +427,9 @@ This agent runs in a Ralph loop until all completion criteria are met. Each iter
 5. Self-check: does the implementation match the design spec exactly? Are all states handled? Are tests comprehensive?
 
 If not, iterate. If yes, signal completion to the orchestrator.
+
+
+
+
+
+

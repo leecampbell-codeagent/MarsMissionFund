@@ -14,6 +14,14 @@ build/
 # TypeScript
 *.tsbuildinfo
 
+# Compiled TypeScript output (Vite projects use esbuild — tsc output not committed)
+packages/frontend/src/**/*.js
+packages/frontend/src/**/*.js.map
+packages/frontend/src/**/*.d.ts
+packages/frontend/src/**/*.d.ts.map
+packages/frontend/tailwind.config.js
+packages/frontend/vite.config.js
+
 # Testing
 coverage/
 
@@ -46,3 +54,12 @@ Thumbs.db
 
 # Logs
 *.log
+
+
+
+
+
+
+
+
+

@@ -365,3 +365,9 @@ This agent runs in a Ralph loop until all completion criteria are met. Each iter
 5. Self-check: did you check every item? Did you verify against the actual codebase, not assumptions?
 
 If not, iterate. If yes, signal completion to the orchestrator.
+
+
+
+
+
+
