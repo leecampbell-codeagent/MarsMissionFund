@@ -222,7 +222,6 @@ Screenshots are uploaded to GitHub's CDN (not committed to the repo) to avoid bl
    ```
    Store each URL for use in the PR body.
 6. Close browser: `playwright-cli close`
-7. Clean up temp files: `rm -f /tmp/feat-XXX-*.png`
 
 **Edge cases:**
 - **App won't start:** Skip screenshots, note in PR body: "Screenshots: app stack failed to start"
@@ -290,7 +289,8 @@ All quality checks passed. Create a PR for review.
 
 ### 8. Post-PR
 
-1. **Update backlog:**
+1. **Clean up screenshot temp files:** `rm -f /tmp/feat-XXX-*.png`
+2. **Update backlog:**
    - Mark feature as "✅ SHIPPED" in `.claude/backlog.md`
 
 2. **Write merge report:**

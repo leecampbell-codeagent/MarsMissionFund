@@ -192,7 +192,6 @@ Screenshots are uploaded to GitHub's CDN (not committed to the repo) to avoid bl
    ```
    Store each URL for use in the PR body.
 6. Close browser: `playwright-cli close`
-7. Clean up temp files: `rm -f /tmp/feat-XXX-*.png`
 
 **Edge cases:**
 - **App won't start:** Skip screenshots, note in PR body: "Screenshots: app stack failed to start"
@@ -242,6 +241,7 @@ Screenshots are uploaded to GitHub's CDN (not committed to the repo) to avoid bl
     - If `PR_TARGET` is `main`, omit the "Stacked on" line from the body.
     - If the feature has **no frontend changes**, omit the `## Screenshots` section entirely.
     - After PR creation, update tracking: `PREVIOUS_FEATURE_BRANCH = "ralph/feat-XXX-[name]"`
+    - Clean up screenshot temp files: `rm -f /tmp/feat-XXX-*.png`
 
 13. **If ANY fail — return to the Quality Track:**
     - Identify which criterion failed
