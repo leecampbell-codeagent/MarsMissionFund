@@ -9,6 +9,13 @@ import { MockWebhookVerificationAdapter } from '../account/adapters/mock/mock-we
 import { AccountAppService } from '../account/application/account-app-service.js';
 import { Account } from '../account/domain/account.js';
 import { type AppDependencies, createApp } from '../app.js';
+import { InMemoryContributionRepository } from '../payments/adapters/mock/in-memory-contribution-repository.js';
+import { InMemoryEscrowLedgerRepository } from '../payments/adapters/mock/in-memory-escrow-ledger-repository.js';
+import { InMemoryProcessedWebhookEventRepository } from '../payments/adapters/mock/in-memory-processed-webhook-event-repository.js';
+import { MockPaymentGatewayAdapter } from '../payments/adapters/mock/mock-payment-gateway-adapter.js';
+import { PaymentAppService } from '../payments/application/payment-app-service.js';
+import { InMemoryEventStoreAdapter } from '../shared/adapters/mock/in-memory-event-store-adapter.js';
+import { InMemoryTransactionAdapter } from '../shared/adapters/mock/in-memory-transaction-adapter.js';
 import type { AuthClaimsExtractor } from '../shared/middleware/enrich-auth-context.js';
 import type { AuthExtractor } from '../shared/middleware/require-authentication.js';
 
@@ -47,12 +54,25 @@ function createMockExtractor(): AuthExtractor & AuthClaimsExtractor {
   };
 }
 
+function createMockPaymentService(): PaymentAppService {
+  return new PaymentAppService(
+    new InMemoryContributionRepository(),
+    new InMemoryEscrowLedgerRepository(),
+    new InMemoryProcessedWebhookEventRepository(),
+    new MockPaymentGatewayAdapter(),
+    new InMemoryEventStoreAdapter(),
+    new InMemoryTransactionAdapter(),
+    testLogger,
+  );
+}
+
 function createTestDeps(accountRepo: InMemoryAccountRepository): AppDependencies {
   const extractor = createMockExtractor();
   return {
     authPort: new MockAuthAdapter(),
     webhookVerifier: new MockWebhookVerificationAdapter(),
     accountAppService: new AccountAppService(accountRepo, testLogger),
+    paymentAppService: createMockPaymentService(),
     authExtractor: extractor,
     claimsExtractor: extractor,
   };

@@ -7,6 +7,11 @@ import type { AuthPort } from './account/ports/auth-port.js';
 import type { WebhookVerificationPort } from './account/ports/webhook-verification-port.js';
 import { healthRouter } from './health/health.router.js';
 import { logger } from './logger.js';
+import {
+  createPaymentRouter,
+  createPaymentWebhookRouter,
+} from './payments/api/payment-routes.js';
+import type { PaymentAppService } from './payments/application/payment-app-service.js';
 import type { AuthClaimsExtractor } from './shared/middleware/enrich-auth-context.js';
 import { createEnrichAuthContext } from './shared/middleware/enrich-auth-context.js';
 import type { AuthExtractor } from './shared/middleware/require-authentication.js';
@@ -16,6 +21,7 @@ export interface AppDependencies {
   readonly authPort: AuthPort;
   readonly webhookVerifier: WebhookVerificationPort;
   readonly accountAppService: AccountAppService;
+  readonly paymentAppService: PaymentAppService;
   readonly authExtractor: AuthExtractor;
   readonly claimsExtractor: AuthClaimsExtractor;
 }
@@ -44,10 +50,13 @@ function createApp(deps?: AppDependencies): express.Express {
   app.use(healthRouter);
 
   if (deps) {
-    // Webhook route must be mounted BEFORE json body parser and auth middleware
-    // because Svix needs the raw body for signature verification
-    const webhookRouter = createWebhookRouter(deps.accountAppService, deps.webhookVerifier, logger);
-    app.use(webhookRouter);
+    // Webhook routes must be mounted BEFORE json body parser and auth middleware
+    // because they need the raw body for signature verification
+    const clerkWebhookRouter = createWebhookRouter(deps.accountAppService, deps.webhookVerifier, logger);
+    app.use(clerkWebhookRouter);
+
+    const paymentWebhookRouter = createPaymentWebhookRouter(deps.paymentAppService, logger);
+    app.use(paymentWebhookRouter);
 
     // Parse JSON request bodies (for all routes except webhooks which use raw)
     app.use(express.json({ limit: '1mb' }));
@@ -62,6 +71,10 @@ function createApp(deps?: AppDependencies): express.Express {
     // Auth routes
     const authRouter = createAuthRouter();
     app.use(requireAuth, enrichContext, authRouter);
+
+    // Payment routes (authenticated)
+    const paymentRouter = createPaymentRouter(deps.paymentAppService, logger);
+    app.use(requireAuth, enrichContext, paymentRouter);
   } else {
     // No deps = simple mode (e.g., health-only tests)
     app.use(express.json({ limit: '1mb' }));

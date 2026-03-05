@@ -91,6 +91,25 @@ Always use `INSERT ... ON CONFLICT` or upsert patterns in webhook handlers.
 - The first feature to emit events will need to implement the `EventStore` port and PG adapter from scratch.
 - Events and aggregate updates must be in the same database transaction (transactional outbox pattern within single DB).
 
+## Webhook Body Parsing in Supertest Tests
+
+- `express.raw({ type: 'application/json' })` will NOT parse the body if Content-Type is not set or doesn't match.
+- When supertest sends a `Buffer` via `.send(buffer)`, it may use `application/octet-stream` content type.
+- Always set `.set('Content-Type', 'application/json')` explicitly in webhook integration tests, OR use `express.raw({ type: ['application/json', 'text/plain', 'application/octet-stream'] })` to accept multiple types.
+- Failure mode is subtle: the route returns 200 (success) but the request body is empty/undefined, so no state changes happen — exactly matching the "no state changes" tests that happen to pass.
+
+## AppDependencies Requires All Services
+
+- The `AppDependencies` interface in `app.ts` is the contract for all services needed by the Express app.
+- Whenever a new service is added to `AppDependencies`, EVERY test that constructs a `AppDependencies` object must be updated.
+- This includes `auth-routes.test.ts` and any other integration tests using `createTestDeps()` helpers.
+- TypeScript will catch this at build time (TS2741: Property missing), so build checks are essential.
+
+## Payment Gateway Error HTTP Status
+
+- Gateway-level payment failures (card declined, insufficient funds) use HTTP 402 ("Payment Required"), NOT 400 or 500.
+- Domain errors from business logic (invalid amount, invalid state) use HTTP 400.
+
 ## npm Workspaces Hoisting
 
 - npm hoists the most common version of a shared dependency to the root.

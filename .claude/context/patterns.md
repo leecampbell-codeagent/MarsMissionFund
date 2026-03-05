@@ -96,6 +96,51 @@
 - Not PostgreSQL ENUM types (ENUMs are hard to modify in migrations).
 - State machine transition validation is enforced at the domain layer, not the database.
 
+## Payment Domain Patterns
+
+### Payment Gateway Port Pattern
+
+- All gateway interactions go through `PaymentGatewayPort` interface — never reference Stripe SDK in application/domain code.
+- Mock adapter (`MockPaymentGatewayAdapter`) uses token-based outcome simulation: `tok_visa` → success, `tok_chargeDeclined` → CARD_DECLINED, `tok_insufficient_funds` → INSUFFICIENT_FUNDS.
+- `MOCK_PAYMENTS=true` env var selects mock vs real adapter in composition root.
+
+### TransactionPort Pattern
+
+- `TransactionPort` interface wraps database transactions. Application services use `withTransaction(fn)`.
+- `InMemoryTransactionAdapter` for tests (runs callback with mock client, no real transaction).
+- `PgTransactionAdapter` for production (BEGIN/COMMIT/ROLLBACK around pg PoolClient).
+- Repositories receive optional `TransactionClient` parameter for transactional writes.
+
+### Contribution State Machine Pattern
+
+- States: `pending_capture → captured`, `pending_capture → failed`, `captured → refunded`, `captured → partially_refunded`, `partially_refunded → refunded`.
+- State transitions return NEW entity instances (immutable). Original entity is unchanged.
+- Invalid transitions throw `InvalidContributionStateError` with source and target state in message.
+
+### Escrow Ledger Pattern
+
+- Append-only: `appendEntry()` is the only write operation. No update/delete.
+- Balance computed from SUM: credits (`contribution`, `interest_credit`) minus debits (`disbursement`, `refund`, `interest_debit`).
+- `amountCents` is always positive; sign semantics come from `entryType`.
+
+### Webhook Idempotency Pattern
+
+- `ProcessedWebhookEventRepository` stores processed event IDs with UNIQUE constraint.
+- Check `hasBeenProcessed(eventId)` before processing. Skip if already processed.
+- `markAsProcessed()` called inside the same transaction as the state changes.
+- Uses `ON CONFLICT (event_id) DO NOTHING` for DB-level idempotency.
+
+### Raw Body Webhook Pattern
+
+- Payment webhook route (`POST /api/v1/payments/webhook`) mounted BEFORE `express.json()`.
+- Uses `express.raw({ type: ['application/json', 'text/plain', 'application/octet-stream'] })` for body parsing.
+- CRITICAL in tests: send webhook bodies with explicit `Content-Type: application/json` header, or `express.raw` may not parse the body.
+
+### AppDependencies Evolution Pattern
+
+- `AppDependencies` interface in `app.ts` must include all service dependencies.
+- When adding a new service (e.g. `paymentAppService`), all integration tests that create `AppDependencies` must be updated to include the new field.
+
 ## Testing Patterns
 
 ### Backend Tests

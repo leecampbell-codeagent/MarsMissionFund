@@ -5,6 +5,13 @@ import { MockWebhookVerificationAdapter } from './account/adapters/mock/mock-web
 import { AccountAppService } from './account/application/account-app-service.js';
 import type { AppDependencies } from './app.js';
 import { logger } from './logger.js';
+import { InMemoryContributionRepository } from './payments/adapters/mock/in-memory-contribution-repository.js';
+import { InMemoryEscrowLedgerRepository } from './payments/adapters/mock/in-memory-escrow-ledger-repository.js';
+import { InMemoryProcessedWebhookEventRepository } from './payments/adapters/mock/in-memory-processed-webhook-event-repository.js';
+import { MockPaymentGatewayAdapter } from './payments/adapters/mock/mock-payment-gateway-adapter.js';
+import { PaymentAppService } from './payments/application/payment-app-service.js';
+import { InMemoryEventStoreAdapter } from './shared/adapters/mock/in-memory-event-store-adapter.js';
+import { InMemoryTransactionAdapter } from './shared/adapters/mock/in-memory-transaction-adapter.js';
 import type { AuthClaimsExtractor } from './shared/middleware/enrich-auth-context.js';
 import type { AuthExtractor } from './shared/middleware/require-authentication.js';
 
@@ -77,6 +84,7 @@ async function createClerkAuthExtractor(): Promise<AuthExtractor & AuthClaimsExt
 
 export async function createDependencies(): Promise<AppDependencies> {
   const isMockAuth = process.env.MOCK_AUTH === 'true';
+  const isMockPayments = process.env.MOCK_PAYMENTS !== 'false';
 
   if (isMockAuth) {
     logger.info('Using mock auth adapters (MOCK_AUTH=true)');
@@ -87,10 +95,13 @@ export async function createDependencies(): Promise<AppDependencies> {
     const accountAppService = new AccountAppService(accountRepository, logger);
     const extractor = createMockAuthExtractor();
 
+    const paymentAppService = createMockPaymentService();
+
     return {
       authPort,
       webhookVerifier,
       accountAppService,
+      paymentAppService,
       authExtractor: extractor,
       claimsExtractor: extractor,
     };
@@ -126,11 +137,79 @@ export async function createDependencies(): Promise<AppDependencies> {
   const accountAppService = new AccountAppService(accountRepository, logger);
   const extractor = await createClerkAuthExtractor();
 
+  let paymentAppService: PaymentAppService;
+
+  if (isMockPayments) {
+    logger.info('Using mock payment gateway (MOCK_PAYMENTS=true)');
+    paymentAppService = createMockPaymentService();
+  } else {
+    logger.info('Using Stripe payment gateway');
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (!stripeSecretKey || !stripeWebhookSecret) {
+      throw new Error('STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET are required when MOCK_PAYMENTS is false');
+    }
+
+    const { StripePaymentGatewayAdapter } = await import(
+      './payments/adapters/stripe/stripe-payment-gateway-adapter.js'
+    );
+    const { PgContributionRepository } = await import(
+      './payments/adapters/pg/pg-contribution-repository.js'
+    );
+    const { PgEscrowLedgerRepository } = await import(
+      './payments/adapters/pg/pg-escrow-ledger-repository.js'
+    );
+    const { PgProcessedWebhookEventRepository } = await import(
+      './payments/adapters/pg/pg-processed-webhook-event-repository.js'
+    );
+    const { PgTransactionAdapter } = await import(
+      './shared/adapters/pg/pg-transaction-adapter.js'
+    );
+
+    const contributionRepo = new PgContributionRepository(pool);
+    const escrowLedgerRepo = new PgEscrowLedgerRepository(pool);
+    const processedWebhookRepo = new PgProcessedWebhookEventRepository(pool);
+    const paymentGateway = new StripePaymentGatewayAdapter(stripeSecretKey, stripeWebhookSecret);
+    const eventStore = new InMemoryEventStoreAdapter(); // TODO: replace with PgEventStoreAdapter when implemented
+    const transactionPort = new PgTransactionAdapter(pool);
+
+    paymentAppService = new PaymentAppService(
+      contributionRepo,
+      escrowLedgerRepo,
+      processedWebhookRepo,
+      paymentGateway,
+      eventStore,
+      transactionPort,
+      logger,
+    );
+  }
+
   return {
     authPort,
     webhookVerifier,
     accountAppService,
+    paymentAppService,
     authExtractor: extractor,
     claimsExtractor: extractor,
   };
+}
+
+function createMockPaymentService(): PaymentAppService {
+  const contributionRepo = new InMemoryContributionRepository();
+  const escrowLedgerRepo = new InMemoryEscrowLedgerRepository();
+  const processedWebhookRepo = new InMemoryProcessedWebhookEventRepository();
+  const paymentGateway = new MockPaymentGatewayAdapter();
+  const eventStore = new InMemoryEventStoreAdapter();
+  const transactionPort = new InMemoryTransactionAdapter();
+
+  return new PaymentAppService(
+    contributionRepo,
+    escrowLedgerRepo,
+    processedWebhookRepo,
+    paymentGateway,
+    eventStore,
+    transactionPort,
+    logger,
+  );
 }
