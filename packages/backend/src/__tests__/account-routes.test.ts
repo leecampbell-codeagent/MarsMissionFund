@@ -65,6 +65,25 @@ function createTestDeps(
   };
 }
 
+function createUnauthenticatedTestDeps(
+  accountRepo: InMemoryAccountRepository,
+  eventStore: InMemoryEventStore,
+): AppDependencies {
+  const extractor = createMockExtractor();
+  // Auth middleware that does NOT attach auth — getUserId returns null → 401
+  const noopAuthPort = {
+    verifyToken: (_token: string) => Promise.resolve(null),
+    getMiddleware: () => (_req: ExpressRequest, _res: import('express').Response, next: import('express').NextFunction) => { next(); },
+  };
+  return {
+    authPort: noopAuthPort,
+    webhookVerifier: new MockWebhookVerificationAdapter(),
+    accountAppService: new AccountAppService(accountRepo, eventStore, testLogger),
+    authExtractor: extractor,
+    claimsExtractor: extractor,
+  };
+}
+
 function makeFullAccount(overrides: Partial<Parameters<typeof Account.reconstitute>[0]> = {}): Account {
   return Account.reconstitute({
     id: 'test-account-id',
@@ -95,6 +114,13 @@ describe('GET /api/v1/accounts/me', () => {
     accountRepo = new InMemoryAccountRepository();
     eventStore = new InMemoryEventStore();
     app = createApp(createTestDeps(accountRepo, eventStore));
+  });
+
+  it('returns 401 when no auth header', async () => {
+    const unauthApp = createApp(createUnauthenticatedTestDeps(accountRepo, eventStore));
+    const response = await request(unauthApp).get('/api/v1/accounts/me');
+    expect(response.status).toBe(401);
+    expect(response.body.error.code).toBe('UNAUTHENTICATED');
   });
 
   it('returns full account data with new fields for authenticated user', async () => {
@@ -142,6 +168,15 @@ describe('PATCH /api/v1/accounts/me', () => {
     accountRepo = new InMemoryAccountRepository();
     eventStore = new InMemoryEventStore();
     app = createApp(createTestDeps(accountRepo, eventStore));
+  });
+
+  it('returns 401 when no auth header', async () => {
+    const unauthApp = createApp(createUnauthenticatedTestDeps(accountRepo, eventStore));
+    const response = await request(unauthApp)
+      .patch('/api/v1/accounts/me')
+      .send({ display_name: 'Jane Pioneer' });
+    expect(response.status).toBe(401);
+    expect(response.body.error.code).toBe('UNAUTHENTICATED');
   });
 
   it('updates display name — success', async () => {
@@ -266,6 +301,22 @@ describe('PATCH /api/v1/accounts/me/preferences', () => {
     app = createApp(createTestDeps(accountRepo, eventStore));
   });
 
+  it('returns 401 when no auth header', async () => {
+    const unauthApp = createApp(createUnauthenticatedTestDeps(accountRepo, eventStore));
+    const response = await request(unauthApp)
+      .patch('/api/v1/accounts/me/preferences')
+      .send({
+        campaign_updates: false,
+        milestone_completions: true,
+        contribution_confirmations: true,
+        new_campaign_recommendations: false,
+        security_alerts: true,
+        platform_announcements: false,
+      });
+    expect(response.status).toBe(401);
+    expect(response.body.error.code).toBe('UNAUTHENTICATED');
+  });
+
   const validPrefs = {
     campaign_updates: false,
     milestone_completions: true,
@@ -358,6 +409,15 @@ describe('PATCH /api/v1/accounts/me/onboarding', () => {
     accountRepo = new InMemoryAccountRepository();
     eventStore = new InMemoryEventStore();
     app = createApp(createTestDeps(accountRepo, eventStore));
+  });
+
+  it('returns 401 when no auth header', async () => {
+    const unauthApp = createApp(createUnauthenticatedTestDeps(accountRepo, eventStore));
+    const response = await request(unauthApp)
+      .patch('/api/v1/accounts/me/onboarding')
+      .send({ step: 'role_selection' });
+    expect(response.status).toBe(401);
+    expect(response.body.error.code).toBe('UNAUTHENTICATED');
   });
 
   it('advances from welcome to role_selection — success', async () => {

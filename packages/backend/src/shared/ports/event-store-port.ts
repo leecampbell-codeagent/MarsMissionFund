@@ -8,7 +8,15 @@ export interface AppendEventInput {
   readonly payload: Record<string, unknown>;
 }
 
+export interface TransactionClient {
+  readonly __brand: 'TransactionClient';
+}
+
 export interface EventStorePort {
-  append(event: AppendEventInput): Promise<void>;
-  getNextSequenceNumber(aggregateId: string): Promise<number>;
+  append(event: AppendEventInput, txClient?: TransactionClient): Promise<void>;
+  getNextSequenceNumber(aggregateId: string, txClient?: TransactionClient): Promise<number>;
+}
+
+export interface TransactionPort {
+  withTransaction<T>(fn: (txClient: TransactionClient) => Promise<T>): Promise<T>;
 }

@@ -9,7 +9,7 @@ import {
 import type { AccountRepository } from '../ports/account-repository.js';
 import type { WebhookEvent } from '../ports/webhook-verification-port.js';
 import { AccountNotFoundError } from '../../shared/domain/errors.js';
-import type { EventStorePort } from '../../shared/ports/event-store-port.js';
+import type { EventStorePort, TransactionClient, TransactionPort } from '../../shared/ports/event-store-port.js';
 
 export interface UpdateProfileInput {
   readonly displayName?: string | null;
@@ -24,6 +24,7 @@ export class AccountAppService {
     private readonly accountRepository: AccountRepository,
     private readonly eventStore: EventStorePort,
     private readonly logger: Logger,
+    private readonly transactionPort?: TransactionPort,
   ) {}
 
   async findOrCreateAccount(
@@ -65,23 +66,33 @@ export class AccountAppService {
     }
 
     const updatedAccount = account.withProfile(input.displayName, input.bio, input.avatarUrl);
-    await this.accountRepository.update(updatedAccount);
 
     const changedFields: string[] = [];
     if (input.displayName !== undefined) changedFields.push('display_name');
     if (input.bio !== undefined) changedFields.push('bio');
     if (input.avatarUrl !== undefined) changedFields.push('avatar_url');
 
-    const seqNum = await this.eventStore.getNextSequenceNumber(accountId);
-    await this.eventStore.append({
-      eventType: ACCOUNT_EVENT_TYPES.PROFILE_UPDATED,
-      aggregateId: accountId,
-      aggregateType: 'account',
-      sequenceNumber: seqNum,
-      correlationId: crypto.randomUUID(),
-      sourceService: 'account-service',
-      payload: { fields_changed: changedFields },
-    });
+    const correlationId = crypto.randomUUID();
+
+    const doWork = async (txClient?: TransactionClient) => {
+      await this.accountRepository.update(updatedAccount, txClient);
+      const seqNum = await this.eventStore.getNextSequenceNumber(accountId, txClient);
+      await this.eventStore.append({
+        eventType: ACCOUNT_EVENT_TYPES.PROFILE_UPDATED,
+        aggregateId: accountId,
+        aggregateType: 'account',
+        sequenceNumber: seqNum,
+        correlationId,
+        sourceService: 'account-service',
+        payload: { fields_changed: changedFields },
+      }, txClient);
+    };
+
+    if (this.transactionPort) {
+      await this.transactionPort.withTransaction(doWork);
+    } else {
+      await doWork();
+    }
 
     this.logger.info({ accountId, action: 'profile_updated' }, 'Account profile updated');
 
@@ -104,18 +115,27 @@ export class AccountAppService {
     ];
 
     const updatedAccount = account.withRoles(mergedRoles);
-    await this.accountRepository.update(updatedAccount);
+    const correlationId = crypto.randomUUID();
 
-    const seqNum = await this.eventStore.getNextSequenceNumber(accountId);
-    await this.eventStore.append({
-      eventType: ACCOUNT_EVENT_TYPES.ROLES_UPDATED,
-      aggregateId: accountId,
-      aggregateType: 'account',
-      sequenceNumber: seqNum,
-      correlationId: crypto.randomUUID(),
-      sourceService: 'account-service',
-      payload: { roles: [...mergedRoles] },
-    });
+    const doWork = async (txClient?: TransactionClient) => {
+      await this.accountRepository.update(updatedAccount, txClient);
+      const seqNum = await this.eventStore.getNextSequenceNumber(accountId, txClient);
+      await this.eventStore.append({
+        eventType: ACCOUNT_EVENT_TYPES.ROLES_UPDATED,
+        aggregateId: accountId,
+        aggregateType: 'account',
+        sequenceNumber: seqNum,
+        correlationId,
+        sourceService: 'account-service',
+        payload: { roles: [...mergedRoles] },
+      }, txClient);
+    };
+
+    if (this.transactionPort) {
+      await this.transactionPort.withTransaction(doWork);
+    } else {
+      await doWork();
+    }
 
     this.logger.info({ accountId, action: 'roles_updated', roles: mergedRoles }, 'Account roles updated');
 
@@ -129,30 +149,41 @@ export class AccountAppService {
     }
 
     const updatedAccount = account.withOnboardingStep(step);
-    await this.accountRepository.update(updatedAccount);
+    const stepCorrelationId = crypto.randomUUID();
+    const completedCorrelationId = crypto.randomUUID();
 
-    const stepSeqNum = await this.eventStore.getNextSequenceNumber(accountId);
-    await this.eventStore.append({
-      eventType: ACCOUNT_EVENT_TYPES.ONBOARDING_STEP_COMPLETED,
-      aggregateId: accountId,
-      aggregateType: 'account',
-      sequenceNumber: stepSeqNum,
-      correlationId: crypto.randomUUID(),
-      sourceService: 'account-service',
-      payload: { step },
-    });
+    const doWork = async (txClient?: TransactionClient) => {
+      await this.accountRepository.update(updatedAccount, txClient);
 
-    if (step === 'completed') {
-      const completedSeqNum = await this.eventStore.getNextSequenceNumber(accountId);
+      const stepSeqNum = await this.eventStore.getNextSequenceNumber(accountId, txClient);
       await this.eventStore.append({
-        eventType: ACCOUNT_EVENT_TYPES.ONBOARDING_COMPLETED,
+        eventType: ACCOUNT_EVENT_TYPES.ONBOARDING_STEP_COMPLETED,
         aggregateId: accountId,
         aggregateType: 'account',
-        sequenceNumber: completedSeqNum,
-        correlationId: crypto.randomUUID(),
+        sequenceNumber: stepSeqNum,
+        correlationId: stepCorrelationId,
         sourceService: 'account-service',
-        payload: {},
-      });
+        payload: { step },
+      }, txClient);
+
+      if (step === 'completed') {
+        const completedSeqNum = await this.eventStore.getNextSequenceNumber(accountId, txClient);
+        await this.eventStore.append({
+          eventType: ACCOUNT_EVENT_TYPES.ONBOARDING_COMPLETED,
+          aggregateId: accountId,
+          aggregateType: 'account',
+          sequenceNumber: completedSeqNum,
+          correlationId: completedCorrelationId,
+          sourceService: 'account-service',
+          payload: {},
+        }, txClient);
+      }
+    };
+
+    if (this.transactionPort) {
+      await this.transactionPort.withTransaction(doWork);
+    } else {
+      await doWork();
     }
 
     this.logger.info(
@@ -172,19 +203,33 @@ export class AccountAppService {
       throw new AccountNotFoundError();
     }
 
+    const oldPrefs = account.notificationPreferences;
     const updatedAccount = account.withNotificationPreferences(prefs);
-    await this.accountRepository.update(updatedAccount);
+    const newPrefs = updatedAccount.notificationPreferences;
+    const categoriesChanged = (Object.keys(newPrefs) as (keyof NotificationPreferences)[]).filter(
+      (key) => oldPrefs[key] !== newPrefs[key],
+    );
+    const correlationId = crypto.randomUUID();
 
-    const seqNum = await this.eventStore.getNextSequenceNumber(accountId);
-    await this.eventStore.append({
-      eventType: ACCOUNT_EVENT_TYPES.PREFERENCES_UPDATED,
-      aggregateId: accountId,
-      aggregateType: 'account',
-      sequenceNumber: seqNum,
-      correlationId: crypto.randomUUID(),
-      sourceService: 'account-service',
-      payload: {},
-    });
+    const doWork = async (txClient?: TransactionClient) => {
+      await this.accountRepository.update(updatedAccount, txClient);
+      const seqNum = await this.eventStore.getNextSequenceNumber(accountId, txClient);
+      await this.eventStore.append({
+        eventType: ACCOUNT_EVENT_TYPES.PREFERENCES_UPDATED,
+        aggregateId: accountId,
+        aggregateType: 'account',
+        sequenceNumber: seqNum,
+        correlationId,
+        sourceService: 'account-service',
+        payload: { categories_changed: categoriesChanged },
+      }, txClient);
+    };
+
+    if (this.transactionPort) {
+      await this.transactionPort.withTransaction(doWork);
+    } else {
+      await doWork();
+    }
 
     this.logger.info({ accountId, action: 'preferences_updated' }, 'Notification preferences updated');
 
