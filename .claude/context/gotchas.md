@@ -622,3 +622,38 @@ identical at this point; the parameter already holds the correct value.
 
 
 
+
+---
+
+### G-034: Frontend/Backend Schema Drift in JSONB Arrays
+
+**Problem:** When backend domain models store complex objects in JSONB columns (milestones, team members, risk disclosures, budget items), the frontend type definitions can drift from the backend Zod schemas. This happened 4 times in feat-003 quality gates:
+- `RiskDisclosure`: frontend had `{title, description, severity}`, backend had `{id, risk, mitigation}`
+- `CampaignCategory`: frontend had `propulsion_systems`, backend had `propulsion`
+- `TeamMember`: frontend missing `id`, had extra `linkedInUrl`, `bio: string | null` vs `z.string()`
+- `Milestone`: frontend missing `id`, `targetDate` format mismatch (ISO vs YYYY-MM-DD)
+
+**Fix:** When implementing JSONB array schemas:
+1. Define the schema in the backend FIRST (`update-campaign.schema.ts`)
+2. Export the inferred TypeScript type: `export type TeamMemberInput = z.infer<typeof teamMemberSchema>`
+3. Use the shared type in `packages/shared/` or manually keep frontend types in sync
+4. Add a contract test that validates the frontend types against the backend Zod schemas
+5. For `id` fields: backend schemas require UUID, frontend components must call `crypto.randomUUID()` when creating new entries
+
+**Detected in:** feat-003 quality gate (4 quality loop iterations needed)
+
+---
+
+### G-035: `z.object()` Does NOT Reject Unknown Keys by Default
+
+**Problem:** Zod's `z.object()` silently strips unknown keys by default. Fields present in the frontend payload but absent from the Zod schema are silently dropped without a 400 error. This caused `linkedInUrl` to appear to work in the UI (no error) but never get persisted. Users lose data with no indication of the failure.
+
+**Fix:** Either:
+- Use `.strict()` on all object schemas to reject unknown keys (breaks if frontend sends extra fields)
+- OR add all frontend-collected fields to the backend schema
+- OR explicitly document which fields are UI-only and not persisted (note this in the frontend type and TeamSection component)
+
+The `emptyBodySchema = z.object({}).strict()` pattern (for body-less endpoints) correctly uses `.strict()`. Apply the same rigor to entity sub-schemas.
+
+**Detected in:** feat-003 quality gate
+
