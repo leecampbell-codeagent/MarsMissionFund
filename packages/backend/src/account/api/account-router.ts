@@ -5,7 +5,7 @@ import type { AccountAppService } from '../application/account-app-service.js';
 import { AccountStatus } from '../domain/value-objects/account-status.js';
 import { serializeUser } from './user-serializer.js';
 
-// PATCH /api/v1/me/profile schema — WARN-003: includes onboardingCompleted + onboardingStep
+// PATCH /api/v1/me/profile schema — onboardingCompleted and onboardingStep removed (HIGH-003)
 const updateProfileSchema = z
   .object({
     displayName: z
@@ -21,8 +21,6 @@ const updateProfileSchema = z
       .optional()
       .transform((v) => (v === '' ? null : v)),
     avatarUrl: z.string().url().nullable().optional(),
-    onboardingCompleted: z.boolean().optional(),
-    onboardingStep: z.enum(['role_selection', 'profiling', 'notifications', 'complete']).optional(),
   })
   .strict()
   .refine((data) => Object.keys(data).length > 0, {
@@ -143,9 +141,12 @@ export function createAccountRouter(accountAppService: AccountAppService): Route
         res.status(400).json({
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'Check your input and try again.',
+            message: 'Request body is invalid.',
             correlation_id: req.correlationId ?? null,
-            details: parseResult.error.format(),
+            issues: parseResult.error.issues.map((i) => ({
+              path: i.path.join('.'),
+              message: i.message,
+            })),
           },
         });
         return;
@@ -206,9 +207,12 @@ export function createAccountRouter(accountAppService: AccountAppService): Route
         res.status(400).json({
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'Check your input and try again.',
+            message: 'Request body is invalid.',
             correlation_id: req.correlationId ?? null,
-            details: parseResult.error.format(),
+            issues: parseResult.error.issues.map((i) => ({
+              path: i.path.join('.'),
+              message: i.message,
+            })),
           },
         });
         return;

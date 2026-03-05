@@ -9,8 +9,8 @@ export class InvalidClerkUserIdError extends DomainError {
 
 export class InvalidEmailError extends DomainError {
   readonly code = 'INVALID_EMAIL';
-  constructor(email: string) {
-    super('INVALID_EMAIL', `Invalid email address: ${email}`);
+  constructor(_email?: string) {
+    super('INVALID_EMAIL', 'The email address provided is invalid.');
   }
 }
 
@@ -30,8 +30,8 @@ export class BioTooLongError extends DomainError {
 
 export class InvalidAvatarUrlError extends DomainError {
   readonly code = 'INVALID_AVATAR_URL';
-  constructor(url: string) {
-    super('INVALID_AVATAR_URL', `Invalid avatar URL: ${url}`);
+  constructor(_url?: string) {
+    super('INVALID_AVATAR_URL', 'The avatar URL provided is invalid.');
   }
 }
 
@@ -64,8 +64,8 @@ export class CannotRemoveBackerRoleError extends DomainError {
 
 export class RoleNotAssignedError extends DomainError {
   readonly code = 'ROLE_NOT_ASSIGNED';
-  constructor(role: string) {
-    super('ROLE_NOT_ASSIGNED', `Role ${role} is not assigned to this user.`);
+  constructor(_role?: string) {
+    super('ROLE_NOT_ASSIGNED', 'The specified role is not assigned to this user.');
   }
 }
 
@@ -78,20 +78,15 @@ export class SecurityAlertsCannotBeDisabledError extends DomainError {
 
 export class UserNotFoundError extends DomainError {
   readonly code = 'USER_NOT_FOUND';
-  constructor(identifier?: string) {
-    super(
-      'USER_NOT_FOUND',
-      identifier
-        ? `User not found: ${identifier}`
-        : "We couldn't find your account. Try signing in again.",
-    );
+  constructor(_identifier?: string) {
+    super('USER_NOT_FOUND', "We couldn't find your account. Try signing in again.");
   }
 }
 
 export class UserAlreadyExistsError extends DomainError {
   readonly code = 'USER_ALREADY_EXISTS';
-  constructor(clerkUserId: string) {
-    super('USER_ALREADY_EXISTS', `User already exists with Clerk ID: ${clerkUserId}`);
+  constructor(_clerkUserId?: string) {
+    super('USER_ALREADY_EXISTS', 'A user account already exists for this identity.');
   }
 }
 
