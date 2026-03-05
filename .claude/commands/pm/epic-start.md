@@ -199,7 +199,11 @@ Screenshots are uploaded to GitHub's CDN (not committed to the repo) to avoid bl
 2. Ensure the app stack is running (it should be from the Playwright tester step)
 3. Open browser once: `playwright-cli open http://localhost:5173`
 4. Resize once: `playwright-cli resize 1280 800`
-5. For each affected route, capture to a temp file and upload to GitHub:
+5. Resolve the upstream repo from git remotes (for the GitHub API calls):
+   ```bash
+   UPSTREAM_REPO=$(git remote get-url upstream | sed 's|.*github.com[:/]||;s|\.git$||')
+   ```
+6. For each affected route, capture to a temp file and upload to GitHub:
    ```bash
    playwright-cli goto /<route>
    # If auth required: playwright-cli state-load (use saved auth state from Playwright tester)
@@ -221,7 +225,7 @@ Screenshots are uploaded to GitHub's CDN (not committed to the repo) to avoid bl
      --jq '.url' 2>/dev/null || true)
    ```
    Store each URL for use in the PR body.
-6. Close browser: `playwright-cli close`
+7. Close browser: `playwright-cli close`
 
 **Edge cases:**
 - **App won't start:** Skip screenshots, note in PR body: "Screenshots: app stack failed to start"
@@ -257,11 +261,20 @@ All quality checks passed. Create a PR for review.
    ```
 
 2. **Push and create PR** (using `PR_TARGET` resolved in step 1b):
+
+   **Resolve repo identifiers from git remotes** (do NOT hardcode repo or owner names):
+   ```bash
+   UPSTREAM_REPO=$(git remote get-url upstream | sed 's|.*github.com[:/]||;s|\.git$||')
+   ORIGIN_OWNER=$(git remote get-url origin | sed 's|.*github.com[:/]||;s|/.*||')
+   ```
+   - `UPSTREAM_REPO` = the `owner/repo` that PRs target (e.g. `LeeCampbell/MarsMissionFund`)
+   - `ORIGIN_OWNER` = the fork owner for the `--head` flag (e.g. `leecampbell-codeagent`)
+
    ```bash
    git push origin ralph/feat-XXX-[name]
    gh pr create \
      --repo "${UPSTREAM_REPO}" \
-     --head "leecampbell-codeagent:ralph/feat-XXX-[name]" \
+     --head "${ORIGIN_OWNER}:ralph/feat-XXX-[name]" \
      --base <PR_TARGET> \
      --title "feat-XXX: [name]" \
      --body "## Summary

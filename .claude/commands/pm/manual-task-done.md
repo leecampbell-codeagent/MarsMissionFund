@@ -176,10 +176,17 @@ Read `.claude/agents/integration-engineer.md` and execute the swap:
    ```
 
 4. **Create PR to upstream** (using `PR_TARGET` resolved in step 4.1):
+
+   **Resolve repo identifiers from git remotes** (do NOT hardcode repo or owner names):
+   ```bash
+   UPSTREAM_REPO=$(git remote get-url upstream | sed 's|.*github.com[:/]||;s|\.git$||')
+   ORIGIN_OWNER=$(git remote get-url origin | sed 's|.*github.com[:/]||;s|/.*||')
+   ```
+
    ```bash
    gh pr create \
      --repo "${UPSTREAM_REPO}" \
-     --head "leecampbell-codeagent:ralph/integrate-[service-name]" \
+     --head "${ORIGIN_OWNER}:ralph/integrate-[service-name]" \
      --base <PR_TARGET> \
      --title "integrate: real [service] adapter" \
      --body "## Summary

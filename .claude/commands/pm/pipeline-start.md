@@ -169,7 +169,11 @@ Screenshots are uploaded to GitHub's CDN (not committed to the repo) to avoid bl
 2. Ensure the app stack is running (it should be from the Playwright tester step)
 3. Open browser once: `playwright-cli open http://localhost:5173`
 4. Resize once: `playwright-cli resize 1280 800`
-5. For each affected route, capture to a temp file and upload to GitHub:
+5. Resolve the upstream repo from git remotes (for the GitHub API calls):
+   ```bash
+   UPSTREAM_REPO=$(git remote get-url upstream | sed 's|.*github.com[:/]||;s|\.git$||')
+   ```
+6. For each affected route, capture to a temp file and upload to GitHub:
    ```bash
    playwright-cli goto /<route>
    # If auth required: playwright-cli state-load (use saved auth state from Playwright tester)
@@ -211,11 +215,20 @@ Screenshots are uploaded to GitHub's CDN (not committed to the repo) to avoid bl
     - [ ] Build succeeds (`npm run build`)
 
 12. **If ALL pass — create a PR to upstream:**
+
+    **Resolve repo identifiers from git remotes** (do NOT hardcode repo or owner names):
+    ```bash
+    UPSTREAM_REPO=$(git remote get-url upstream | sed 's|.*github.com[:/]||;s|\.git$||')
+    ORIGIN_OWNER=$(git remote get-url origin | sed 's|.*github.com[:/]||;s|/.*||')
+    ```
+    - `UPSTREAM_REPO` = the `owner/repo` that PRs target (e.g. `LeeCampbell/MarsMissionFund`)
+    - `ORIGIN_OWNER` = the fork owner for the `--head` flag (e.g. `leecampbell-codeagent`)
+
     ```bash
     git push origin ralph/feat-XXX-[name]
     gh pr create \
       --repo "${UPSTREAM_REPO}" \
-      --head "leecampbell-codeagent:ralph/feat-XXX-[name]" \
+      --head "${ORIGIN_OWNER}:ralph/feat-XXX-[name]" \
       --base <PR_TARGET> \
       --title "feat-XXX: [name]" \
       --body "## Summary

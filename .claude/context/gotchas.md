@@ -91,6 +91,17 @@ Always use `INSERT ... ON CONFLICT` or upsert patterns in webhook handlers.
 - The first feature to emit events will need to implement the `EventStore` port and PG adapter from scratch.
 - Events and aggregate updates must be in the same database transaction (transactional outbox pattern within single DB).
 
+## PR Target Must Be Upstream, Not Fork
+
+- When creating PRs with `gh pr create`, you MUST use `--repo` to target the upstream repo.
+- Without `--repo`, `gh` defaults to the current repo's origin remote — which is the fork.
+- Do NOT hardcode repo names or owner names. Derive them from git remotes:
+  ```bash
+  UPSTREAM_REPO=$(git remote get-url upstream | sed 's|.*github.com[:/]||;s|\.git$||')
+  ORIGIN_OWNER=$(git remote get-url origin | sed 's|.*github.com[:/]||;s|/.*||')
+  ```
+- Use `--repo "${UPSTREAM_REPO}"` and `--head "${ORIGIN_OWNER}:<branch>"` in `gh pr create`.
+
 ## npm Workspaces Hoisting
 
 - npm hoists the most common version of a shared dependency to the root.
