@@ -1,3 +1,4 @@
+import { InvalidWebhookSignatureError } from '../../domain/payment-errors.js';
 import type {
   CapturePaymentInput,
   CapturePaymentOutcome,
@@ -7,6 +8,12 @@ import type {
   RefundPaymentInput,
   RefundPaymentOutcome,
 } from '../../ports/payment-gateway-port.js';
+
+/**
+ * Sentinel signature value that forces the mock to reject with InvalidWebhookSignatureError.
+ * Use this value in tests to exercise the invalid-signature code path.
+ */
+export const MOCK_INVALID_SIGNATURE = 'invalid-sig';
 
 type WebhookEventType =
   | 'payment_intent.succeeded'
@@ -67,7 +74,11 @@ export class MockPaymentGatewayAdapter implements PaymentGatewayPort {
     };
   }
 
-  async parseWebhookEvent(rawBody: Buffer, _signature: string): Promise<NormalisedWebhookEvent> {
+  async parseWebhookEvent(rawBody: Buffer, signature: string): Promise<NormalisedWebhookEvent> {
+    if (signature === MOCK_INVALID_SIGNATURE) {
+      throw new InvalidWebhookSignatureError();
+    }
+
     const body = JSON.parse(rawBody.toString('utf8')) as Record<string, unknown>;
 
     const eventId = typeof body.id === 'string' ? body.id : `mock_evt_${Date.now()}`;

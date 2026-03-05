@@ -11,7 +11,7 @@ import { type AppDependencies, createApp } from '../app.js';
 import { InMemoryContributionRepository } from '../payments/adapters/mock/in-memory-contribution-repository.js';
 import { InMemoryEscrowLedgerRepository } from '../payments/adapters/mock/in-memory-escrow-ledger-repository.js';
 import { InMemoryProcessedWebhookEventRepository } from '../payments/adapters/mock/in-memory-processed-webhook-event-repository.js';
-import { MockPaymentGatewayAdapter } from '../payments/adapters/mock/mock-payment-gateway-adapter.js';
+import { MockPaymentGatewayAdapter, MOCK_INVALID_SIGNATURE } from '../payments/adapters/mock/mock-payment-gateway-adapter.js';
 import { PaymentAppService } from '../payments/application/payment-app-service.js';
 import { Contribution } from '../payments/domain/contribution.js';
 import { InMemoryEventStoreAdapter } from '../shared/adapters/mock/in-memory-event-store-adapter.js';
@@ -263,5 +263,16 @@ describe('POST /api/v1/payments/webhook', () => {
     const unchanged = await ctx.contributionRepo.findById('contrib-uuid-001');
     expect(unchanged?.status).toBe('captured');
     expect(unchanged?.gatewayReference).toBe('pi_existing');
+  });
+
+  it('returns 400 INVALID_WEBHOOK_SIGNATURE when signature verification fails', async () => {
+    const response = await request(ctx.app)
+      .post('/api/v1/payments/webhook')
+      .set('Content-Type', 'application/json')
+      .set('stripe-signature', MOCK_INVALID_SIGNATURE)
+      .send(makeWebhookBody());
+
+    expect(response.status).toBe(400);
+    expect(response.body.error.code).toBe('INVALID_WEBHOOK_SIGNATURE');
   });
 });
