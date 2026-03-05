@@ -365,7 +365,7 @@ Formatting is never a review discussion — it is automated.
 
 | Language | Linter | Formatter | Configuration |
 | --- | --- | --- | --- |
-| TypeScript | Biome | Biome | `biome.json` |
+| TypeScript | ESLint (flat config) | Prettier | `eslint.config.js`, `.prettierrc` |
 | Markdown | markdownlint-cli2 | — | `.markdownlint.jsonc` (per L3-007) |
 
 ### 10.2 Enforcement
@@ -417,7 +417,40 @@ This spec shares boundaries with every other L3 spec and several L4 specs.
 
 ---
 
-## 12. Change Log
+## 12. Development Environment
+
+### 12.1 Agent Runtime (Autonomous Docker Container)
+
+When running inside the autonomous agent container (`autonomous/docker-compose.yml`), the following infrastructure is **pre-provisioned** and must not be recreated:
+
+| Service | Host | Port | Credentials |
+| --- | --- | --- | --- |
+| PostgreSQL | `postgres` | 5432 | user: `mmf`, password: `mmf`, database: `mmf` |
+
+- `DATABASE_URL` is set in the environment — code should read it from `process.env.DATABASE_URL`.
+- The agent **cannot** run `docker compose` from inside the container. Do not attempt to start or manage Docker services from within the agent runtime.
+- dbmate handles migrations via files in `db/migrations/`. Run migrations with `dbmate up`.
+
+### 12.2 Local Human Development
+
+A root `docker-compose.yml` should be created for **human developers** running outside the container. This compose file provides:
+
+- PostgreSQL (matching the same credentials as the agent runtime)
+- dbmate for running migrations
+- Backend dev server (`tsx watch`)
+- Frontend dev server (`vite`)
+
+The agent should create this file as part of infrastructure setup, but must not depend on it for its own runtime.
+
+### 12.3 Running Services Directly
+
+- **Backend**: `npm run dev --workspace=packages/backend` — runs via `tsx watch`
+- **Frontend**: `npm run dev --workspace=packages/frontend` — runs via `vite` dev server
+- **Both**: can be started concurrently from root via npm scripts
+
+---
+
+## 13. Change Log
 
 | Date | Version | Author | Summary |
 | --- | --- | --- | --- |
