@@ -85,16 +85,6 @@ cp /opt/agent/scripts/.pre-commit-config.yaml /workspace/.pre-commit-config.yaml
 prek install
 
 # ---------------------------------------------------------------------------
-# Step 2c: Configure Claude Code hooks (biome lint on Edit/Write)
-# ---------------------------------------------------------------------------
-STEP="claude_hooks"
-echo "Installing Claude Code hooks..."
-mkdir -p /workspace/.claude/hooks
-cp /opt/agent/scripts/claude-hooks/settings.json /workspace/.claude/settings.json
-cp /opt/agent/scripts/claude-hooks/hooks/lint-ts-file.sh /workspace/.claude/hooks/lint-ts-file.sh
-chmod +x /workspace/.claude/hooks/lint-ts-file.sh
-
-# ---------------------------------------------------------------------------
 # Step 3: Lock down outbound network
 # ---------------------------------------------------------------------------
 STEP="firewall"

@@ -3,12 +3,15 @@
   "private": true,
   "description": "Sample crowdfunding app for Autonomous Agentic Coding workshops",
   "scripts": {
-    "lint": "biome check .",
-    "format": "biome check --formatter-enabled=true --linter-enabled=false .",
+    "lint": "biome check . && markdownlint-cli2 '**/*.md'",
+    "lint:fix": "biome check --write . && markdownlint-cli2 --fix '**/*.md'",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
     "typecheck": "echo 'No workspaces to typecheck yet'",
     "test": "echo 'No workspaces to test yet'"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.5"
+    "@biomejs/biome": "^2.4.5",
+    "markdownlint-cli2": "^0.21.0"
   }
 }

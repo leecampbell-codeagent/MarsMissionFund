@@ -102,5 +102,18 @@
     ],
     "deny": ["Bash(git branch -D:*)", "Bash(gh pr merge:*)", "Bash(git -C *)", "Bash(cd *)"],
     "ask": []
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/lint-staged-file.sh"
+          }
+        ]
+      }
+    ]
   }
 }
