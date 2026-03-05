@@ -15,7 +15,7 @@
 
 | # | Feature | Context | Priority | Status | Dependencies | Complexity |
 |---|---------|---------|----------|--------|-------------|------------|
-| 001 | Account Registration and Authentication | Account (L4-001) | P0 | ✅ SPECCED | None | M |
+| 001 | Account Registration and Authentication | Account (L4-001) | P0 | ✅ SHIPPED | None | M |
 | 002 | KYC Verification Stub | KYC (L4-005) | P0 | 🔲 | feat-001 | S |
 | 003 | Campaign Creation, Submission, and Review Pipeline | Campaign (L4-002) | P0 | 🔲 | feat-001, feat-002 | L |
 | 004 | Campaign Discovery and Public Campaign Pages | Donor (L4-003), Campaign (L4-002) | P1 | 🔲 | feat-003 | M |
