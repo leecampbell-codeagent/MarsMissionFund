@@ -5,7 +5,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "docker compose up --build",
+    "dev": "npm run dev:backend & npm run dev:frontend & wait",
+    "dev:docker": "docker compose up --build",
     "dev:frontend": "npm run dev --workspace=packages/frontend",
     "dev:backend": "npm run dev --workspace=packages/backend",
     "lint": "biome check . && markdownlint-cli2 '**/*.md'",
