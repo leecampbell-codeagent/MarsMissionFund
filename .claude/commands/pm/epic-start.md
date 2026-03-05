@@ -196,28 +196,42 @@ git push origin ralph/feat-XXX-[name]
 
 **If the feature has frontend changes:**
 
+Screenshots are uploaded to GitHub's CDN (not committed to the repo) to avoid bloating git history with binary files.
+
 1. Identify affected routes from the feature spec's frontend section
 2. Ensure the app stack is running (it should be from the Playwright tester step)
-3. For each affected route:
+3. Open browser once: `playwright-cli open http://localhost:5173`
+4. Resize once: `playwright-cli resize 1280 800`
+5. For each affected route, capture to a temp file and upload to GitHub:
    ```bash
-   playwright-cli open http://localhost:5173
-   playwright-cli resize 1280 800
    playwright-cli goto /<route>
    # If auth required: playwright-cli state-load (use saved auth state from Playwright tester)
-   playwright-cli screenshot --filename=.claude/screenshots/feat-XXX/{route-slug}.png
+   playwright-cli screenshot --filename=/tmp/feat-XXX-{route-slug}.png
+
+   # Upload to GitHub CDN — returns a markdown image URL
+   SCREENSHOT_URL=$(gh api \
+     --method POST \
+     -H "Accept: application/json" \
+     "repos/${UPSTREAM_REPO}/issues/1/comments" \
+     -f body="![{route-slug}](placeholder)" \
+     --jq '.body' 2>/dev/null || true)
+   # Alternative: use the repository's upload mechanism
+   SCREENSHOT_URL=$(gh api \
+     --method POST \
+     "repos/${UPSTREAM_REPO}/git/blobs" \
+     -f content="$(base64 < /tmp/feat-XXX-{route-slug}.png)" \
+     -f encoding=base64 \
+     --jq '.url' 2>/dev/null || true)
    ```
-4. Close browser: `playwright-cli close`
-5. Commit and push:
-   ```bash
-   git add .claude/screenshots/feat-XXX/
-   git commit -m "chore: add screenshots for feat-XXX"
-   git push origin ralph/feat-XXX-[name]
-   ```
+   Store each URL for use in the PR body.
+6. Close browser: `playwright-cli close`
+7. Clean up temp files: `rm -f /tmp/feat-XXX-*.png`
 
 **Edge cases:**
 - **App won't start:** Skip screenshots, note in PR body: "Screenshots: app stack failed to start"
 - **Auth-gated pages:** Use `playwright-cli state-load` with saved auth state from Playwright tester
 - **No frontend changes:** Omit screenshots section from PR body entirely
+- **Upload fails:** Fall back to noting "Screenshots: upload failed" in PR body — never commit PNGs to the repo
 
 ### 6. Fix Loop (if quality gate fails)
 
@@ -259,8 +273,8 @@ All quality checks passed. Create a PR for review.
    - **Stacked on:** <PR_TARGET> (if not main — merge parent PR first)
 
    ## Screenshots
-   ![route-name](https://raw.githubusercontent.com/leecampbell-codeagent/MarsMissionFund/ralph/feat-XXX-name/.claude/screenshots/feat-XXX/route-slug.png)
-   [Repeat for each captured route. If no frontend changes, omit this section entirely.]
+   ![route-name](<SCREENSHOT_URL from step 5b>)
+   [Repeat for each captured route using the GitHub CDN URLs from step 5b. If no frontend changes, omit this section entirely.]
 
    ## Quality Gate
    - Tests: all passing

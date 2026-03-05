@@ -154,26 +154,26 @@ Your task is done when:
 - [ ] Exploratory report written to `.claude/reports/feat-XXX-exploratory.md`
 - [ ] Clear verdict issued
 - [ ] If FAIL or ISSUES FOUND: specific issue descriptions written for re-dispatch
-- [ ] PR screenshots saved to `.claude/screenshots/feat-XXX/{route-slug}.png` (one per affected route, at 1280x800)
+- [ ] PR screenshots saved to `/tmp/feat-XXX-{route-slug}.png` (one per affected route, at 1280x800)
 
 ---
 
 ## PR Screenshots
 
-In addition to the exploratory screenshots taken during verification, capture **final-state screenshots** for inclusion in the PR. These are taken at a consistent viewport size and saved to a structured location.
+In addition to the exploratory screenshots taken during verification, capture **final-state screenshots** for inclusion in the PR. These are taken at a consistent viewport size and saved to a temp location (never committed to the repo).
 
 **When:** After all acceptance criteria have been verified and you've issued your verdict.
 
-**Where:** Save to `.claude/screenshots/feat-XXX/{route-slug}.png`
+**Where:** Save to `/tmp/feat-XXX-{route-slug}.png` (temp files — the orchestrator uploads these to GitHub's CDN)
 
 **How:**
 ```bash
 playwright-cli resize 1280 800
 playwright-cli goto /<route>
-playwright-cli screenshot --filename=.claude/screenshots/feat-XXX/{route-slug}.png
+playwright-cli screenshot --filename=/tmp/feat-XXX-{route-slug}.png
 ```
 
-Capture one screenshot per affected route (e.g., `dashboard.png`, `project-detail.png`, `create-project.png`). These are used by the orchestrator to embed in the PR body so reviewers can see what was built without running the app.
+Capture one screenshot per affected route (e.g., `dashboard.png`, `project-detail.png`, `create-project.png`). The orchestrator will upload these to GitHub's CDN and embed the URLs in the PR body — screenshots are never committed to the repo.
 
 ---
 
