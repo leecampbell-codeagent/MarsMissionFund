@@ -1,12 +1,12 @@
 import pino from 'pino';
 import { describe, expect, it } from 'vitest';
 import { InMemoryUserRepository } from '../../account/adapters/in-memory-user-repository.adapter.js';
+import { UserNotFoundError } from '../../account/domain/errors/account-errors.js';
 import { User, type UserData } from '../../account/domain/models/user.js';
 import { AccountStatus } from '../../account/domain/value-objects/account-status.js';
 import { KycStatus } from '../../account/domain/value-objects/kyc-status.js';
 import { NotificationPreferences } from '../../account/domain/value-objects/notification-preferences.js';
 import { Role } from '../../account/domain/value-objects/role.js';
-import { UserNotFoundError } from '../../account/domain/errors/account-errors.js';
 import { InMemoryKycAuditRepository } from '../adapters/in-memory-kyc-audit-repository.adapter.js';
 import { StubKycVerificationAdapter } from '../adapters/stub-kyc-provider.adapter.js';
 import {
@@ -311,7 +311,9 @@ describe('KycAppService.submitKyc() — KYC status validation', () => {
       accountStatus: AccountStatus.Active,
     });
 
-    await expect(service.submitKyc('user_already_verified')).rejects.toThrow(KycAlreadyVerifiedError);
+    await expect(service.submitKyc('user_already_verified')).rejects.toThrow(
+      KycAlreadyVerifiedError,
+    );
   });
 
   it('throws KycResubmissionNotAllowedError when kycStatus is expired', async () => {
@@ -506,7 +508,11 @@ describe('InMemoryUserRepository.updateKycStatus()', () => {
     const repo = new InMemoryUserRepository();
     seedUser(repo, 'user_update_kyc', { kycStatus: KycStatus.NotStarted });
 
-    const updated = await repo.updateKycStatus('user_update_kyc', KycStatus.NotStarted, KycStatus.Pending);
+    const updated = await repo.updateKycStatus(
+      'user_update_kyc',
+      KycStatus.NotStarted,
+      KycStatus.Pending,
+    );
 
     expect(updated.kycStatus).toBe(KycStatus.Pending);
   });
@@ -536,7 +542,11 @@ describe('InMemoryUserRepository.updateKycStatus()', () => {
       roles: [Role.Backer, Role.Creator],
     });
 
-    const updated = await repo.updateKycStatus('user_preserve', KycStatus.NotStarted, KycStatus.Pending);
+    const updated = await repo.updateKycStatus(
+      'user_preserve',
+      KycStatus.NotStarted,
+      KycStatus.Pending,
+    );
 
     expect(updated.displayName).toBe(original.displayName);
     expect(updated.roles).toEqual(original.roles);

@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface LoadingSpinnerProps {
   readonly size?: 'sm' | 'md' | 'lg';
@@ -90,31 +90,3 @@ export function LoadingSpinner({
     </span>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

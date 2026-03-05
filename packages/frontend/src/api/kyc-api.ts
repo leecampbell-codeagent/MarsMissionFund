@@ -3,10 +3,16 @@
  * Maps to endpoints defined in feat-002-spec-api.md.
  */
 
+import type { UserProfile } from './account-api';
 import { apiClient } from './client';
-import { type UserProfile } from './account-api';
 
-export type KycStatus = 'not_started' | 'pending' | 'in_review' | 'verified' | 'rejected' | 'expired';
+export type KycStatus =
+  | 'not_started'
+  | 'pending'
+  | 'in_review'
+  | 'verified'
+  | 'rejected'
+  | 'expired';
 
 export interface KycStatusResponse {
   readonly kycStatus: KycStatus;

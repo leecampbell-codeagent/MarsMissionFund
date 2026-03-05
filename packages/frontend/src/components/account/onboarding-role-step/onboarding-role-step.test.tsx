@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { OnboardingRoleStep } from './onboarding-role-step';
 
 describe('OnboardingRoleStep', () => {
@@ -16,7 +16,9 @@ describe('OnboardingRoleStep', () => {
 
   it('renders the heading', () => {
     render(<OnboardingRoleStep {...defaultProps} />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('HOW WILL YOU JOIN THE MISSION?');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      'HOW WILL YOU JOIN THE MISSION?',
+    );
   });
 
   it('renders all 3 role cards in a radiogroup', () => {
@@ -63,31 +65,3 @@ describe('OnboardingRoleStep', () => {
     expect(backerCard).toHaveAttribute('aria-checked', 'true');
   });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

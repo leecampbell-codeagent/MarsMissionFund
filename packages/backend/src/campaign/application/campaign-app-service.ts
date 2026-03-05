@@ -2,7 +2,14 @@ import type { Logger } from 'pino';
 import { UserNotFoundError } from '../../account/domain/errors/account-errors.js';
 import type { User } from '../../account/domain/models/user.js';
 import type { UserRepository } from '../../account/ports/user-repository.port.js';
-import { Campaign, type BudgetItem, type Milestone, type RiskDisclosure, type TeamMember, type UpdateCampaignInput } from '../domain/models/campaign.js';
+import {
+  type BudgetItem,
+  Campaign,
+  type Milestone,
+  type RiskDisclosure,
+  type TeamMember,
+  type UpdateCampaignInput,
+} from '../domain/models/campaign.js';
 import type { CampaignCategory } from '../domain/value-objects/campaign-category.js';
 import { CAMPAIGN_CATEGORIES } from '../domain/value-objects/campaign-category.js';
 
@@ -16,20 +23,20 @@ export interface PublicCampaignListItem {
   readonly shortDescription: string | null;
   readonly category: string | null;
   readonly heroImageUrl: string | null;
-  readonly status: string;                  // 'live' | 'funded'
+  readonly status: string; // 'live' | 'funded'
   readonly fundingGoalCents: string | null; // BIGINT as string (G-024)
   readonly deadline: Date | null;
   readonly launchedAt: Date | null;
-  readonly creatorName: string | null;      // users.display_name (may be null)
+  readonly creatorName: string | null; // users.display_name (may be null)
   // Funding progress — stubbed for feat-004
-  readonly totalRaisedCents: string;        // Always '0' in feat-004
-  readonly contributorCount: number;        // Always 0 in feat-004
+  readonly totalRaisedCents: string; // Always '0' in feat-004
+  readonly contributorCount: number; // Always 0 in feat-004
   readonly fundingPercentage: number | null; // null when fundingGoalCents is null
 }
 
 export interface PublicCampaignDetail extends PublicCampaignListItem {
   readonly description: string | null;
-  readonly fundingCapCents: string | null;  // BIGINT as string (G-024)
+  readonly fundingCapCents: string | null; // BIGINT as string (G-024)
   readonly milestones: Milestone[];
   readonly teamMembers: TeamMember[];
   readonly riskDisclosures: RiskDisclosure[];
@@ -42,32 +49,27 @@ export interface CategoryStats {
   readonly category: string;
   readonly campaignCount: number;
   readonly activeCampaignCount: number;
-  readonly totalRaisedCents: string;   // Always '0' in feat-004
-  readonly contributorCount: number;   // Always 0 in feat-004
+  readonly totalRaisedCents: string; // Always '0' in feat-004
+  readonly contributorCount: number; // Always 0 in feat-004
 }
 
 export type PublicSortOption = 'newest' | 'ending_soon' | 'most_funded' | 'least_funded';
 export type PublicStatusFilter = 'active' | 'funded' | 'ending_soon';
 
 export interface PublicSearchOptions {
-  readonly q?: string;                          // Trimmed search term; empty string = no FTS
-  readonly categories?: readonly string[];      // Validated CampaignCategory values
+  readonly q?: string; // Trimmed search term; empty string = no FTS
+  readonly categories?: readonly string[]; // Validated CampaignCategory values
   readonly status?: PublicStatusFilter;
-  readonly sort?: PublicSortOption;             // Default: 'newest'
-  readonly limit: number;                       // 1–100, default 20
-  readonly offset: number;                      // >= 0, default 0
+  readonly sort?: PublicSortOption; // Default: 'newest'
+  readonly limit: number; // 1–100, default 20
+  readonly offset: number; // >= 0, default 0
 }
 
 export interface PublicSearchResult {
   readonly items: PublicCampaignListItem[];
   readonly total: number;
 }
-import {
-  CREATOR_ARCHIVABLE_STATUSES,
-  CampaignStatus,
-  EDITABLE_STATUSES,
-  SUBMITTABLE_STATUSES,
-} from '../domain/value-objects/campaign-status.js';
+
 import {
   AccountNotActiveError,
   AdminRoleRequiredError,
@@ -91,6 +93,12 @@ import {
   ReviewerRoleRequiredError,
   SubmissionValidationError,
 } from '../domain/errors/campaign-errors.js';
+import {
+  CampaignStatus,
+  CREATOR_ARCHIVABLE_STATUSES,
+  EDITABLE_STATUSES,
+  SUBMITTABLE_STATUSES,
+} from '../domain/value-objects/campaign-status.js';
 import type { CampaignAuditRepository } from '../ports/campaign-audit-repository.port.js';
 import type { CampaignRepository } from '../ports/campaign-repository.port.js';
 
@@ -118,10 +126,7 @@ export class CampaignAppService {
    * Creates a new campaign draft.
    * Called by POST /api/v1/campaigns.
    */
-  async createDraft(
-    clerkUserId: string,
-    input: { title: string },
-  ): Promise<Campaign> {
+  async createDraft(clerkUserId: string, input: { title: string }): Promise<Campaign> {
     // Step 1: Load and validate user
     const user = await this.userRepository.findByClerkUserId(clerkUserId);
     if (!user) throw new UserNotFoundError(clerkUserId);
@@ -291,10 +296,7 @@ export class CampaignAppService {
 
     // alignmentStatement
     if (!campaign.alignmentStatement || campaign.alignmentStatement.trim().length === 0) {
-      throw new SubmissionValidationError(
-        'alignmentStatement',
-        'Alignment statement is required.',
-      );
+      throw new SubmissionValidationError('alignmentStatement', 'Alignment statement is required.');
     }
     if (campaign.alignmentStatement.length > 1000) {
       throw new SubmissionValidationError(
@@ -304,7 +306,10 @@ export class CampaignAppService {
     }
 
     // category
-    if (!campaign.category || !CAMPAIGN_CATEGORIES.includes(campaign.category as CampaignCategory)) {
+    if (
+      !campaign.category ||
+      !CAMPAIGN_CATEGORIES.includes(campaign.category as CampaignCategory)
+    ) {
       throw new SubmissionValidationError('category', 'A valid category is required.');
     }
 
@@ -355,10 +360,7 @@ export class CampaignAppService {
 
     // teamMembers
     if (campaign.teamMembers.length < 1) {
-      throw new SubmissionValidationError(
-        'teamMembers',
-        'At least one team member is required.',
-      );
+      throw new SubmissionValidationError('teamMembers', 'At least one team member is required.');
     }
     if (campaign.teamMembers.length > 20) {
       throw new SubmissionValidationError('teamMembers', 'Maximum 20 team members allowed.');
@@ -366,10 +368,7 @@ export class CampaignAppService {
 
     // milestones
     if (campaign.milestones.length < 2) {
-      throw new MilestoneValidationError(
-        'milestones',
-        'At least two milestones are required.',
-      );
+      throw new MilestoneValidationError('milestones', 'At least two milestones are required.');
     }
     if (campaign.milestones.length > 10) {
       throw new MilestoneValidationError('milestones', 'Maximum 10 milestones allowed.');
@@ -382,10 +381,7 @@ export class CampaignAppService {
         );
       }
     }
-    const basisPointsSum = campaign.milestones.reduce(
-      (sum, m) => sum + m.fundingBasisPoints,
-      0,
-    );
+    const basisPointsSum = campaign.milestones.reduce((sum, m) => sum + m.fundingBasisPoints, 0);
     if (basisPointsSum !== 10000) {
       throw new MilestoneValidationError(
         'milestones',

@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { formatCents, formatFundingPercentage } from '../../../types/campaign';
 
 export interface FundingProgressBarProps {
@@ -22,9 +22,7 @@ export function FundingProgressBar({
   const clampedPercent = Math.min(fundingPercentage ?? 0, 100);
   const isFunded = (fundingPercentage ?? 0) >= 100;
 
-  const progressFill = isFunded
-    ? 'var(--color-progress-complete)'
-    : 'var(--color-progress-fill)';
+  const progressFill = isFunded ? 'var(--color-progress-complete)' : 'var(--color-progress-fill)';
 
   return (
     <div>
@@ -95,9 +93,7 @@ export function FundingProgressBar({
           style={{
             fontFamily: 'var(--font-data)',
             fontSize: '14px',
-            color: isFunded
-              ? 'var(--color-status-success)'
-              : 'var(--color-text-accent)',
+            color: isFunded ? 'var(--color-status-success)' : 'var(--color-text-accent)',
           }}
         >
           {formatFundingPercentage(fundingPercentage)}

@@ -4,14 +4,14 @@
  * Never use the authenticated apiClient here — these endpoints are public.
  */
 
-import { ApiError } from './client';
-import {
-  type PublicCampaignListItem,
-  type PublicCampaignDetail,
-  type PublicCampaignSearchParams,
-  type PaginatedCampaigns,
-  type PublicCategoryStats,
+import type {
+  PaginatedCampaigns,
+  PublicCampaignDetail,
+  PublicCampaignListItem,
+  PublicCampaignSearchParams,
+  PublicCategoryStats,
 } from '../types/campaign';
+import { ApiError } from './client';
 
 interface PublicCampaignDetailResponse {
   readonly data: PublicCampaignDetail;
@@ -131,4 +131,9 @@ export async function getCategoryStats(category: string): Promise<PublicCategory
   return response.data;
 }
 
-export type { PublicCampaignListItem, PublicCampaignDetail, PaginatedCampaigns, PublicCategoryStats };
+export type {
+  PublicCampaignListItem,
+  PublicCampaignDetail,
+  PaginatedCampaigns,
+  PublicCategoryStats,
+};

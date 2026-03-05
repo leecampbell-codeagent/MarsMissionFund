@@ -1,9 +1,9 @@
-import { type ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import type { ReactElement } from 'react';
 import { getCategoryStats } from '../../../api/public-campaign-api';
 import {
-  type CampaignCategory,
   CAMPAIGN_CATEGORY_LABELS,
+  type CampaignCategory,
   formatCents,
 } from '../../../types/campaign';
 

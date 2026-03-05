@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import type { Campaign, Milestone } from '../../../types/campaign';
 import { MilestonesSection } from './MilestonesSection';
-import { type Campaign, type Milestone } from '../../../types/campaign';
 
 // Minimal campaign for testing sections
 const baseCampaign: Campaign = {
@@ -37,8 +37,20 @@ const baseCampaign: Campaign = {
 describe('MilestonesSection', () => {
   it('shows running basis points total', () => {
     const milestones: Milestone[] = [
-      { id: '00000000-0000-0000-0000-000000000001', title: 'Phase 1', description: 'First phase', fundingBasisPoints: 5000, targetDate: null },
-      { id: '00000000-0000-0000-0000-000000000002', title: 'Phase 2', description: 'Second phase', fundingBasisPoints: 3000, targetDate: null },
+      {
+        id: '00000000-0000-0000-0000-000000000001',
+        title: 'Phase 1',
+        description: 'First phase',
+        fundingBasisPoints: 5000,
+        targetDate: null,
+      },
+      {
+        id: '00000000-0000-0000-0000-000000000002',
+        title: 'Phase 2',
+        description: 'Second phase',
+        fundingBasisPoints: 3000,
+        targetDate: null,
+      },
     ];
     render(<MilestonesSection campaign={{ ...baseCampaign, milestones }} onChange={vi.fn()} />);
     expect(screen.getByRole('status')).toHaveTextContent('8000 / 10,000');
@@ -46,7 +58,13 @@ describe('MilestonesSection', () => {
 
   it('shows warning state when total is not 10000', () => {
     const milestones: Milestone[] = [
-      { id: '00000000-0000-0000-0000-000000000003', title: 'Phase 1', description: 'Test', fundingBasisPoints: 5000, targetDate: null },
+      {
+        id: '00000000-0000-0000-0000-000000000003',
+        title: 'Phase 1',
+        description: 'Test',
+        fundingBasisPoints: 5000,
+        targetDate: null,
+      },
     ];
     render(<MilestonesSection campaign={{ ...baseCampaign, milestones }} onChange={vi.fn()} />);
     expect(screen.getByRole('status')).toHaveTextContent('incomplete');
@@ -54,8 +72,20 @@ describe('MilestonesSection', () => {
 
   it('shows success state when total is exactly 10000', () => {
     const milestones: Milestone[] = [
-      { id: '00000000-0000-0000-0000-000000000004', title: 'Phase 1', description: 'First', fundingBasisPoints: 5000, targetDate: null },
-      { id: '00000000-0000-0000-0000-000000000005', title: 'Phase 2', description: 'Second', fundingBasisPoints: 5000, targetDate: null },
+      {
+        id: '00000000-0000-0000-0000-000000000004',
+        title: 'Phase 1',
+        description: 'First',
+        fundingBasisPoints: 5000,
+        targetDate: null,
+      },
+      {
+        id: '00000000-0000-0000-0000-000000000005',
+        title: 'Phase 2',
+        description: 'Second',
+        fundingBasisPoints: 5000,
+        targetDate: null,
+      },
     ];
     render(<MilestonesSection campaign={{ ...baseCampaign, milestones }} onChange={vi.fn()} />);
     expect(screen.getByRole('status')).toHaveTextContent('complete');
@@ -70,25 +100,48 @@ describe('MilestonesSection', () => {
     const handleChange = vi.fn();
     render(<MilestonesSection campaign={baseCampaign} onChange={handleChange} />);
     await userEvent.click(screen.getByRole('button', { name: '+ Add Milestone' }));
-    expect(handleChange).toHaveBeenCalledWith('milestones', expect.arrayContaining([
-      expect.objectContaining({ id: expect.any(String), title: '', description: '' }),
-    ]));
+    expect(handleChange).toHaveBeenCalledWith(
+      'milestones',
+      expect.arrayContaining([
+        expect.objectContaining({ id: expect.any(String), title: '', description: '' }),
+      ]),
+    );
   });
 
   it('calls onChange to remove a milestone', async () => {
     const milestones: Milestone[] = [
-      { id: '00000000-0000-0000-0000-000000000007', title: 'Phase 1', description: 'First', fundingBasisPoints: 10000, targetDate: null },
+      {
+        id: '00000000-0000-0000-0000-000000000007',
+        title: 'Phase 1',
+        description: 'First',
+        fundingBasisPoints: 10000,
+        targetDate: null,
+      },
     ];
     const handleChange = vi.fn();
-    render(<MilestonesSection campaign={{ ...baseCampaign, milestones }} onChange={handleChange} />);
+    render(
+      <MilestonesSection campaign={{ ...baseCampaign, milestones }} onChange={handleChange} />,
+    );
     await userEvent.click(screen.getByRole('button', { name: 'Remove milestone 1' }));
     expect(handleChange).toHaveBeenCalledWith('milestones', []);
   });
 
   it('displays milestone count when milestones exist', () => {
     const milestones: Milestone[] = [
-      { id: '00000000-0000-0000-0000-000000000008', title: 'Phase 1', description: 'First', fundingBasisPoints: 5000, targetDate: null },
-      { id: '00000000-0000-0000-0000-000000000009', title: 'Phase 2', description: 'Second', fundingBasisPoints: 5000, targetDate: null },
+      {
+        id: '00000000-0000-0000-0000-000000000008',
+        title: 'Phase 1',
+        description: 'First',
+        fundingBasisPoints: 5000,
+        targetDate: null,
+      },
+      {
+        id: '00000000-0000-0000-0000-000000000009',
+        title: 'Phase 2',
+        description: 'Second',
+        fundingBasisPoints: 5000,
+        targetDate: null,
+      },
     ];
     render(<MilestonesSection campaign={{ ...baseCampaign, milestones }} onChange={vi.fn()} />);
     expect(screen.getByLabelText('Milestone 1')).toBeInTheDocument();
@@ -152,7 +205,11 @@ describe('CampaignForm integration', () => {
 
   it('shows submit error from server', async () => {
     const { ReviewSubmitSection } = await import('./ReviewSubmitSection');
-    const error = { status: 400, code: 'SUBMISSION_VALIDATION_ERROR', message: 'Milestone funding must sum to 10000.' } as import('../../../api/client').ApiError;
+    const error = {
+      status: 400,
+      code: 'SUBMISSION_VALIDATION_ERROR',
+      message: 'Milestone funding must sum to 10000.',
+    } as import('../../../api/client').ApiError;
 
     render(
       <ReviewSubmitSection
@@ -165,7 +222,9 @@ describe('CampaignForm integration', () => {
 
     // Multiple alerts: validation issues + server error — use getAllByRole
     const alerts = screen.getAllByRole('alert');
-    const serverErrorAlert = alerts.find((el) => el.textContent?.includes('Milestone funding must sum to 10000.'));
+    const serverErrorAlert = alerts.find((el) =>
+      el.textContent?.includes('Milestone funding must sum to 10000.'),
+    );
     expect(serverErrorAlert).toBeDefined();
     expect(serverErrorAlert).toHaveTextContent('Milestone funding must sum to 10000.');
   });
@@ -180,12 +239,34 @@ describe('CampaignForm integration', () => {
       heroImageUrl: 'https://example.com/hero.jpg',
       fundingGoalCents: '100000000',
       deadline: '2027-01-15T00:00:00.000Z',
-      teamMembers: [{ id: '550e8400-e29b-41d4-a716-446655440010', name: 'John', role: 'Engineer', bio: null, linkedInUrl: null }],
-      milestones: [
-        { id: '550e8400-e29b-41d4-a716-446655440020', title: 'M1', description: 'First', fundingBasisPoints: 5000, targetDate: null },
-        { id: '550e8400-e29b-41d4-a716-446655440021', title: 'M2', description: 'Second', fundingBasisPoints: 5000, targetDate: null },
+      teamMembers: [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440010',
+          name: 'John',
+          role: 'Engineer',
+          bio: null,
+          linkedInUrl: null,
+        },
       ],
-      riskDisclosures: [{ id: crypto.randomUUID(), risk: 'Risk 1', mitigation: 'A mitigation plan' }],
+      milestones: [
+        {
+          id: '550e8400-e29b-41d4-a716-446655440020',
+          title: 'M1',
+          description: 'First',
+          fundingBasisPoints: 5000,
+          targetDate: null,
+        },
+        {
+          id: '550e8400-e29b-41d4-a716-446655440021',
+          title: 'M2',
+          description: 'Second',
+          fundingBasisPoints: 5000,
+          targetDate: null,
+        },
+      ],
+      riskDisclosures: [
+        { id: crypto.randomUUID(), risk: 'Risk 1', mitigation: 'A mitigation plan' },
+      ],
     };
 
     render(

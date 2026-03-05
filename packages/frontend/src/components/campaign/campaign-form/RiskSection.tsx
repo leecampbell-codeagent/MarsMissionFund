@@ -1,5 +1,5 @@
-import { type ReactElement, type ChangeEvent } from 'react';
-import { type Campaign, type RiskDisclosure } from '../../../types/campaign';
+import type { ChangeEvent, ReactElement } from 'react';
+import type { Campaign, RiskDisclosure } from '../../../types/campaign';
 import { Button } from '../../ui/Button';
 
 interface RiskSectionProps {
@@ -58,7 +58,10 @@ export function RiskSection({ campaign, onChange }: RiskSectionProps): ReactElem
   };
 
   const removeRisk = (index: number) => {
-    onChange('riskDisclosures', risks.filter((_, i) => i !== index));
+    onChange(
+      'riskDisclosures',
+      risks.filter((_, i) => i !== index),
+    );
   };
 
   const updateRisk = (index: number, field: keyof RiskDisclosure, value: string) => {
@@ -69,7 +72,10 @@ export function RiskSection({ campaign, onChange }: RiskSectionProps): ReactElem
   };
 
   return (
-    <section aria-label="Risk Disclosures" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <section
+      aria-label="Risk Disclosures"
+      style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+    >
       <h2
         style={{
           fontFamily: 'var(--font-display)',
@@ -81,12 +87,27 @@ export function RiskSection({ campaign, onChange }: RiskSectionProps): ReactElem
       >
         Risk Disclosures
       </h2>
-      <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+      <p
+        style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: '13px',
+          color: 'var(--color-text-secondary)',
+          margin: 0,
+        }}
+      >
         At least 1 risk disclosure required. Max 10. Be transparent about potential challenges.
       </p>
 
       {risks.length === 0 && (
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-tertiary)', textAlign: 'center', padding: '24px' }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '14px',
+            color: 'var(--color-text-tertiary)',
+            textAlign: 'center',
+            padding: '24px',
+          }}
+        >
           No risk disclosures added yet.
         </p>
       )}
@@ -94,20 +115,36 @@ export function RiskSection({ campaign, onChange }: RiskSectionProps): ReactElem
       {risks.map((risk, index) => (
         <div key={index} style={riskCardStyle} aria-label={`Risk disclosure ${index + 1}`}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '13px',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 600,
+              }}
+            >
               Risk {index + 1}
             </span>
-            <Button variant="ghost" size="sm" onClick={() => removeRisk(index)} aria-label={`Remove risk disclosure ${index + 1}`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => removeRisk(index)}
+              aria-label={`Remove risk disclosure ${index + 1}`}
+            >
               Remove
             </Button>
           </div>
 
           <div>
-            <label htmlFor={`risk-risk-${index}`} style={labelStyle}>Risk *</label>
+            <label htmlFor={`risk-risk-${index}`} style={labelStyle}>
+              Risk *
+            </label>
             <textarea
               id={`risk-risk-${index}`}
               value={risk.risk}
-              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => updateRisk(index, 'risk', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                updateRisk(index, 'risk', e.target.value)
+              }
               placeholder="Describe the risk (max 500 chars)"
               maxLength={500}
               rows={2}
@@ -117,11 +154,15 @@ export function RiskSection({ campaign, onChange }: RiskSectionProps): ReactElem
           </div>
 
           <div>
-            <label htmlFor={`risk-mitigation-${index}`} style={labelStyle}>Mitigation *</label>
+            <label htmlFor={`risk-mitigation-${index}`} style={labelStyle}>
+              Mitigation *
+            </label>
             <textarea
               id={`risk-mitigation-${index}`}
               value={risk.mitigation}
-              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => updateRisk(index, 'mitigation', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                updateRisk(index, 'mitigation', e.target.value)
+              }
               placeholder="How will you mitigate this risk? (max 500 chars)"
               maxLength={500}
               rows={2}
@@ -133,12 +174,7 @@ export function RiskSection({ campaign, onChange }: RiskSectionProps): ReactElem
       ))}
 
       {risks.length < 10 && (
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={addRisk}
-          disabled={risks.length >= 10}
-        >
+        <Button variant="secondary" size="sm" onClick={addRisk} disabled={risks.length >= 10}>
           + Add Risk Disclosure
         </Button>
       )}

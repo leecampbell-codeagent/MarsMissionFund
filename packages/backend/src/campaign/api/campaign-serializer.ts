@@ -14,7 +14,7 @@ export function serializeCampaign(campaign: Campaign): Record<string, unknown> {
     category: campaign.category,
     heroImageUrl: campaign.heroImageUrl,
     fundingGoalCents: campaign.fundingGoalCents, // string or null (G-024)
-    fundingCapCents: campaign.fundingCapCents,    // string or null (G-024)
+    fundingCapCents: campaign.fundingCapCents, // string or null (G-024)
     deadline: campaign.deadline?.toISOString() ?? null,
     milestones: campaign.milestones,
     teamMembers: campaign.teamMembers,

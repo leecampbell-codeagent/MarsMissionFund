@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import type { CampaignSummary } from '../../../types/campaign';
 import { CampaignCard } from './CampaignCard';
-import { type CampaignSummary } from '../../../types/campaign';
 
 const mockCampaign: CampaignSummary = {
   id: '550e8400-e29b-41d4-a716-446655440001',
@@ -57,7 +57,9 @@ describe('CampaignCard', () => {
   it('calls onClick when clicked', async () => {
     const handleClick = vi.fn();
     render(<CampaignCard campaign={mockCampaign} onClick={handleClick} />);
-    await userEvent.click(screen.getByRole('button', { name: /Campaign: Ion Drive Propulsion System/ }));
+    await userEvent.click(
+      screen.getByRole('button', { name: /Campaign: Ion Drive Propulsion System/ }),
+    );
     expect(handleClick).toHaveBeenCalledOnce();
   });
 

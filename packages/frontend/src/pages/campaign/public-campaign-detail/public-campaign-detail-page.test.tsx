@@ -1,10 +1,10 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ApiError } from '../../../api/client';
+import type { PublicCampaignDetail } from '../../../types/campaign';
 import PublicCampaignDetailPage from './public-campaign-detail-page';
-import { type PublicCampaignDetail } from '../../../types/campaign';
-import { type ApiError } from '../../../api/client';
 
 vi.mock('../../../hooks/campaign/use-public-campaign', () => ({
   usePublicCampaign: vi.fn(),
@@ -16,7 +16,8 @@ const mockCampaign: PublicCampaignDetail = {
   id: '550e8400-e29b-41d4-a716-446655440001',
   title: 'Advanced Ion Drive Propulsion System',
   shortDescription: 'Next-generation ion drive for deep space missions.',
-  description: 'This mission aims to develop a revolutionary ion drive.\n\nThe technology builds on 20 years of research.',
+  description:
+    'This mission aims to develop a revolutionary ion drive.\n\nThe technology builds on 20 years of research.',
   category: 'propulsion',
   heroImageUrl: null,
   status: 'live',
@@ -103,7 +104,9 @@ describe('PublicCampaignDetailPage', () => {
       error: null,
     });
     renderPage();
-    expect(screen.getByRole('heading', { name: /Advanced Ion Drive Propulsion System/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /Advanced Ion Drive Propulsion System/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText('by Dr. Sarah Chen')).toBeInTheDocument();
     expect(screen.getByText('Propulsion')).toBeInTheDocument();
   });
@@ -116,7 +119,9 @@ describe('PublicCampaignDetailPage', () => {
       error: null,
     });
     renderPage();
-    expect(screen.getByRole('status', { name: 'Campaign status: Fully Funded' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('status', { name: 'Campaign status: Fully Funded' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Fully Funded')).toBeInTheDocument();
   });
 
@@ -175,7 +180,9 @@ describe('PublicCampaignDetailPage', () => {
     renderPage();
     expect(screen.getByText('Dr. Sarah Chen')).toBeInTheDocument();
     expect(screen.getByText('Lead Engineer')).toBeInTheDocument();
-    expect(screen.getByText('Expert in ion propulsion with 15 years of experience.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Expert in ion propulsion with 15 years of experience.'),
+    ).toBeInTheDocument();
   });
 
   it('renders "Team information unavailable." for empty teamMembers', () => {
@@ -292,7 +299,9 @@ describe('PublicCampaignDetailPage', () => {
       error: null,
     });
     renderPage();
-    expect(screen.queryByRole('region', { name: /mars mission alignment/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('region', { name: /mars mission alignment/i }),
+    ).not.toBeInTheDocument();
   });
 
   it('renders tags when present', () => {

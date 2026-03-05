@@ -1,7 +1,7 @@
-import { type ReactElement } from 'react';
-import { type Campaign, formatCents, formatBasisPoints } from '../../../types/campaign';
+import type { ReactElement } from 'react';
+import type { ApiError } from '../../../api/client';
+import { type Campaign, formatBasisPoints, formatCents } from '../../../types/campaign';
 import { Button } from '../../ui/Button';
-import { type ApiError } from '../../../api/client';
 
 interface ReviewSubmitSectionProps {
   readonly campaign: Campaign;
@@ -47,7 +47,10 @@ function validateForSubmit(campaign: Campaign): ValidationIssue[] {
   } else {
     const total = campaign.milestones.reduce((s, m) => s + m.fundingBasisPoints, 0);
     if (total !== 10000) {
-      issues.push({ field: 'Milestones', message: `Funding basis points must sum to 10,000. Current: ${total}.` });
+      issues.push({
+        field: 'Milestones',
+        message: `Funding basis points must sum to 10,000. Current: ${total}.`,
+      });
     }
   }
   if (campaign.riskDisclosures.length === 0) {
@@ -70,7 +73,10 @@ export function ReviewSubmitSection({
   const canSubmit = issues.length === 0;
 
   return (
-    <section aria-label="Review and Submit" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <section
+      aria-label="Review and Submit"
+      style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+    >
       <h2
         style={{
           fontFamily: 'var(--font-display)',
@@ -95,27 +101,60 @@ export function ReviewSubmitSection({
           gap: '12px',
         }}
       >
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', textTransform: 'uppercase', color: 'var(--color-text-primary)', margin: 0 }}>
+        <h3
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: '20px',
+            textTransform: 'uppercase',
+            color: 'var(--color-text-primary)',
+            margin: 0,
+          }}
+        >
           {campaign.title}
         </h3>
         {campaign.shortDescription && (
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0 }}>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              color: 'var(--color-text-secondary)',
+              margin: 0,
+            }}
+          >
             {campaign.shortDescription}
           </p>
         )}
         <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
           {campaign.fundingGoalCents && (
-            <span style={{ fontFamily: 'var(--font-data)', fontSize: '13px', color: 'var(--color-text-primary)' }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-data)',
+                fontSize: '13px',
+                color: 'var(--color-text-primary)',
+              }}
+            >
               Goal: {formatCents(campaign.fundingGoalCents)}
             </span>
           )}
           {campaign.milestones.length > 0 && (
-            <span style={{ fontFamily: 'var(--font-data)', fontSize: '13px', color: 'var(--color-text-primary)' }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-data)',
+                fontSize: '13px',
+                color: 'var(--color-text-primary)',
+              }}
+            >
               Milestones: {campaign.milestones.length}
             </span>
           )}
           {campaign.teamMembers.length > 0 && (
-            <span style={{ fontFamily: 'var(--font-data)', fontSize: '13px', color: 'var(--color-text-primary)' }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-data)',
+                fontSize: '13px',
+                color: 'var(--color-text-primary)',
+              }}
+            >
               Team: {campaign.teamMembers.length} members
             </span>
           )}
@@ -123,7 +162,16 @@ export function ReviewSubmitSection({
         {campaign.milestones.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {campaign.milestones.map((m, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-data)', fontSize: '12px', color: 'var(--color-text-tertiary)' }}>
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontFamily: 'var(--font-data)',
+                  fontSize: '12px',
+                  color: 'var(--color-text-tertiary)',
+                }}
+              >
                 <span>{m.title || `Milestone ${i + 1}`}</span>
                 <span>{formatBasisPoints(m.fundingBasisPoints)}</span>
               </div>
@@ -144,12 +192,35 @@ export function ReviewSubmitSection({
             padding: '16px',
           }}
         >
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-status-warning)', margin: '0 0 8px' }}>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: 'var(--color-status-warning)',
+              margin: '0 0 8px',
+            }}
+          >
             Please resolve the following before submitting:
           </p>
-          <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <ul
+            style={{
+              margin: 0,
+              paddingLeft: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px',
+            }}
+          >
             {issues.map((issue, i) => (
-              <li key={i} style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+              <li
+                key={i}
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '13px',
+                  color: 'var(--color-text-secondary)',
+                }}
+              >
                 <strong>{issue.field}:</strong> {issue.message}
               </li>
             ))}
@@ -168,7 +239,14 @@ export function ReviewSubmitSection({
             padding: '16px',
           }}
         >
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-status-error)', margin: 0 }}>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '13px',
+              color: 'var(--color-status-error)',
+              margin: 0,
+            }}
+          >
             {submitError.message}
           </p>
         </div>
@@ -190,7 +268,14 @@ export function ReviewSubmitSection({
       </div>
 
       {canSubmit && (
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-tertiary)', textAlign: 'center' }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '12px',
+            color: 'var(--color-text-tertiary)',
+            textAlign: 'center',
+          }}
+        >
           Once submitted, your campaign cannot be edited until reviewed.
         </p>
       )}

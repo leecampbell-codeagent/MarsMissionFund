@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import type { NotificationPrefs } from '../../../api/account-api';
 import { NotificationPrefsForm } from './notification-prefs-form';
-import { type NotificationPrefs } from '../../../api/account-api';
 
 const defaultPrefs: NotificationPrefs = {
   campaignUpdates: true,
@@ -16,7 +16,12 @@ const defaultPrefs: NotificationPrefs = {
 describe('NotificationPrefsForm', () => {
   it('renders all 6 preference categories', () => {
     render(
-      <NotificationPrefsForm prefs={defaultPrefs} isLoading={false} isUpdating={false} onToggle={vi.fn()} />,
+      <NotificationPrefsForm
+        prefs={defaultPrefs}
+        isLoading={false}
+        isUpdating={false}
+        onToggle={vi.fn()}
+      />,
     );
     expect(screen.getByText('Campaign Updates')).toBeInTheDocument();
     expect(screen.getByText('Milestone Completions')).toBeInTheDocument();
@@ -28,7 +33,12 @@ describe('NotificationPrefsForm', () => {
 
   it('security alerts toggle is aria-disabled', () => {
     render(
-      <NotificationPrefsForm prefs={defaultPrefs} isLoading={false} isUpdating={false} onToggle={vi.fn()} />,
+      <NotificationPrefsForm
+        prefs={defaultPrefs}
+        isLoading={false}
+        isUpdating={false}
+        onToggle={vi.fn()}
+      />,
     );
     const securitySwitch = screen.getByRole('switch', { name: /Security Alerts/i });
     expect(securitySwitch).toHaveAttribute('aria-disabled', 'true');
@@ -38,7 +48,12 @@ describe('NotificationPrefsForm', () => {
     const user = userEvent.setup();
     const onToggle = vi.fn();
     render(
-      <NotificationPrefsForm prefs={defaultPrefs} isLoading={false} isUpdating={false} onToggle={onToggle} />,
+      <NotificationPrefsForm
+        prefs={defaultPrefs}
+        isLoading={false}
+        isUpdating={false}
+        onToggle={onToggle}
+      />,
     );
     const recoSwitch = screen.getByRole('switch', { name: /Recommendations/i });
     await user.click(recoSwitch);
@@ -57,43 +72,25 @@ describe('NotificationPrefsForm', () => {
 
   it('renders toggle switches when prefs are loaded', () => {
     render(
-      <NotificationPrefsForm prefs={defaultPrefs} isLoading={false} isUpdating={false} onToggle={vi.fn()} />,
+      <NotificationPrefsForm
+        prefs={defaultPrefs}
+        isLoading={false}
+        isUpdating={false}
+        onToggle={vi.fn()}
+      />,
     );
     expect(screen.getAllByRole('switch').length).toBe(6);
   });
 
   it('fieldset has legend for accessibility', () => {
     render(
-      <NotificationPrefsForm prefs={defaultPrefs} isLoading={false} isUpdating={false} onToggle={vi.fn()} />,
+      <NotificationPrefsForm
+        prefs={defaultPrefs}
+        isLoading={false}
+        isUpdating={false}
+        onToggle={vi.fn()}
+      />,
     );
     expect(screen.getByText('Notification preferences')).toBeInTheDocument();
   });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

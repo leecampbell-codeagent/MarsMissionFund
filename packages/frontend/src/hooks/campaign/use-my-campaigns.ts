@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { listMyCampaigns } from '../../api/campaign-api';
-import { type CampaignSummary } from '../../types/campaign';
-import { type ApiError } from '../../api/client';
+import type { ApiError } from '../../api/client';
+import type { CampaignSummary } from '../../types/campaign';
 
 export const MY_CAMPAIGNS_QUERY_KEY = ['myCampaigns'] as const;
 

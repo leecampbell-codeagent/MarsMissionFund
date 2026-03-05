@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getNotificationPrefs,
-  updateNotificationPrefs,
   type NotificationPrefs,
+  updateNotificationPrefs,
 } from '../../api/account-api';
 import { CURRENT_USER_QUERY_KEY } from './use-current-user';
 
@@ -52,31 +52,3 @@ export function useNotificationPrefs(): UseNotificationPrefsResult {
     isUpdating: mutation.isPending,
   };
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

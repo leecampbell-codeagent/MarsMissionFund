@@ -103,37 +103,6 @@ export class AccountNotActiveError extends DomainError {
 export class AccountSuspendedError extends DomainError {
   readonly code = 'ACCOUNT_SUSPENDED';
   constructor() {
-    super(
-      'ACCOUNT_SUSPENDED',
-      'Your account has been suspended. Please contact support.',
-    );
+    super('ACCOUNT_SUSPENDED', 'Your account has been suspended. Please contact support.');
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

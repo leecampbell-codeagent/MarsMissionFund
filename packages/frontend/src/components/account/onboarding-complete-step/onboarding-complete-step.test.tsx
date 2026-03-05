@@ -1,5 +1,5 @@
-import { render, screen, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { act, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { OnboardingCompleteStep } from './onboarding-complete-step';
 
 describe('OnboardingCompleteStep', () => {
@@ -49,31 +49,3 @@ describe('OnboardingCompleteStep', () => {
     expect(liveRegion).toBeInTheDocument();
   });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

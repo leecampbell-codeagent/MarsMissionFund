@@ -1,11 +1,11 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  type PublicCampaignListItem,
   CAMPAIGN_CATEGORY_LABELS,
   type CampaignCategory,
   formatCents,
   formatFundingPercentage,
+  type PublicCampaignListItem,
 } from '../../../types/campaign';
 import { PublicStatusBadge } from '../public-status-badge/PublicStatusBadge';
 
@@ -13,7 +13,10 @@ export interface PublicCampaignCardProps {
   readonly campaign: PublicCampaignListItem;
 }
 
-function getDaysRemainingText(daysRemaining: number | null, status: 'live' | 'funded'): string | null {
+function getDaysRemainingText(
+  daysRemaining: number | null,
+  status: 'live' | 'funded',
+): string | null {
   if (status === 'funded') return null;
   if (daysRemaining === null) return null;
   if (daysRemaining === 0) return 'Last day!';
@@ -33,9 +36,7 @@ export function PublicCampaignCard({ campaign }: PublicCampaignCardProps): React
 
   const clampedPercent = Math.min(campaign.fundingPercentage ?? 0, 100);
   const isFunded = (campaign.fundingPercentage ?? 0) >= 100 || campaign.status === 'funded';
-  const progressFill = isFunded
-    ? 'var(--color-progress-complete)'
-    : 'var(--color-progress-fill)';
+  const progressFill = isFunded ? 'var(--color-progress-complete)' : 'var(--color-progress-fill)';
 
   const daysText = getDaysRemainingText(campaign.daysRemaining, campaign.status);
   const creatorDisplay = campaign.creatorName ?? 'Creator';
@@ -55,7 +56,13 @@ export function PublicCampaignCard({ campaign }: PublicCampaignCardProps): React
     >
       <Link
         to={`/campaigns/${campaign.id}`}
-        style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', flex: 1 }}
+        style={{
+          textDecoration: 'none',
+          color: 'inherit',
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+        }}
         aria-label={`View campaign: ${campaign.title}`}
       >
         {/* Hero image */}
@@ -88,7 +95,15 @@ export function PublicCampaignCard({ campaign }: PublicCampaignCardProps): React
         </div>
 
         {/* Card body */}
-        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+        <div
+          style={{
+            padding: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            flex: 1,
+          }}
+        >
           {/* Badges row */}
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
             <PublicStatusBadge status={campaign.status} daysRemaining={campaign.daysRemaining} />

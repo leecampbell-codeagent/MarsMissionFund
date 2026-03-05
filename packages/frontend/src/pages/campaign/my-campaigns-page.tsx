@@ -1,9 +1,9 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMyCampaigns } from '../../hooks/campaign/use-my-campaigns';
 import { CampaignCard } from '../../components/campaign/campaign-card/CampaignCard';
-import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { Button } from '../../components/ui/Button';
+import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
+import { useMyCampaigns } from '../../hooks/campaign/use-my-campaigns';
 
 /**
  * MyCampaignsPage — /me/campaigns
@@ -15,7 +15,15 @@ export default function MyCampaignsPage(): ReactElement {
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'var(--color-bg-page)' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          background: 'var(--color-bg-page)',
+        }}
+      >
         <LoadingSpinner size="lg" label="Loading campaigns" />
       </div>
     );
@@ -23,11 +31,25 @@ export default function MyCampaignsPage(): ReactElement {
 
   if (isError) {
     return (
-      <div style={{ background: 'var(--color-bg-page)', minHeight: '100vh', padding: '48px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div
+        style={{
+          background: 'var(--color-bg-page)',
+          minHeight: '100vh',
+          padding: '48px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <div style={{ textAlign: 'center', maxWidth: '400px' }}>
           <p
             role="alert"
-            style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-status-error)', marginBottom: '16px' }}
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              color: 'var(--color-status-error)',
+              marginBottom: '16px',
+            }}
           >
             {error?.message ?? 'Failed to load campaigns.'}
           </p>
@@ -42,7 +64,6 @@ export default function MyCampaignsPage(): ReactElement {
   return (
     <div style={{ background: 'var(--color-bg-page)', minHeight: '100vh', padding: '48px 24px' }}>
       <div style={{ maxWidth: '960px', margin: '0 auto' }}>
-
         {/* Page header */}
         <div
           style={{
@@ -80,11 +101,7 @@ export default function MyCampaignsPage(): ReactElement {
               My Campaigns
             </h1>
           </div>
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => navigate('/campaigns/new')}
-          >
+          <Button variant="primary" size="md" onClick={() => navigate('/campaigns/new')}>
             + Create Campaign
           </Button>
         </div>
@@ -143,11 +160,7 @@ export default function MyCampaignsPage(): ReactElement {
                 You haven&apos;t created any campaigns yet. Start your Mars mission proposal.
               </p>
             </div>
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={() => navigate('/campaigns/new')}
-            >
+            <Button variant="primary" size="lg" onClick={() => navigate('/campaigns/new')}>
               Create Campaign
             </Button>
           </div>

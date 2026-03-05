@@ -1,12 +1,12 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
 import { ClerkProvider, useAuth } from '@clerk/clerk-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { initApiClient } from './api/client';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import { initApiClient } from './api/client';
 import './index.css';
 
-const PUBLISHABLE_KEY = import.meta.env['VITE_CLERK_PUBLISHABLE_KEY'] as string | undefined;
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
 
 if (!PUBLISHABLE_KEY) {
   throw new Error('VITE_CLERK_PUBLISHABLE_KEY is required. Add it to your .env file.');
@@ -46,31 +46,3 @@ createRoot(rootElement).render(
     </ClerkProvider>
   </StrictMode>,
 );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

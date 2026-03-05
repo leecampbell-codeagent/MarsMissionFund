@@ -1,5 +1,5 @@
-import { type ReactElement, type ChangeEvent } from 'react';
-import { type Campaign, type TeamMember } from '../../../types/campaign';
+import type { ChangeEvent, ReactElement } from 'react';
+import type { Campaign, TeamMember } from '../../../types/campaign';
 import { Button } from '../../ui/Button';
 
 interface TeamSectionProps {
@@ -60,18 +60,22 @@ export function TeamSection({ campaign, onChange }: TeamSectionProps): ReactElem
   };
 
   const removeMember = (index: number) => {
-    onChange('teamMembers', members.filter((_, i) => i !== index));
+    onChange(
+      'teamMembers',
+      members.filter((_, i) => i !== index),
+    );
   };
 
   const updateMember = (index: number, field: keyof TeamMember, value: string | null) => {
-    const updated = members.map((m, i) =>
-      i === index ? { ...m, [field]: value } : m,
-    );
+    const updated = members.map((m, i) => (i === index ? { ...m, [field]: value } : m));
     onChange('teamMembers', updated);
   };
 
   return (
-    <section aria-label="Team Members" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <section
+      aria-label="Team Members"
+      style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+    >
       <h2
         style={{
           fontFamily: 'var(--font-display)',
@@ -83,12 +87,27 @@ export function TeamSection({ campaign, onChange }: TeamSectionProps): ReactElem
       >
         Team Members
       </h2>
-      <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+      <p
+        style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: '13px',
+          color: 'var(--color-text-secondary)',
+          margin: 0,
+        }}
+      >
         At least 1 team member required. Max 20.
       </p>
 
       {members.length === 0 && (
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-tertiary)', textAlign: 'center', padding: '24px' }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '14px',
+            color: 'var(--color-text-tertiary)',
+            textAlign: 'center',
+            padding: '24px',
+          }}
+        >
           No team members added yet.
         </p>
       )}
@@ -96,21 +115,37 @@ export function TeamSection({ campaign, onChange }: TeamSectionProps): ReactElem
       {members.map((member, index) => (
         <div key={index} style={memberCardStyle} aria-label={`Team member ${index + 1}`}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '13px',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 600,
+              }}
+            >
               Member {index + 1}
             </span>
-            <Button variant="ghost" size="sm" onClick={() => removeMember(index)} aria-label={`Remove team member ${index + 1}`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => removeMember(index)}
+              aria-label={`Remove team member ${index + 1}`}
+            >
               Remove
             </Button>
           </div>
 
           <div>
-            <label htmlFor={`member-name-${index}`} style={labelStyle}>Name *</label>
+            <label htmlFor={`member-name-${index}`} style={labelStyle}>
+              Name *
+            </label>
             <input
               id={`member-name-${index}`}
               type="text"
               value={member.name}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => updateMember(index, 'name', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                updateMember(index, 'name', e.target.value)
+              }
               placeholder="Full name"
               required
               style={inputStyle}
@@ -118,12 +153,16 @@ export function TeamSection({ campaign, onChange }: TeamSectionProps): ReactElem
           </div>
 
           <div>
-            <label htmlFor={`member-role-${index}`} style={labelStyle}>Role *</label>
+            <label htmlFor={`member-role-${index}`} style={labelStyle}>
+              Role *
+            </label>
             <input
               id={`member-role-${index}`}
               type="text"
               value={member.role}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => updateMember(index, 'role', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                updateMember(index, 'role', e.target.value)
+              }
               placeholder="e.g. Chief Engineer"
               required
               style={inputStyle}
@@ -131,7 +170,9 @@ export function TeamSection({ campaign, onChange }: TeamSectionProps): ReactElem
           </div>
 
           <div>
-            <label htmlFor={`member-bio-${index}`} style={labelStyle}>Bio</label>
+            <label htmlFor={`member-bio-${index}`} style={labelStyle}>
+              Bio
+            </label>
             <textarea
               id={`member-bio-${index}`}
               value={member.bio ?? ''}
@@ -145,7 +186,9 @@ export function TeamSection({ campaign, onChange }: TeamSectionProps): ReactElem
           </div>
 
           <div>
-            <label htmlFor={`member-linkedin-${index}`} style={labelStyle}>LinkedIn URL</label>
+            <label htmlFor={`member-linkedin-${index}`} style={labelStyle}>
+              LinkedIn URL
+            </label>
             <input
               id={`member-linkedin-${index}`}
               type="url"
@@ -161,12 +204,7 @@ export function TeamSection({ campaign, onChange }: TeamSectionProps): ReactElem
       ))}
 
       {members.length < 20 && (
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={addMember}
-          disabled={members.length >= 20}
-        >
+        <Button variant="secondary" size="sm" onClick={addMember} disabled={members.length >= 20}>
           + Add Team Member
         </Button>
       )}

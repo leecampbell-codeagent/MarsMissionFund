@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { OnboardingNotificationsStep } from './onboarding-notifications-step';
 
 describe('OnboardingNotificationsStep', () => {
@@ -56,12 +56,3 @@ describe('OnboardingNotificationsStep', () => {
     expect(screen.getByText('Notification preferences')).toBeInTheDocument();
   });
 });
-
-
-
-
-
-
-
-
-

@@ -1,5 +1,5 @@
-import { type ReactElement } from 'react';
-import { type KycStatus } from '../../../api/kyc-api';
+import type { ReactElement } from 'react';
+import type { KycStatus } from '../../../api/kyc-api';
 
 interface KycStatusBadgeProps {
   readonly kycStatus: KycStatus;

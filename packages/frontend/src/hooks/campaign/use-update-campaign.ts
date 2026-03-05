@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateCampaign } from '../../api/campaign-api';
-import { type Campaign, type UpdateCampaignInput } from '../../types/campaign';
-import { type ApiError } from '../../api/client';
+import type { ApiError } from '../../api/client';
+import type { Campaign, UpdateCampaignInput } from '../../types/campaign';
 import { campaignQueryKey } from './use-campaign';
 
 export interface UseUpdateCampaignResult {

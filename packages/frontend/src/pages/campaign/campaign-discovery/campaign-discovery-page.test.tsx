@@ -1,10 +1,10 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { PaginatedCampaigns, PublicCampaignListItem } from '../../../types/campaign';
 import CampaignDiscoveryPage from './campaign-discovery-page';
-import { type PaginatedCampaigns, type PublicCampaignListItem } from '../../../types/campaign';
 
 // Mock the hooks
 vi.mock('../../../hooks/campaign/use-public-campaigns', () => ({
@@ -107,7 +107,11 @@ describe('CampaignDiscoveryPage', () => {
       data: null,
       isLoading: false,
       isError: true,
-      error: { status: 500, code: 'SERVER_ERROR', message: 'Failed' } as import('../../../api/client').ApiError,
+      error: {
+        status: 500,
+        code: 'SERVER_ERROR',
+        message: 'Failed',
+      } as import('../../../api/client').ApiError,
     });
     renderPage();
     expect(screen.getByRole('alert')).toBeInTheDocument();

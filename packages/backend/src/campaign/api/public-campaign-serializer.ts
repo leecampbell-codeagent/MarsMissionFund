@@ -30,10 +30,10 @@ export function serializePublicCampaignListItem(
     category: item.category,
     heroImageUrl: item.heroImageUrl,
     status: item.status,
-    fundingGoalCents: item.fundingGoalCents,       // string | null (G-024)
-    totalRaisedCents: item.totalRaisedCents,       // '0' in feat-004
-    contributorCount: item.contributorCount,       // 0 in feat-004
-    fundingPercentage: item.fundingPercentage,     // 0.00 | null
+    fundingGoalCents: item.fundingGoalCents, // string | null (G-024)
+    totalRaisedCents: item.totalRaisedCents, // '0' in feat-004
+    contributorCount: item.contributorCount, // 0 in feat-004
+    fundingPercentage: item.fundingPercentage, // 0.00 | null
     deadline: item.deadline?.toISOString() ?? null,
     daysRemaining: computeDaysRemaining(item.deadline, now),
     launchedAt: item.launchedAt?.toISOString() ?? null,
@@ -70,7 +70,7 @@ export function serializeCategoryStats(stats: CategoryStats): Record<string, unk
     category: stats.category,
     campaignCount: stats.campaignCount,
     activeCampaignCount: stats.activeCampaignCount,
-    totalRaisedCents: stats.totalRaisedCents,  // '0' in feat-004
-    contributorCount: stats.contributorCount,  // 0 in feat-004
+    totalRaisedCents: stats.totalRaisedCents, // '0' in feat-004
+    contributorCount: stats.contributorCount, // 0 in feat-004
   };
 }

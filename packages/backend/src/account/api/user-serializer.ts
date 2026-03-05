@@ -23,25 +23,3 @@ export function serializeUser(user: User): object {
     updatedAt: user.updatedAt.toISOString(),
   };
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

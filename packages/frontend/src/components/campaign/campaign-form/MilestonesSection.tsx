@@ -1,5 +1,5 @@
-import { type ReactElement, type ChangeEvent } from 'react';
-import { type Campaign, type Milestone, formatBasisPoints } from '../../../types/campaign';
+import type { ChangeEvent, ReactElement } from 'react';
+import { type Campaign, formatBasisPoints, type Milestone } from '../../../types/campaign';
 import { Button } from '../../ui/Button';
 
 interface MilestonesSectionProps {
@@ -63,10 +63,17 @@ export function MilestonesSection({ campaign, onChange }: MilestonesSectionProps
   };
 
   const removeMilestone = (index: number) => {
-    onChange('milestones', milestones.filter((_, i) => i !== index));
+    onChange(
+      'milestones',
+      milestones.filter((_, i) => i !== index),
+    );
   };
 
-  const updateMilestone = (index: number, field: keyof Milestone, value: string | number | null) => {
+  const updateMilestone = (
+    index: number,
+    field: keyof Milestone,
+    value: string | number | null,
+  ) => {
     const updated = milestones.map((m, i) =>
       i === index ? { ...m, [field]: value } : m,
     ) as Milestone[];
@@ -74,7 +81,10 @@ export function MilestonesSection({ campaign, onChange }: MilestonesSectionProps
   };
 
   return (
-    <section aria-label="Milestones" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <section
+      aria-label="Milestones"
+      style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+    >
       <h2
         style={{
           fontFamily: 'var(--font-display)',
@@ -103,7 +113,13 @@ export function MilestonesSection({ campaign, onChange }: MilestonesSectionProps
           alignItems: 'center',
         }}
       >
-        <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: isValid ? 'var(--color-status-success)' : 'var(--color-status-warning)' }}>
+        <span
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '13px',
+            color: isValid ? 'var(--color-status-success)' : 'var(--color-status-warning)',
+          }}
+        >
           {isValid ? '✓ Funding allocation complete' : 'Funding allocation incomplete'}
         </span>
         <span
@@ -118,12 +134,28 @@ export function MilestonesSection({ campaign, onChange }: MilestonesSectionProps
         </span>
       </div>
 
-      <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
-        At least 2 milestones required. Max 10. Allocations must sum to exactly 10,000 basis points (100%).
+      <p
+        style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: '13px',
+          color: 'var(--color-text-secondary)',
+          margin: 0,
+        }}
+      >
+        At least 2 milestones required. Max 10. Allocations must sum to exactly 10,000 basis points
+        (100%).
       </p>
 
       {milestones.length === 0 && (
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-tertiary)', textAlign: 'center', padding: '24px' }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '14px',
+            color: 'var(--color-text-tertiary)',
+            textAlign: 'center',
+            padding: '24px',
+          }}
+        >
           No milestones added yet.
         </p>
       )}
@@ -131,21 +163,37 @@ export function MilestonesSection({ campaign, onChange }: MilestonesSectionProps
       {milestones.map((milestone, index) => (
         <div key={index} style={milestoneCardStyle} aria-label={`Milestone ${index + 1}`}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '13px',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 600,
+              }}
+            >
               Milestone {index + 1}
             </span>
-            <Button variant="ghost" size="sm" onClick={() => removeMilestone(index)} aria-label={`Remove milestone ${index + 1}`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => removeMilestone(index)}
+              aria-label={`Remove milestone ${index + 1}`}
+            >
               Remove
             </Button>
           </div>
 
           <div>
-            <label htmlFor={`milestone-title-${index}`} style={labelStyle}>Title *</label>
+            <label htmlFor={`milestone-title-${index}`} style={labelStyle}>
+              Title *
+            </label>
             <input
               id={`milestone-title-${index}`}
               type="text"
               value={milestone.title}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => updateMilestone(index, 'title', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                updateMilestone(index, 'title', e.target.value)
+              }
               placeholder="e.g. Prototype Complete"
               required
               style={inputStyle}
@@ -153,11 +201,15 @@ export function MilestonesSection({ campaign, onChange }: MilestonesSectionProps
           </div>
 
           <div>
-            <label htmlFor={`milestone-description-${index}`} style={labelStyle}>Description *</label>
+            <label htmlFor={`milestone-description-${index}`} style={labelStyle}>
+              Description *
+            </label>
             <textarea
               id={`milestone-description-${index}`}
               value={milestone.description}
-              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => updateMilestone(index, 'description', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                updateMilestone(index, 'description', e.target.value)
+              }
               placeholder="What will be delivered at this milestone?"
               rows={2}
               required
@@ -175,23 +227,34 @@ export function MilestonesSection({ campaign, onChange }: MilestonesSectionProps
               min="0.01"
               max="100"
               step="0.01"
-              value={milestone.fundingBasisPoints ? (milestone.fundingBasisPoints / 100).toFixed(2) : ''}
+              value={
+                milestone.fundingBasisPoints ? (milestone.fundingBasisPoints / 100).toFixed(2) : ''
+              }
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
                 const pct = parseFloat(e.target.value);
-                const bp = isNaN(pct) ? 0 : Math.round(pct * 100);
+                const bp = Number.isNaN(pct) ? 0 : Math.round(pct * 100);
                 updateMilestone(index, 'fundingBasisPoints', bp);
               }}
               placeholder="e.g. 25.00"
               required
               style={inputStyle}
             />
-            <p style={{ fontFamily: 'var(--font-data)', fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '4px' }}>
+            <p
+              style={{
+                fontFamily: 'var(--font-data)',
+                fontSize: '11px',
+                color: 'var(--color-text-tertiary)',
+                marginTop: '4px',
+              }}
+            >
               = {milestone.fundingBasisPoints} basis points
             </p>
           </div>
 
           <div>
-            <label htmlFor={`milestone-date-${index}`} style={labelStyle}>Target Date</label>
+            <label htmlFor={`milestone-date-${index}`} style={labelStyle}>
+              Target Date
+            </label>
             <input
               id={`milestone-date-${index}`}
               type="date"

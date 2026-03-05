@@ -1,33 +1,55 @@
-import { type ReactElement } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { usePublicCampaign } from '../../../hooks/campaign/use-public-campaign';
+import type { ReactElement } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { FundingProgressBar } from '../../../components/campaign/funding-progress-bar/FundingProgressBar';
 import { PublicStatusBadge } from '../../../components/campaign/public-status-badge/PublicStatusBadge';
 import { LoadingSpinner } from '../../../components/ui/LoadingSpinner';
+import { usePublicCampaign } from '../../../hooks/campaign/use-public-campaign';
 import {
   CAMPAIGN_CATEGORY_LABELS,
   type CampaignCategory,
-  formatCents,
   formatBasisPoints,
+  formatCents,
 } from '../../../types/campaign';
 
-function DaysRemainingText({ daysRemaining }: { readonly daysRemaining: number | null }): ReactElement {
+function DaysRemainingText({
+  daysRemaining,
+}: {
+  readonly daysRemaining: number | null;
+}): ReactElement {
   if (daysRemaining === null) {
     return (
-      <span style={{ fontFamily: 'var(--font-data)', fontSize: '14px', color: 'var(--color-text-tertiary)' }}>
+      <span
+        style={{
+          fontFamily: 'var(--font-data)',
+          fontSize: '14px',
+          color: 'var(--color-text-tertiary)',
+        }}
+      >
         No deadline
       </span>
     );
   }
   if (daysRemaining === 0) {
     return (
-      <span style={{ fontFamily: 'var(--font-data)', fontSize: '14px', color: 'var(--color-status-warning)' }}>
+      <span
+        style={{
+          fontFamily: 'var(--font-data)',
+          fontSize: '14px',
+          color: 'var(--color-status-warning)',
+        }}
+      >
         Last day!
       </span>
     );
   }
   return (
-    <span style={{ fontFamily: 'var(--font-data)', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
+    <span
+      style={{
+        fontFamily: 'var(--font-data)',
+        fontSize: '14px',
+        color: 'var(--color-text-secondary)',
+      }}
+    >
       {daysRemaining} days left
     </span>
   );
@@ -218,7 +240,15 @@ export default function PublicCampaignDetailPage(): ReactElement {
             }}
           >
             {/* Badges row */}
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '16px' }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '10px',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                marginBottom: '16px',
+              }}
+            >
               <PublicStatusBadge status={campaign.status} daysRemaining={campaign.daysRemaining} />
               {categoryLabel && (
                 <span
@@ -301,7 +331,9 @@ export default function PublicCampaignDetailPage(): ReactElement {
         {/* Two-column content layout */}
         <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
           {/* Main content */}
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '40px' }}>
+          <div
+            style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '40px' }}
+          >
             {/* Description */}
             {campaign.description && (
               <section aria-label="Campaign description">

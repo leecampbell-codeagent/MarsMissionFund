@@ -1,12 +1,12 @@
 import {
-  CampaignNotEditableError,
-  CampaignNotSubmittableError,
-  CampaignNotClaimableError,
   CampaignNotApprovableError,
-  CampaignNotRejectableError,
+  CampaignNotClaimableError,
+  CampaignNotEditableError,
   CampaignNotLaunchableError,
-  InvalidCampaignTitleError,
+  CampaignNotRejectableError,
+  CampaignNotSubmittableError,
   CampaignTitleTooLongError,
+  InvalidCampaignTitleError,
   InvalidCreatorIdError,
 } from '../errors/campaign-errors.js';
 import type { CampaignCategory } from '../value-objects/campaign-category.js';
@@ -101,32 +101,84 @@ export class Campaign {
 
   // ─── Accessors ────────────────────────────────────────────────────────────
 
-  get id(): string { return this.props.id; }
-  get creatorUserId(): string { return this.props.creatorUserId; }
-  get title(): string { return this.props.title; }
-  get shortDescription(): string | null { return this.props.shortDescription; }
-  get description(): string | null { return this.props.description; }
-  get category(): CampaignCategory | null { return this.props.category; }
-  get heroImageUrl(): string | null { return this.props.heroImageUrl; }
-  get fundingGoalCents(): string | null { return this.props.fundingGoalCents; }
-  get fundingCapCents(): string | null { return this.props.fundingCapCents; }
-  get deadline(): Date | null { return this.props.deadline; }
-  get milestones(): Milestone[] { return this.props.milestones; }
-  get teamMembers(): TeamMember[] { return this.props.teamMembers; }
-  get riskDisclosures(): RiskDisclosure[] { return this.props.riskDisclosures; }
-  get budgetBreakdown(): BudgetItem[] { return this.props.budgetBreakdown; }
-  get alignmentStatement(): string | null { return this.props.alignmentStatement; }
-  get tags(): string[] { return this.props.tags; }
-  get status(): CampaignStatus { return this.props.status; }
-  get rejectionReason(): string | null { return this.props.rejectionReason; }
-  get resubmissionGuidance(): string | null { return this.props.resubmissionGuidance; }
-  get reviewNotes(): string | null { return this.props.reviewNotes; }
-  get reviewedByUserId(): string | null { return this.props.reviewedByUserId; }
-  get reviewedAt(): Date | null { return this.props.reviewedAt; }
-  get submittedAt(): Date | null { return this.props.submittedAt; }
-  get launchedAt(): Date | null { return this.props.launchedAt; }
-  get createdAt(): Date { return this.props.createdAt; }
-  get updatedAt(): Date { return this.props.updatedAt; }
+  get id(): string {
+    return this.props.id;
+  }
+  get creatorUserId(): string {
+    return this.props.creatorUserId;
+  }
+  get title(): string {
+    return this.props.title;
+  }
+  get shortDescription(): string | null {
+    return this.props.shortDescription;
+  }
+  get description(): string | null {
+    return this.props.description;
+  }
+  get category(): CampaignCategory | null {
+    return this.props.category;
+  }
+  get heroImageUrl(): string | null {
+    return this.props.heroImageUrl;
+  }
+  get fundingGoalCents(): string | null {
+    return this.props.fundingGoalCents;
+  }
+  get fundingCapCents(): string | null {
+    return this.props.fundingCapCents;
+  }
+  get deadline(): Date | null {
+    return this.props.deadline;
+  }
+  get milestones(): Milestone[] {
+    return this.props.milestones;
+  }
+  get teamMembers(): TeamMember[] {
+    return this.props.teamMembers;
+  }
+  get riskDisclosures(): RiskDisclosure[] {
+    return this.props.riskDisclosures;
+  }
+  get budgetBreakdown(): BudgetItem[] {
+    return this.props.budgetBreakdown;
+  }
+  get alignmentStatement(): string | null {
+    return this.props.alignmentStatement;
+  }
+  get tags(): string[] {
+    return this.props.tags;
+  }
+  get status(): CampaignStatus {
+    return this.props.status;
+  }
+  get rejectionReason(): string | null {
+    return this.props.rejectionReason;
+  }
+  get resubmissionGuidance(): string | null {
+    return this.props.resubmissionGuidance;
+  }
+  get reviewNotes(): string | null {
+    return this.props.reviewNotes;
+  }
+  get reviewedByUserId(): string | null {
+    return this.props.reviewedByUserId;
+  }
+  get reviewedAt(): Date | null {
+    return this.props.reviewedAt;
+  }
+  get submittedAt(): Date | null {
+    return this.props.submittedAt;
+  }
+  get launchedAt(): Date | null {
+    return this.props.launchedAt;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
   // ─── Factory ────────────────────────────────────────────────────────────
 
@@ -202,36 +254,21 @@ export class Campaign {
       ...this.props,
       title: input.title !== undefined ? input.title : this.props.title,
       shortDescription:
-        input.shortDescription !== undefined
-          ? input.shortDescription
-          : this.props.shortDescription,
-      description:
-        input.description !== undefined ? input.description : this.props.description,
+        input.shortDescription !== undefined ? input.shortDescription : this.props.shortDescription,
+      description: input.description !== undefined ? input.description : this.props.description,
       category: input.category !== undefined ? input.category : this.props.category,
-      heroImageUrl:
-        input.heroImageUrl !== undefined ? input.heroImageUrl : this.props.heroImageUrl,
+      heroImageUrl: input.heroImageUrl !== undefined ? input.heroImageUrl : this.props.heroImageUrl,
       fundingGoalCents:
-        input.fundingGoalCents !== undefined
-          ? input.fundingGoalCents
-          : this.props.fundingGoalCents,
+        input.fundingGoalCents !== undefined ? input.fundingGoalCents : this.props.fundingGoalCents,
       fundingCapCents:
-        input.fundingCapCents !== undefined
-          ? input.fundingCapCents
-          : this.props.fundingCapCents,
-      deadline:
-        input.deadline !== undefined
-          ? new Date(input.deadline)
-          : this.props.deadline,
+        input.fundingCapCents !== undefined ? input.fundingCapCents : this.props.fundingCapCents,
+      deadline: input.deadline !== undefined ? new Date(input.deadline) : this.props.deadline,
       milestones: input.milestones !== undefined ? input.milestones : this.props.milestones,
       teamMembers: input.teamMembers !== undefined ? input.teamMembers : this.props.teamMembers,
       riskDisclosures:
-        input.riskDisclosures !== undefined
-          ? input.riskDisclosures
-          : this.props.riskDisclosures,
+        input.riskDisclosures !== undefined ? input.riskDisclosures : this.props.riskDisclosures,
       budgetBreakdown:
-        input.budgetBreakdown !== undefined
-          ? input.budgetBreakdown
-          : this.props.budgetBreakdown,
+        input.budgetBreakdown !== undefined ? input.budgetBreakdown : this.props.budgetBreakdown,
       alignmentStatement:
         input.alignmentStatement !== undefined
           ? input.alignmentStatement
@@ -299,11 +336,7 @@ export class Campaign {
    * resubmissionGuidance, and reviewedAt set.
    * Throws CampaignNotRejectableError if status !== 'under_review'.
    */
-  reject(
-    rejectionReason: string,
-    resubmissionGuidance: string,
-    reviewedAt: Date,
-  ): Campaign {
+  reject(rejectionReason: string, resubmissionGuidance: string, reviewedAt: Date): Campaign {
     if (this.props.status !== CampaignStatus.UnderReview) {
       throw new CampaignNotRejectableError();
     }

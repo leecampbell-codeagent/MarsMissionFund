@@ -1,5 +1,5 @@
-import { type ReactElement } from 'react';
-import { type KycStatus } from '../../../api/kyc-api';
+import type { ReactElement } from 'react';
+import type { KycStatus } from '../../../api/kyc-api';
 import { useKycSubmit } from '../../../hooks/account/use-kyc-submit';
 import { KycStatusBadge } from '../kyc-status-badge';
 
@@ -177,7 +177,12 @@ export function KycVerificationPanel({
   error = null,
   onRetry,
 }: KycVerificationPanelProps): ReactElement {
-  const { submitKyc, isLoading: isSubmitting, isError: isSubmitError, error: submitError } = useKycSubmit();
+  const {
+    submitKyc,
+    isLoading: isSubmitting,
+    isError: isSubmitError,
+    error: submitError,
+  } = useKycSubmit();
 
   if (isLoading) {
     return <LoadingSkeleton />;
@@ -199,11 +204,7 @@ export function KycVerificationPanel({
             Failed to load verification status. Please try again.
           </p>
           {onRetry && (
-            <button
-              type="button"
-              onClick={onRetry}
-              style={primaryButtonStyle}
-            >
+            <button type="button" onClick={onRetry} style={primaryButtonStyle}>
               Retry
             </button>
           )}
@@ -237,7 +238,8 @@ export function KycVerificationPanel({
                 aria-live="assertive"
                 style={{
                   background: 'color-mix(in srgb, var(--color-status-error) 12%, transparent)',
-                  border: '1px solid color-mix(in srgb, var(--color-status-error) 20%, transparent)',
+                  border:
+                    '1px solid color-mix(in srgb, var(--color-status-error) 20%, transparent)',
                   borderRadius: 'var(--radius-badge)',
                   padding: '12px 16px',
                   marginBottom: '12px',
@@ -260,7 +262,9 @@ export function KycVerificationPanel({
               <CtaButton
                 label="Start Verification"
                 isLoading={isSubmitting}
-                onClick={() => { void submitKyc(); }}
+                onClick={() => {
+                  void submitKyc();
+                }}
               />
             </div>
           </div>
@@ -307,7 +311,8 @@ export function KycVerificationPanel({
                 aria-live="assertive"
                 style={{
                   background: 'color-mix(in srgb, var(--color-status-error) 12%, transparent)',
-                  border: '1px solid color-mix(in srgb, var(--color-status-error) 20%, transparent)',
+                  border:
+                    '1px solid color-mix(in srgb, var(--color-status-error) 20%, transparent)',
                   borderRadius: 'var(--radius-badge)',
                   padding: '12px 16px',
                 }}
@@ -329,7 +334,9 @@ export function KycVerificationPanel({
               <CtaButton
                 label="Resubmit Verification"
                 isLoading={isSubmitting}
-                onClick={() => { void submitKyc(); }}
+                onClick={() => {
+                  void submitKyc();
+                }}
               />
             </div>
           </div>
@@ -356,9 +363,7 @@ export function KycVerificationPanel({
   return (
     <div style={cardStyle}>
       <div style={topAccentStyle} />
-      <div style={{ paddingTop: '8px' }}>
-        {renderContent()}
-      </div>
+      <div style={{ paddingTop: '8px' }}>{renderContent()}</div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
-import { type ReactElement, type ChangeEvent } from 'react';
-import { type Campaign } from '../../../types/campaign';
+import type { ChangeEvent, ReactElement } from 'react';
+import type { Campaign } from '../../../types/campaign';
 
 interface DetailsSectionProps {
   readonly campaign: Campaign;
@@ -77,7 +77,14 @@ export function DetailsSection({ campaign, onChange }: DetailsSectionProps): Rea
         >
           {descLen}/10,000 characters
         </p>
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '11px',
+            color: 'var(--color-text-tertiary)',
+            marginTop: '2px',
+          }}
+        >
           Plain text only. HTML tags will appear as literal characters.
         </p>
       </div>
@@ -97,7 +104,14 @@ export function DetailsSection({ campaign, onChange }: DetailsSectionProps): Rea
           placeholder="https://example.com/image.jpg"
           style={inputStyle}
         />
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '4px' }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '11px',
+            color: 'var(--color-text-tertiary)',
+            marginTop: '4px',
+          }}
+        >
           Must be a secure HTTPS URL. Leave blank to use a gradient background.
         </p>
       </div>

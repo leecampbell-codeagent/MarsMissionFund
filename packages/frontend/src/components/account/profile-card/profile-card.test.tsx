@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import type { UserProfile } from '../../../api/account-api';
 import { ProfileCard } from './profile-card';
-import { type UserProfile } from '../../../api/account-api';
 
 const mockUser: UserProfile = {
   id: 'usr_01',
@@ -83,22 +83,3 @@ describe('ProfileCard', () => {
     expect(screen.getByText('Active')).toBeInTheDocument();
   });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

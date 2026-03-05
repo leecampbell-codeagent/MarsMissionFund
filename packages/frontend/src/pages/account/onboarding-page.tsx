@@ -1,14 +1,19 @@
-import { type ReactElement, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateProfile, updateNotificationPrefs, completeOnboarding, type NotificationPrefs } from '../../api/account-api';
-import { useCurrentUser, CURRENT_USER_QUERY_KEY } from '../../hooks/account/use-current-user';
+import { type ReactElement, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  completeOnboarding,
+  type NotificationPrefs,
+  updateNotificationPrefs,
+  updateProfile,
+} from '../../api/account-api';
+import { OnboardingCompleteStep } from '../../components/account/onboarding-complete-step';
+import { OnboardingNotificationsStep } from '../../components/account/onboarding-notifications-step';
+import { OnboardingProfileStep } from '../../components/account/onboarding-profile-step';
+import { OnboardingRoleStep } from '../../components/account/onboarding-role-step';
 import { OnboardingStepIndicator } from '../../components/account/onboarding-step-indicator';
 import { OnboardingWelcomeStep } from '../../components/account/onboarding-welcome-step';
-import { OnboardingRoleStep } from '../../components/account/onboarding-role-step';
-import { OnboardingProfileStep } from '../../components/account/onboarding-profile-step';
-import { OnboardingNotificationsStep } from '../../components/account/onboarding-notifications-step';
-import { OnboardingCompleteStep } from '../../components/account/onboarding-complete-step';
+import { CURRENT_USER_QUERY_KEY, useCurrentUser } from '../../hooks/account/use-current-user';
 
 const TOTAL_STEPS = 5;
 
@@ -67,7 +72,7 @@ export default function OnboardingPage(): ReactElement {
       completeMutation.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentStep]);
+  }, [currentStep, completeMutation.mutate]);
 
   // Auto-redirect after step 5 settles
   useEffect(() => {
@@ -118,15 +123,10 @@ export default function OnboardingPage(): ReactElement {
           </div>
         )}
 
-        {currentStep === 1 && (
-          <OnboardingWelcomeStep onNext={() => setCurrentStep(2)} />
-        )}
+        {currentStep === 1 && <OnboardingWelcomeStep onNext={() => setCurrentStep(2)} />}
 
         {currentStep === 2 && (
-          <OnboardingRoleStep
-            onNext={() => setCurrentStep(3)}
-            onBack={() => setCurrentStep(1)}
-          />
+          <OnboardingRoleStep onNext={() => setCurrentStep(3)} onBack={() => setCurrentStep(1)} />
         )}
 
         {currentStep === 3 && (
@@ -153,7 +153,14 @@ export default function OnboardingPage(): ReactElement {
         )}
 
         {currentStep === TOTAL_STEPS && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '60vh',
+            }}
+          >
             <OnboardingCompleteStep displayName={user?.displayName ?? null} />
           </div>
         )}
@@ -161,12 +168,3 @@ export default function OnboardingPage(): ReactElement {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-

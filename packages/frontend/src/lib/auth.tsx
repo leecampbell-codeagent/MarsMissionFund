@@ -5,13 +5,8 @@
  * When VITE_MOCK_AUTH=true, ClerkProvider is not mounted and direct Clerk imports will crash.
  */
 
-import {
-  SignedIn,
-  SignedOut,
-  useAuth,
-  useUser,
-} from '@clerk/clerk-react';
-import { type ReactElement, type ReactNode } from 'react';
+import { SignedIn, SignedOut, useAuth, useUser } from '@clerk/clerk-react';
+import type { ReactElement, ReactNode } from 'react';
 
 export interface AppAuthState {
   readonly isLoaded: boolean;
@@ -87,31 +82,3 @@ interface AppSignedOutProps {
 export function AppSignedOut({ children }: AppSignedOutProps): ReactElement {
   return <SignedOut>{children}</SignedOut>;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

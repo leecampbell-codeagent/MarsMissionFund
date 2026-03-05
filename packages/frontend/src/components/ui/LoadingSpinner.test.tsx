@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { LoadingSpinner } from './LoadingSpinner';
 
 describe('LoadingSpinner', () => {
@@ -35,6 +35,3 @@ describe('LoadingSpinner', () => {
     expect(svg).toHaveAttribute('height', '32');
   });
 });
-
-
-

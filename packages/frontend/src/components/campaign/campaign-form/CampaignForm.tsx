@@ -1,16 +1,31 @@
-import { type ReactElement, useState, useCallback, useRef } from 'react';
-import { type Campaign, type Milestone, type TeamMember, type RiskDisclosure, type BudgetItem, type UpdateCampaignInput } from '../../../types/campaign';
+import { type ReactElement, useCallback, useRef, useState } from 'react';
+import type { ApiError } from '../../../api/client';
+import type {
+  BudgetItem,
+  Campaign,
+  Milestone,
+  RiskDisclosure,
+  TeamMember,
+  UpdateCampaignInput,
+} from '../../../types/campaign';
 import { BasicsSection } from './BasicsSection';
+import { BudgetSection } from './BudgetSection';
 import { DetailsSection } from './DetailsSection';
 import { FundingSection } from './FundingSection';
-import { TeamSection } from './TeamSection';
 import { MilestonesSection } from './MilestonesSection';
-import { RiskSection } from './RiskSection';
-import { BudgetSection } from './BudgetSection';
 import { ReviewSubmitSection } from './ReviewSubmitSection';
-import { type ApiError } from '../../../api/client';
+import { RiskSection } from './RiskSection';
+import { TeamSection } from './TeamSection';
 
-type SectionId = 'basics' | 'details' | 'funding' | 'team' | 'milestones' | 'risk' | 'budget' | 'review';
+type SectionId =
+  | 'basics'
+  | 'details'
+  | 'funding'
+  | 'team'
+  | 'milestones'
+  | 'risk'
+  | 'budget'
+  | 'review';
 
 interface Section {
   readonly id: SectionId;
@@ -152,7 +167,9 @@ export function CampaignForm({
               style={{
                 background: 'transparent',
                 border: 'none',
-                borderLeft: isActive ? '2px solid var(--color-action-primary)' : '2px solid transparent',
+                borderLeft: isActive
+                  ? '2px solid var(--color-action-primary)'
+                  : '2px solid transparent',
                 padding: '8px 12px',
                 cursor: 'pointer',
                 textAlign: 'left',
@@ -219,7 +236,9 @@ export function CampaignForm({
         {activeSection === 'review' && (
           <ReviewSubmitSection
             campaign={localCampaign}
-            onSubmit={() => { void handleSubmit(); }}
+            onSubmit={() => {
+              void handleSubmit();
+            }}
             isSubmitting={isSubmitting}
             submitError={submitError}
           />

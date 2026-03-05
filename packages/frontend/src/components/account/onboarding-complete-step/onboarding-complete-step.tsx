@@ -19,9 +19,7 @@ export function OnboardingCompleteStep({ displayName }: OnboardingCompleteStepPr
     return () => clearTimeout(timer);
   }, []);
 
-  const heading = displayName
-    ? `YOU'RE IN, ${displayName.toUpperCase()}.`
-    : "YOU'RE IN.";
+  const heading = displayName ? `YOU'RE IN, ${displayName.toUpperCase()}.` : "YOU'RE IN.";
 
   return (
     <div
@@ -111,31 +109,3 @@ export function OnboardingCompleteStep({ displayName }: OnboardingCompleteStepPr
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

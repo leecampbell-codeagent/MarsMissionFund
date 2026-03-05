@@ -1,6 +1,6 @@
 import { type ReactElement, useState } from 'react';
+import type { NotificationPrefs } from '../../../api/account-api';
 import { Button } from '../../ui/Button';
-import { type NotificationPrefs } from '../../../api/account-api';
 
 interface OnboardingNotificationsStepProps {
   readonly onNext: (prefs: Partial<NotificationPrefs>) => void;
@@ -29,7 +29,7 @@ const PREF_ROWS: PrefRow[] = [
   {
     key: 'campaignUpdates',
     label: 'Campaign Updates',
-    description: 'News from missions you\'re backing.',
+    description: "News from missions you're backing.",
     locked: false,
   },
   {
@@ -47,7 +47,7 @@ const PREF_ROWS: PrefRow[] = [
   {
     key: 'recommendations',
     label: 'Recommendations',
-    description: 'Missions we think you\'ll want to back.',
+    description: "Missions we think you'll want to back.",
     locked: false,
   },
   {
@@ -67,8 +67,22 @@ const PREF_ROWS: PrefRow[] = [
 function LockIcon(): ReactElement {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2" />
-      <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <rect
+        x="3"
+        y="11"
+        width="18"
+        height="11"
+        rx="2"
+        ry="2"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M7 11V7a5 5 0 0 1 10 0v4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -280,31 +294,3 @@ export function OnboardingNotificationsStep({
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

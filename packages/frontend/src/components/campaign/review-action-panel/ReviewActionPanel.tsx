@@ -1,4 +1,4 @@
-import { type ReactElement, useState, type ChangeEvent } from 'react';
+import { type ChangeEvent, type ReactElement, useState } from 'react';
 import { Button } from '../../ui/Button';
 
 interface ReviewActionPanelProps {
@@ -74,9 +74,12 @@ export function ReviewActionPanel({
     fontFamily: 'var(--font-body)',
     fontSize: '13px',
     fontWeight: 600,
-    color: activeTab === tab
-      ? tab === 'approve' ? 'var(--color-status-success)' : 'var(--color-status-error)'
-      : 'var(--color-text-secondary)',
+    color:
+      activeTab === tab
+        ? tab === 'approve'
+          ? 'var(--color-status-success)'
+          : 'var(--color-status-error)'
+        : 'var(--color-text-secondary)',
     textTransform: 'uppercase',
     letterSpacing: '0.04em',
     transition: 'color var(--motion-hover), border-color var(--motion-hover)',
@@ -93,7 +96,10 @@ export function ReviewActionPanel({
       }}
     >
       {/* Tab bar */}
-      <div role="tablist" style={{ display: 'flex', borderBottom: '1px solid var(--color-border-subtle)' }}>
+      <div
+        role="tablist"
+        style={{ display: 'flex', borderBottom: '1px solid var(--color-border-subtle)' }}
+      >
         <button
           role="tab"
           aria-selected={activeTab === 'approve'}
@@ -124,12 +130,22 @@ export function ReviewActionPanel({
         hidden={activeTab !== 'approve'}
         style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}
       >
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '13px',
+            color: 'var(--color-text-secondary)',
+            margin: 0,
+          }}
+        >
           Provide review notes documenting your assessment.
         </p>
         <div>
           <label htmlFor="review-notes" style={labelStyle}>
-            Review Notes <span aria-hidden="true" style={{ color: 'var(--color-status-error)' }}>*</span>
+            Review Notes{' '}
+            <span aria-hidden="true" style={{ color: 'var(--color-status-error)' }}>
+              *
+            </span>
           </label>
           <textarea
             id="review-notes"
@@ -141,7 +157,14 @@ export function ReviewActionPanel({
             aria-required="true"
           />
           {reviewNotes.trim().length === 0 && (
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '4px' }}>
+            <p
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '11px',
+                color: 'var(--color-text-tertiary)',
+                marginTop: '4px',
+              }}
+            >
               Notes are required to approve.
             </p>
           )}
@@ -168,12 +191,22 @@ export function ReviewActionPanel({
         hidden={activeTab !== 'reject'}
         style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}
       >
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '13px',
+            color: 'var(--color-text-secondary)',
+            margin: 0,
+          }}
+        >
           Provide clear feedback to help the creator improve their proposal.
         </p>
         <div>
           <label htmlFor="rejection-reason" style={labelStyle}>
-            Rejection Reason <span aria-hidden="true" style={{ color: 'var(--color-status-error)' }}>*</span>
+            Rejection Reason{' '}
+            <span aria-hidden="true" style={{ color: 'var(--color-status-error)' }}>
+              *
+            </span>
           </label>
           <textarea
             id="rejection-reason"
@@ -187,12 +220,17 @@ export function ReviewActionPanel({
         </div>
         <div>
           <label htmlFor="resubmission-guidance" style={labelStyle}>
-            Resubmission Guidance <span aria-hidden="true" style={{ color: 'var(--color-status-error)' }}>*</span>
+            Resubmission Guidance{' '}
+            <span aria-hidden="true" style={{ color: 'var(--color-status-error)' }}>
+              *
+            </span>
           </label>
           <textarea
             id="resubmission-guidance"
             value={resubmissionGuidance}
-            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setResubmissionGuidance(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+              setResubmissionGuidance(e.target.value)
+            }
             placeholder="What changes would make this campaign approvable?"
             rows={3}
             style={textareaStyle}
@@ -200,7 +238,13 @@ export function ReviewActionPanel({
           />
         </div>
         {(!rejectionReason.trim() || !resubmissionGuidance.trim()) && (
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-tertiary)' }}>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '11px',
+              color: 'var(--color-text-tertiary)',
+            }}
+          >
             Both fields are required to reject.
           </p>
         )}
@@ -219,7 +263,8 @@ export function ReviewActionPanel({
               fontFamily: 'var(--font-body)',
               fontSize: '12px',
               fontWeight: 600,
-              color: !canReject || isLoading ? 'rgba(138, 150, 168, 0.8)' : 'var(--color-status-error)',
+              color:
+                !canReject || isLoading ? 'rgba(138, 150, 168, 0.8)' : 'var(--color-status-error)',
               opacity: !canReject || isLoading ? 0.6 : 1,
             }}
           >

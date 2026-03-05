@@ -9,31 +9,3 @@ export const KycStatus = {
 } as const;
 
 export type KycStatus = (typeof KycStatus)[keyof typeof KycStatus];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -13,8 +13,8 @@ import { correlationIdMiddleware } from '../../shared/middleware/auth.js';
 import { createErrorHandler } from '../../shared/middleware/error-handler.js';
 import { InMemoryCampaignAuditRepository } from '../adapters/in-memory-campaign-audit-repository.adapter.js';
 import { InMemoryCampaignRepository } from '../adapters/in-memory-campaign-repository.adapter.js';
-import { Campaign } from '../domain/models/campaign.js';
 import { CampaignAppService } from '../application/campaign-app-service.js';
+import { Campaign } from '../domain/models/campaign.js';
 import { createCampaignRouter } from './campaign-router.js';
 
 // Mock @clerk/express to avoid real Clerk JWT validation in tests (G-012)
@@ -128,9 +128,7 @@ describe('POST /api/v1/campaigns', () => {
   });
 
   it('returns 401 without auth', async () => {
-    const res = await request(app)
-      .post('/api/v1/campaigns')
-      .send({ title: 'Test' });
+    const res = await request(app).post('/api/v1/campaigns').send({ title: 'Test' });
 
     expect(res.status).toBe(401);
   });
@@ -366,7 +364,9 @@ describe('POST /api/v1/campaigns/:id/approve', () => {
     const campaign = Campaign.create({ creatorUserId: creator.id, title: 'Camp' });
     await campaignRepo.save(campaign);
     await campaignRepo.updateStatus(campaign.id, 'draft', 'submitted', { submittedAt: new Date() });
-    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', { reviewedByUserId: reviewer.id });
+    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', {
+      reviewedByUserId: reviewer.id,
+    });
 
     const res = await request(app)
       .post(`/api/v1/campaigns/${campaign.id}/approve`)
@@ -384,7 +384,9 @@ describe('POST /api/v1/campaigns/:id/approve', () => {
     const campaign = Campaign.create({ creatorUserId: creator.id, title: 'Camp' });
     await campaignRepo.save(campaign);
     await campaignRepo.updateStatus(campaign.id, 'draft', 'submitted', { submittedAt: new Date() });
-    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', { reviewedByUserId: reviewer.id });
+    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', {
+      reviewedByUserId: reviewer.id,
+    });
 
     const res = await request(app)
       .post(`/api/v1/campaigns/${campaign.id}/approve`)
@@ -410,7 +412,9 @@ describe('POST /api/v1/campaigns/:id/reject', () => {
     const campaign = Campaign.create({ creatorUserId: creator.id, title: 'Camp' });
     await campaignRepo.save(campaign);
     await campaignRepo.updateStatus(campaign.id, 'draft', 'submitted', { submittedAt: new Date() });
-    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', { reviewedByUserId: reviewer.id });
+    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', {
+      reviewedByUserId: reviewer.id,
+    });
 
     const res = await request(app)
       .post(`/api/v1/campaigns/${campaign.id}/reject`)
@@ -441,8 +445,13 @@ describe('POST /api/v1/campaigns/:id/launch', () => {
     const campaign = Campaign.create({ creatorUserId: user.id, title: 'Camp' });
     await campaignRepo.save(campaign);
     await campaignRepo.updateStatus(campaign.id, 'draft', 'submitted', { submittedAt: new Date() });
-    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', { reviewedByUserId: user.id });
-    await campaignRepo.updateStatus(campaign.id, 'under_review', 'approved', { reviewNotes: 'OK', reviewedAt: new Date() });
+    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', {
+      reviewedByUserId: user.id,
+    });
+    await campaignRepo.updateStatus(campaign.id, 'under_review', 'approved', {
+      reviewNotes: 'OK',
+      reviewedAt: new Date(),
+    });
 
     const res = await request(app)
       .post(`/api/v1/campaigns/${campaign.id}/launch`)
@@ -522,7 +531,9 @@ describe('POST /api/v1/campaigns/:id/reassign', () => {
     const campaign = Campaign.create({ creatorUserId: creator.id, title: 'Camp' });
     await campaignRepo.save(campaign);
     await campaignRepo.updateStatus(campaign.id, 'draft', 'submitted', { submittedAt: new Date() });
-    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', { reviewedByUserId: reviewer1.id });
+    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', {
+      reviewedByUserId: reviewer1.id,
+    });
 
     const res = await request(app)
       .post(`/api/v1/campaigns/${campaign.id}/reassign`)
@@ -541,7 +552,9 @@ describe('POST /api/v1/campaigns/:id/reassign', () => {
     const campaign = Campaign.create({ creatorUserId: creator.id, title: 'Camp' });
     await campaignRepo.save(campaign);
     await campaignRepo.updateStatus(campaign.id, 'draft', 'submitted', { submittedAt: new Date() });
-    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', { reviewedByUserId: reviewer1.id });
+    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', {
+      reviewedByUserId: reviewer1.id,
+    });
 
     const res = await request(app)
       .post(`/api/v1/campaigns/${campaign.id}/reassign`)

@@ -1,5 +1,5 @@
-import { type ReactElement, type ChangeEvent } from 'react';
-import { type Campaign, type BudgetItem } from '../../../types/campaign';
+import type { ChangeEvent, ReactElement } from 'react';
+import type { BudgetItem, Campaign } from '../../../types/campaign';
 import { Button } from '../../ui/Button';
 
 interface BudgetSectionProps {
@@ -58,24 +58,28 @@ export function BudgetSection({ campaign, onChange }: BudgetSectionProps): React
   };
 
   const removeItem = (index: number) => {
-    onChange('budgetBreakdown', items.filter((_, i) => i !== index));
+    onChange(
+      'budgetBreakdown',
+      items.filter((_, i) => i !== index),
+    );
   };
 
   const updateItem = (index: number, field: keyof BudgetItem, value: string) => {
-    const updated = items.map((item, i) =>
-      i === index ? { ...item, [field]: value } : item,
-    );
+    const updated = items.map((item, i) => (i === index ? { ...item, [field]: value } : item));
     onChange('budgetBreakdown', updated);
   };
 
   const handleAmountChange = (index: number, dollars: string) => {
     const num = parseFloat(dollars);
-    const cents = isNaN(num) ? '0' : String(Math.round(num * 100));
+    const cents = Number.isNaN(num) ? '0' : String(Math.round(num * 100));
     updateItem(index, 'estimatedCents', cents);
   };
 
   return (
-    <section aria-label="Budget Breakdown" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <section
+      aria-label="Budget Breakdown"
+      style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+    >
       <h2
         style={{
           fontFamily: 'var(--font-display)',
@@ -99,12 +103,27 @@ export function BudgetSection({ campaign, onChange }: BudgetSectionProps): React
           (optional)
         </span>
       </h2>
-      <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+      <p
+        style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: '13px',
+          color: 'var(--color-text-secondary)',
+          margin: 0,
+        }}
+      >
         Provide a breakdown of how you plan to use the funding.
       </p>
 
       {items.length === 0 && (
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-tertiary)', textAlign: 'center', padding: '24px' }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '14px',
+            color: 'var(--color-text-tertiary)',
+            textAlign: 'center',
+            padding: '24px',
+          }}
+        >
           No budget items added yet.
         </p>
       )}
@@ -112,21 +131,37 @@ export function BudgetSection({ campaign, onChange }: BudgetSectionProps): React
       {items.map((item, index) => (
         <div key={index} style={budgetCardStyle} aria-label={`Budget item ${index + 1}`}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '13px',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 600,
+              }}
+            >
               Item {index + 1}
             </span>
-            <Button variant="ghost" size="sm" onClick={() => removeItem(index)} aria-label={`Remove budget item ${index + 1}`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => removeItem(index)}
+              aria-label={`Remove budget item ${index + 1}`}
+            >
               Remove
             </Button>
           </div>
 
           <div>
-            <label htmlFor={`budget-category-${index}`} style={labelStyle}>Category *</label>
+            <label htmlFor={`budget-category-${index}`} style={labelStyle}>
+              Category *
+            </label>
             <input
               id={`budget-category-${index}`}
               type="text"
               value={item.category}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => updateItem(index, 'category', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                updateItem(index, 'category', e.target.value)
+              }
               placeholder="e.g. R&D, Equipment, Personnel"
               required
               style={inputStyle}
@@ -134,12 +169,16 @@ export function BudgetSection({ campaign, onChange }: BudgetSectionProps): React
           </div>
 
           <div>
-            <label htmlFor={`budget-description-${index}`} style={labelStyle}>Description *</label>
+            <label htmlFor={`budget-description-${index}`} style={labelStyle}>
+              Description *
+            </label>
             <input
               id={`budget-description-${index}`}
               type="text"
               value={item.description}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => updateItem(index, 'description', e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                updateItem(index, 'description', e.target.value)
+              }
               placeholder="What will this budget cover?"
               required
               style={inputStyle}
@@ -147,9 +186,21 @@ export function BudgetSection({ campaign, onChange }: BudgetSectionProps): React
           </div>
 
           <div>
-            <label htmlFor={`budget-amount-${index}`} style={labelStyle}>Amount (USD) *</label>
+            <label htmlFor={`budget-amount-${index}`} style={labelStyle}>
+              Amount (USD) *
+            </label>
             <div style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontFamily: 'var(--font-data)', color: 'var(--color-text-tertiary)', pointerEvents: 'none' }}>
+              <span
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  fontFamily: 'var(--font-data)',
+                  color: 'var(--color-text-tertiary)',
+                  pointerEvents: 'none',
+                }}
+              >
                 $
               </span>
               <input
@@ -158,7 +209,9 @@ export function BudgetSection({ campaign, onChange }: BudgetSectionProps): React
                 min="0"
                 step="1000"
                 defaultValue={Number(item.estimatedCents) / 100}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => handleAmountChange(index, e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  handleAmountChange(index, e.target.value)
+                }
                 placeholder="0"
                 required
                 style={{ ...inputStyle, paddingLeft: '24px' }}

@@ -1,4 +1,4 @@
-import { type ReactElement, type ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { LoadingSpinner } from './LoadingSpinner';
 
 interface ButtonProps {
@@ -102,38 +102,8 @@ export function Button({
       aria-label={ariaLabel}
       aria-disabled={ariaDisabled ?? isDisabled}
     >
-      {isLoading && (
-        <LoadingSpinner size="sm" decorative label="Loading" />
-      )}
+      {isLoading && <LoadingSpinner size="sm" decorative label="Loading" />}
       {children}
     </button>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

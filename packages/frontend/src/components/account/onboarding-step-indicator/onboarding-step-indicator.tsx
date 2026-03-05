@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface OnboardingStepIndicatorProps {
   readonly currentStep: number;
@@ -71,31 +71,3 @@ export function OnboardingStepIndicator({
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

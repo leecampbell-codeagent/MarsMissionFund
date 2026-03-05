@@ -1,5 +1,9 @@
-import { type ReactElement } from 'react';
-import { type CampaignSummary, CAMPAIGN_CATEGORY_LABELS, formatCents } from '../../../types/campaign';
+import type { ReactElement } from 'react';
+import {
+  CAMPAIGN_CATEGORY_LABELS,
+  type CampaignSummary,
+  formatCents,
+} from '../../../types/campaign';
 import { CampaignStatusBadge } from '../campaign-status-badge/CampaignStatusBadge';
 
 interface CampaignCardProps {
@@ -21,9 +25,7 @@ function formatRelativeDate(isoString: string): string {
  * Uses --gradient-surface-card for card background per L2-001.
  */
 export function CampaignCard({ campaign, onClick }: CampaignCardProps): ReactElement {
-  const categoryLabel = campaign.category
-    ? CAMPAIGN_CATEGORY_LABELS[campaign.category]
-    : null;
+  const categoryLabel = campaign.category ? CAMPAIGN_CATEGORY_LABELS[campaign.category] : null;
 
   const displayDate = campaign.submittedAt ?? campaign.createdAt;
   const dateLabel = campaign.submittedAt ? 'Submitted' : 'Created';
@@ -48,11 +50,27 @@ export function CampaignCard({ campaign, onClick }: CampaignCardProps): ReactEle
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
       aria-label={`Campaign: ${campaign.title}`}
     >
       {/* Header row: badge + date */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '8px',
+        }}
+      >
         <CampaignStatusBadge status={campaign.status} />
         <span
           style={{
@@ -84,7 +102,14 @@ export function CampaignCard({ campaign, onClick }: CampaignCardProps): ReactEle
       </h3>
 
       {/* Meta row: category + funding goal */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '8px',
+        }}
+      >
         {categoryLabel ? (
           <span
             style={{

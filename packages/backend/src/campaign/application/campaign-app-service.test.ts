@@ -8,7 +8,6 @@ import { NotificationPreferences } from '../../account/domain/value-objects/noti
 import { Role } from '../../account/domain/value-objects/role.js';
 import { InMemoryCampaignAuditRepository } from '../adapters/in-memory-campaign-audit-repository.adapter.js';
 import { InMemoryCampaignRepository } from '../adapters/in-memory-campaign-repository.adapter.js';
-import { Campaign } from '../domain/models/campaign.js';
 import {
   AccountNotActiveError,
   AdminRoleRequiredError,
@@ -27,6 +26,7 @@ import {
   ReviewerRoleRequiredError,
   SubmissionValidationError,
 } from '../domain/errors/campaign-errors.js';
+import { Campaign } from '../domain/models/campaign.js';
 import { CampaignAppService } from './campaign-app-service.js';
 
 const logger = pino({ level: 'silent' });
@@ -42,10 +42,7 @@ function getUserId(clerkUserId: string): string {
   return USER_IDS[clerkUserId];
 }
 
-function makeUserData(
-  clerkUserId: string,
-  overrides: Partial<UserData> = {},
-): UserData {
+function makeUserData(clerkUserId: string, overrides: Partial<UserData> = {}): UserData {
   return {
     id: getUserId(clerkUserId),
     clerkUserId,
@@ -82,18 +79,35 @@ function makeFullCampaignData(_creatorUserId: string) {
   return {
     title: 'HelioShield: Advanced Radiation Protection',
     shortDescription: 'Protecting Mars crews from solar radiation.',
-    description: 'A comprehensive protection system designed to shield Mars crews from radiation. '.repeat(3),
+    description:
+      'A comprehensive protection system designed to shield Mars crews from radiation. '.repeat(3),
     category: 'radiation_protection' as const,
     heroImageUrl: null,
     fundingGoalCents: '100000000',
     fundingCapCents: '150000000',
     deadline: futureDeadline.toISOString(),
     milestones: [
-      { id: crypto.randomUUID(), title: 'Phase 1', description: 'Research', fundingBasisPoints: 5000, targetDate: '2026-08-01' },
-      { id: crypto.randomUUID(), title: 'Phase 2', description: 'Build', fundingBasisPoints: 5000, targetDate: '2026-12-01' },
+      {
+        id: crypto.randomUUID(),
+        title: 'Phase 1',
+        description: 'Research',
+        fundingBasisPoints: 5000,
+        targetDate: '2026-08-01',
+      },
+      {
+        id: crypto.randomUUID(),
+        title: 'Phase 2',
+        description: 'Build',
+        fundingBasisPoints: 5000,
+        targetDate: '2026-12-01',
+      },
     ],
-    teamMembers: [{ id: crypto.randomUUID(), name: 'Dr. Ada', role: 'Lead', bio: 'Expert in radiation' }],
-    riskDisclosures: [{ id: crypto.randomUUID(), risk: 'Technical delays', mitigation: 'Buffer time built in' }],
+    teamMembers: [
+      { id: crypto.randomUUID(), name: 'Dr. Ada', role: 'Lead', bio: 'Expert in radiation' },
+    ],
+    riskDisclosures: [
+      { id: crypto.randomUUID(), risk: 'Technical delays', mitigation: 'Buffer time built in' },
+    ],
     budgetBreakdown: [],
     alignmentStatement: 'This project directly enables safe long-term Mars habitation.',
     tags: ['radiation', 'safety'],
@@ -205,9 +219,9 @@ describe('CampaignAppService.updateDraft()', () => {
     const campaign = Campaign.create({ creatorUserId: otherUser.id, title: 'Other Campaign' });
     await campaignRepo.save(campaign);
 
-    await expect(
-      service.updateDraft('creator_001', campaign.id, { title: 'X' }),
-    ).rejects.toThrow(CampaignNotFoundError);
+    await expect(service.updateDraft('creator_001', campaign.id, { title: 'X' })).rejects.toThrow(
+      CampaignNotFoundError,
+    );
   });
 });
 
@@ -272,7 +286,9 @@ describe('CampaignAppService.submitCampaign()', () => {
     const user = seedUser(userRepo, 'reviewer_001', { roles: [Role.Reviewer, Role.Backer] });
     // Simulate campaign going to under_review
     await campaignRepo.updateStatus(campaign.id, 'draft', 'submitted', { submittedAt: new Date() });
-    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', { reviewedByUserId: user.id });
+    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', {
+      reviewedByUserId: user.id,
+    });
 
     await expect(service.submitCampaign('creator_001', campaign.id)).rejects.toThrow(
       CampaignNotRevizableError,
@@ -343,7 +359,9 @@ describe('CampaignAppService.getReviewQueue()', () => {
 
     const c1 = Campaign.create({ creatorUserId: creator.id, title: 'Camp 1' });
     await campaignRepo.save(c1);
-    await campaignRepo.updateStatus(c1.id, 'draft', 'submitted', { submittedAt: new Date('2026-03-01') });
+    await campaignRepo.updateStatus(c1.id, 'draft', 'submitted', {
+      submittedAt: new Date('2026-03-01'),
+    });
 
     const queue = await service.getReviewQueue('reviewer_001');
     expect(queue).toHaveLength(1);
@@ -438,7 +456,9 @@ describe('CampaignAppService.approveCampaign()', () => {
     const campaign = Campaign.create({ creatorUserId: creator.id, title: 'Camp' });
     await campaignRepo.save(campaign);
     await campaignRepo.updateStatus(campaign.id, 'draft', 'submitted', { submittedAt: new Date() });
-    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', { reviewedByUserId: reviewer.id });
+    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', {
+      reviewedByUserId: reviewer.id,
+    });
     return { campaign, reviewer };
   }
 
@@ -455,9 +475,9 @@ describe('CampaignAppService.approveCampaign()', () => {
     const { campaign } = await makeUnderReviewCampaign();
     seedUser(userRepo, 'reviewer_002', { roles: [Role.Reviewer, Role.Backer] });
 
-    await expect(
-      service.approveCampaign('reviewer_002', campaign.id, 'Notes'),
-    ).rejects.toThrow(NotAssignedReviewerError);
+    await expect(service.approveCampaign('reviewer_002', campaign.id, 'Notes')).rejects.toThrow(
+      NotAssignedReviewerError,
+    );
   });
 
   it('throws CampaignNotApprovableError for non-under_review campaign', async () => {
@@ -466,9 +486,9 @@ describe('CampaignAppService.approveCampaign()', () => {
     const campaign = Campaign.create({ creatorUserId: creator.id, title: 'Camp' });
     await campaignRepo.save(campaign);
 
-    await expect(
-      service.approveCampaign('reviewer_001', campaign.id, 'Notes'),
-    ).rejects.toThrow(CampaignNotApprovableError);
+    await expect(service.approveCampaign('reviewer_001', campaign.id, 'Notes')).rejects.toThrow(
+      CampaignNotApprovableError,
+    );
   });
 });
 
@@ -491,7 +511,9 @@ describe('CampaignAppService.rejectCampaign()', () => {
     const campaign = Campaign.create({ creatorUserId: creator.id, title: 'Camp' });
     await campaignRepo.save(campaign);
     await campaignRepo.updateStatus(campaign.id, 'draft', 'submitted', { submittedAt: new Date() });
-    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', { reviewedByUserId: reviewer.id });
+    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', {
+      reviewedByUserId: reviewer.id,
+    });
 
     const rejected = await service.rejectCampaign(
       'reviewer_001',
@@ -535,8 +557,13 @@ describe('CampaignAppService.launchCampaign()', () => {
     const campaign = Campaign.create({ creatorUserId: user.id, title: 'Camp' });
     await campaignRepo.save(campaign);
     await campaignRepo.updateStatus(campaign.id, 'draft', 'submitted', { submittedAt: new Date() });
-    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', { reviewedByUserId: user.id });
-    await campaignRepo.updateStatus(campaign.id, 'under_review', 'approved', { reviewNotes: 'OK', reviewedAt: new Date() });
+    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', {
+      reviewedByUserId: user.id,
+    });
+    await campaignRepo.updateStatus(campaign.id, 'under_review', 'approved', {
+      reviewNotes: 'OK',
+      reviewedAt: new Date(),
+    });
 
     const live = await service.launchCampaign('creator_001', campaign.id);
     expect(live.status).toBe('live');
@@ -621,7 +648,9 @@ describe('CampaignAppService.reassignReviewer()', () => {
     const campaign = Campaign.create({ creatorUserId: creator.id, title: 'Camp' });
     await campaignRepo.save(campaign);
     await campaignRepo.updateStatus(campaign.id, 'draft', 'submitted', { submittedAt: new Date() });
-    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', { reviewedByUserId: reviewer1.id });
+    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', {
+      reviewedByUserId: reviewer1.id,
+    });
 
     const reassigned = await service.reassignReviewer('admin_001', campaign.id, reviewer2.id);
     expect(reassigned.reviewedByUserId).toBe(reviewer2.id);
@@ -633,7 +662,9 @@ describe('CampaignAppService.reassignReviewer()', () => {
     const campaign = Campaign.create({ creatorUserId: creator.id, title: 'Camp' });
     await campaignRepo.save(campaign);
     await campaignRepo.updateStatus(campaign.id, 'draft', 'submitted', { submittedAt: new Date() });
-    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', { reviewedByUserId: reviewer.id });
+    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', {
+      reviewedByUserId: reviewer.id,
+    });
 
     await expect(
       service.reassignReviewer('reviewer_001', campaign.id, reviewer.id),
@@ -647,9 +678,9 @@ describe('CampaignAppService.reassignReviewer()', () => {
     const campaign = Campaign.create({ creatorUserId: creator.id, title: 'Camp' });
     await campaignRepo.save(campaign);
 
-    await expect(
-      service.reassignReviewer('admin_001', campaign.id, reviewer2.id),
-    ).rejects.toThrow(CampaignInvalidStateError);
+    await expect(service.reassignReviewer('admin_001', campaign.id, reviewer2.id)).rejects.toThrow(
+      CampaignInvalidStateError,
+    );
   });
 
   it('throws ReassignTargetNotReviewerError for non-reviewer target', async () => {
@@ -661,10 +692,12 @@ describe('CampaignAppService.reassignReviewer()', () => {
     const campaign = Campaign.create({ creatorUserId: creator.id, title: 'Camp' });
     await campaignRepo.save(campaign);
     await campaignRepo.updateStatus(campaign.id, 'draft', 'submitted', { submittedAt: new Date() });
-    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', { reviewedByUserId: reviewer.id });
+    await campaignRepo.updateStatus(campaign.id, 'submitted', 'under_review', {
+      reviewedByUserId: reviewer.id,
+    });
 
-    await expect(
-      service.reassignReviewer('admin_001', campaign.id, backer.id),
-    ).rejects.toThrow(ReassignTargetNotReviewerError);
+    await expect(service.reassignReviewer('admin_001', campaign.id, backer.id)).rejects.toThrow(
+      ReassignTargetNotReviewerError,
+    );
   });
 });

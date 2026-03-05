@@ -162,9 +162,7 @@ describe('GET /api/v1/kyc/status', () => {
   it('returns kycStatus not_started for new user', async () => {
     seedUser(userRepository, 'user_kyc_new', { kycStatus: KycStatus.NotStarted });
 
-    const res = await request(app)
-      .get('/api/v1/kyc/status')
-      .set('x-test-user-id', 'user_kyc_new');
+    const res = await request(app).get('/api/v1/kyc/status').set('x-test-user-id', 'user_kyc_new');
 
     expect(res.status).toBe(200);
     expect(res.body.data.kycStatus).toBe('not_started');
@@ -175,9 +173,7 @@ describe('GET /api/v1/kyc/status', () => {
       updatedAt: new Date('2026-03-05T14:30:00.000Z'),
     });
 
-    const res = await request(app)
-      .get('/api/v1/kyc/status')
-      .set('x-test-user-id', 'user_kyc_date');
+    const res = await request(app).get('/api/v1/kyc/status').set('x-test-user-id', 'user_kyc_date');
 
     expect(res.status).toBe(200);
     expect(new Date(res.body.data.updatedAt).toISOString()).toBe('2026-03-05T14:30:00.000Z');

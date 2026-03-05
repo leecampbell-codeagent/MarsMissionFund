@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import type { CampaignStatus } from '../../../types/campaign';
 import { CampaignStatusBadge } from './CampaignStatusBadge';
-import { type CampaignStatus } from '../../../types/campaign';
 
 describe('CampaignStatusBadge', () => {
   const statusCases: Array<{ status: CampaignStatus; label: string }> = [

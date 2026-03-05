@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCampaign } from '../../api/campaign-api';
-import { type Campaign } from '../../types/campaign';
-import { type ApiError } from '../../api/client';
+import type { ApiError } from '../../api/client';
+import type { Campaign } from '../../types/campaign';
 
 export function campaignQueryKey(id: string): readonly [string, string] {
   return ['campaign', id] as const;

@@ -1,17 +1,21 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { PublicStatusBadge } from './PublicStatusBadge';
 
 describe('PublicStatusBadge', () => {
   it('renders "Fully Funded" for funded status', () => {
     render(<PublicStatusBadge status="funded" />);
-    expect(screen.getByRole('status', { name: 'Campaign status: Fully Funded' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('status', { name: 'Campaign status: Fully Funded' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Fully Funded')).toBeInTheDocument();
   });
 
   it('renders "Ending Soon" for live status with daysRemaining <= 7', () => {
     render(<PublicStatusBadge status="live" daysRemaining={3} />);
-    expect(screen.getByRole('status', { name: 'Campaign status: Ending Soon' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('status', { name: 'Campaign status: Ending Soon' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Ending Soon')).toBeInTheDocument();
   });
 

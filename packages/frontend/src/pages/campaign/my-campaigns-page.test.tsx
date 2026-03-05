@@ -1,9 +1,9 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { CampaignSummary } from '../../types/campaign';
 import MyCampaignsPage from './my-campaigns-page';
-import { type CampaignSummary } from '../../types/campaign';
 
 // Mock the hooks
 vi.mock('../../hooks/campaign/use-my-campaigns', () => ({
@@ -57,7 +57,11 @@ describe('MyCampaignsPage', () => {
       campaigns: [],
       isLoading: false,
       isError: true,
-      error: { status: 500, code: 'SERVER_ERROR', message: 'Failed to load campaigns.' } as import('../../api/client').ApiError,
+      error: {
+        status: 500,
+        code: 'SERVER_ERROR',
+        message: 'Failed to load campaigns.',
+      } as import('../../api/client').ApiError,
     });
 
     renderWithProviders(<MyCampaignsPage />);
@@ -73,7 +77,9 @@ describe('MyCampaignsPage', () => {
     });
 
     renderWithProviders(<MyCampaignsPage />);
-    expect(screen.getByText("You haven't created any campaigns yet. Start your Mars mission proposal.")).toBeInTheDocument();
+    expect(
+      screen.getByText("You haven't created any campaigns yet. Start your Mars mission proposal."),
+    ).toBeInTheDocument();
     // The Create Campaign button (in both header and empty state)
     const buttons = screen.getAllByRole('button', { name: /Create Campaign/i });
     expect(buttons.length).toBeGreaterThanOrEqual(1);

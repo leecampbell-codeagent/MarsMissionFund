@@ -17,39 +17,7 @@ export interface UserRepository {
     roles: Role[],
     email?: string,
   ): Promise<User>;
-  updateKycStatus(
-    clerkUserId: string,
-    fromStatus: KycStatus,
-    toStatus: KycStatus,
-  ): Promise<User>;
+  updateKycStatus(clerkUserId: string, fromStatus: KycStatus, toStatus: KycStatus): Promise<User>;
   touchLastSeen(clerkUserId: string): Promise<void>;
   completeOnboarding(clerkUserId: string): Promise<User>;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

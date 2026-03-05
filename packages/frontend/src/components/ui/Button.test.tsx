@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Button } from './Button';
 
 describe('Button', () => {
@@ -21,7 +21,11 @@ describe('Button', () => {
   it('is disabled when disabled=true', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
-    render(<Button disabled onClick={onClick}>Disabled</Button>);
+    render(
+      <Button disabled onClick={onClick}>
+        Disabled
+      </Button>,
+    );
     const btn = screen.getByRole('button', { name: 'Disabled' });
     expect(btn).toBeDisabled();
     await user.click(btn);
@@ -46,31 +50,3 @@ describe('Button', () => {
     expect(screen.getByRole('button', { name: 'Skip profile setup for now' })).toBeInTheDocument();
   });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
+import type { ApiError } from '../../api/client';
 import { searchPublicCampaigns } from '../../api/public-campaign-api';
-import { type PublicCampaignSearchParams, type PaginatedCampaigns } from '../../types/campaign';
-import { type ApiError } from '../../api/client';
+import type { PaginatedCampaigns, PublicCampaignSearchParams } from '../../types/campaign';
 
 export function publicCampaignsQueryKey(
   params: PublicCampaignSearchParams,
@@ -22,9 +22,7 @@ export interface UsePublicCampaignsResult {
  * Stale time: 30 seconds.
  * No authentication required.
  */
-export function usePublicCampaigns(
-  params: PublicCampaignSearchParams,
-): UsePublicCampaignsResult {
+export function usePublicCampaigns(params: PublicCampaignSearchParams): UsePublicCampaignsResult {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: publicCampaignsQueryKey(params),
     queryFn: () => searchPublicCampaigns(params),

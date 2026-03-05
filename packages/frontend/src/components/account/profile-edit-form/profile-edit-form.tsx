@@ -1,5 +1,5 @@
-import { type ReactElement, useState, useEffect, useId } from 'react';
-import { type UserProfile } from '../../../api/account-api';
+import { type ReactElement, useEffect, useId, useState } from 'react';
+import type { UserProfile } from '../../../api/account-api';
 import { Button } from '../../ui/Button';
 
 interface ProfileEditFormProps {
@@ -262,7 +262,10 @@ export function ProfileEditForm({
           disabled={isSaving}
           aria-disabled={isSaving}
         >
-          <span role={isSuccess ? 'status' : undefined} aria-live={isSuccess ? 'polite' : undefined}>
+          <span
+            role={isSuccess ? 'status' : undefined}
+            aria-live={isSuccess ? 'polite' : undefined}
+          >
             {saveButtonLabel}
           </span>
         </Button>
@@ -270,31 +273,3 @@ export function ProfileEditForm({
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

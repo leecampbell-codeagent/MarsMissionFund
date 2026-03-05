@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { OnboardingProfileStep } from './onboarding-profile-step';
 
 describe('OnboardingProfileStep', () => {
@@ -69,12 +69,11 @@ describe('OnboardingProfileStep', () => {
 
   it('shows API error message when error prop is set', () => {
     render(
-      <OnboardingProfileStep
-        {...defaultProps}
-        error="We couldn't save your profile. Try again."
-      />,
+      <OnboardingProfileStep {...defaultProps} error="We couldn't save your profile. Try again." />,
     );
-    expect(screen.getByRole('alert')).toHaveTextContent("We couldn't save your profile. Try again.");
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      "We couldn't save your profile. Try again.",
+    );
   });
 
   it('calls onNext with form data on valid submit', async () => {
@@ -84,7 +83,10 @@ describe('OnboardingProfileStep', () => {
     await user.type(screen.getByLabelText(/DISPLAY NAME/i), 'Ada Lovelace');
     await user.type(screen.getByLabelText(/BIO/i), 'Propulsion engineer');
     await user.click(screen.getByRole('button', { name: /Save and continue/i }));
-    expect(onNext).toHaveBeenCalledWith({ displayName: 'Ada Lovelace', bio: 'Propulsion engineer' });
+    expect(onNext).toHaveBeenCalledWith({
+      displayName: 'Ada Lovelace',
+      bio: 'Propulsion engineer',
+    });
   });
 
   it('shows character count for bio', () => {
@@ -92,31 +94,3 @@ describe('OnboardingProfileStep', () => {
     expect(screen.getByText('0 / 500')).toBeInTheDocument();
   });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

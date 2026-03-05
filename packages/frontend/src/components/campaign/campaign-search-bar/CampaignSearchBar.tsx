@@ -1,4 +1,4 @@
-import { type ReactElement, type ChangeEvent } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
 
 export interface CampaignSearchBarProps {
   readonly value: string;
@@ -48,7 +48,6 @@ export function CampaignSearchBar({
 
       <input
         type="search"
-        role="searchbox"
         aria-label="Search campaigns"
         value={value}
         onChange={handleChange}

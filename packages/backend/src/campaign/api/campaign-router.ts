@@ -4,12 +4,12 @@ import { z } from 'zod';
 import { getClerkAuth } from '../../shared/middleware/auth.js';
 import type { CampaignAppService } from '../application/campaign-app-service.js';
 import type { UpdateCampaignInput } from '../domain/models/campaign.js';
+import { serializeCampaign, serializeCampaignSummary } from './campaign-serializer.js';
 import { approveCampaignSchema } from './schemas/approve-campaign.schema.js';
 import { createCampaignSchema } from './schemas/create-campaign.schema.js';
 import { reassignCampaignSchema } from './schemas/reassign-campaign.schema.js';
 import { rejectCampaignSchema } from './schemas/reject-campaign.schema.js';
 import { updateCampaignSchema } from './schemas/update-campaign.schema.js';
-import { serializeCampaign, serializeCampaignSummary } from './campaign-serializer.js';
 
 // Empty body schema — rejects any fields
 const emptyBodySchema = z.object({}).strict();
@@ -179,7 +179,13 @@ export function createCampaignRouter(
 
       const parseResult = emptyBodySchema.safeParse(req.body ?? {});
       if (!parseResult.success) {
-        res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Request body must be empty.', correlation_id: req.correlationId ?? null } });
+        res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Request body must be empty.',
+            correlation_id: req.correlationId ?? null,
+          },
+        });
         return;
       }
 
@@ -274,7 +280,13 @@ export function createCampaignRouter(
 
       const parseResult = emptyBodySchema.safeParse(req.body ?? {});
       if (!parseResult.success) {
-        res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Request body must be empty.', correlation_id: req.correlationId ?? null } });
+        res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Request body must be empty.',
+            correlation_id: req.correlationId ?? null,
+          },
+        });
         return;
       }
 
@@ -296,7 +308,13 @@ export function createCampaignRouter(
 
       const parseResult = emptyBodySchema.safeParse(req.body ?? {});
       if (!parseResult.success) {
-        res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Request body must be empty.', correlation_id: req.correlationId ?? null } });
+        res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Request body must be empty.',
+            correlation_id: req.correlationId ?? null,
+          },
+        });
         return;
       }
 

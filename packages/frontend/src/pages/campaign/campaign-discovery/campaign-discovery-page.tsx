@@ -1,11 +1,11 @@
-import { type ReactElement, useState, useEffect, useRef } from 'react';
+import { type ReactElement, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { usePublicCampaigns } from '../../../hooks/campaign/use-public-campaigns';
-import { PublicCampaignCard } from '../../../components/campaign/public-campaign-card/PublicCampaignCard';
 import { CampaignSearchBar } from '../../../components/campaign/campaign-search-bar/CampaignSearchBar';
 import { CategoryFilter } from '../../../components/campaign/category-filter/CategoryFilter';
 import { CategoryStatsBar } from '../../../components/campaign/category-stats-bar/CategoryStatsBar';
-import { type PublicCampaignSearchParams } from '../../../types/campaign';
+import { PublicCampaignCard } from '../../../components/campaign/public-campaign-card/PublicCampaignCard';
+import { usePublicCampaigns } from '../../../hooks/campaign/use-public-campaigns';
+import type { PublicCampaignSearchParams } from '../../../types/campaign';
 
 const SORT_OPTIONS: { value: string; label: string }[] = [
   { value: 'newest', label: 'Newest' },
@@ -40,7 +40,7 @@ export default function CampaignDiscoveryPage(): ReactElement {
   // Sync URL → local on mount / external navigation
   useEffect(() => {
     setLocalSearch(searchParams.get('q') ?? '');
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchParams.get]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Debounce: write to URL after 300ms of no typing
   const handleSearchChange = (value: string) => {
@@ -317,10 +317,8 @@ export default function CampaignDiscoveryPage(): ReactElement {
           <div
             role="alert"
             style={{
-              background:
-                'color-mix(in srgb, var(--color-status-error) 10%, transparent)',
-              border:
-                '1px solid color-mix(in srgb, var(--color-status-error) 30%, transparent)',
+              background: 'color-mix(in srgb, var(--color-status-error) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--color-status-error) 30%, transparent)',
               borderRadius: 'var(--radius-card)',
               padding: '24px',
               textAlign: 'center',

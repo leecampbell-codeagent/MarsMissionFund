@@ -1,7 +1,12 @@
 import { z } from 'zod';
 import { CAMPAIGN_CATEGORIES } from '../../domain/value-objects/campaign-category.js';
 
-export const PUBLIC_SORT_OPTIONS = ['newest', 'ending_soon', 'most_funded', 'least_funded'] as const;
+export const PUBLIC_SORT_OPTIONS = [
+  'newest',
+  'ending_soon',
+  'most_funded',
+  'least_funded',
+] as const;
 export const PUBLIC_STATUS_FILTERS = ['active', 'funded', 'ending_soon'] as const;
 
 export const publicCampaignSearchSchema = z.object({

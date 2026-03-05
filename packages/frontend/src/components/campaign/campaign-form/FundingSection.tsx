@@ -1,5 +1,5 @@
-import { type ReactElement, type ChangeEvent, useState } from 'react';
-import { type Campaign } from '../../../types/campaign';
+import { type ChangeEvent, type ReactElement, useState } from 'react';
+import type { Campaign } from '../../../types/campaign';
 
 interface FundingSectionProps {
   readonly campaign: Campaign;
@@ -47,13 +47,13 @@ function dollarInputToCents(dollars: string): string | null {
   const trimmed = dollars.trim();
   if (!trimmed) return null;
   const numericValue = parseFloat(trimmed);
-  if (isNaN(numericValue) || numericValue <= 0) return null;
+  if (Number.isNaN(numericValue) || numericValue <= 0) return null;
   return String(Math.round(numericValue * 100));
 }
 
 function formatPreview(dollars: string): string {
   const num = parseFloat(dollars);
-  if (isNaN(num)) return '';
+  if (Number.isNaN(num)) return '';
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
 }
 
@@ -66,7 +66,7 @@ export function FundingSection({ campaign, onChange }: FundingSectionProps): Rea
   const [capInput, setCapInput] = useState(centsToDollarInput(campaign.fundingCapCents));
 
   const goalNum = parseFloat(goalInput);
-  const isGoalBelowMin = !isNaN(goalNum) && goalNum < 1_000_000;
+  const isGoalBelowMin = !Number.isNaN(goalNum) && goalNum < 1_000_000;
 
   const handleGoalBlur = () => {
     const cents = dollarInputToCents(goalInput);
@@ -95,7 +95,10 @@ export function FundingSection({ campaign, onChange }: FundingSectionProps): Rea
       {/* Funding goal */}
       <div>
         <label htmlFor="campaign-funding-goal" style={labelStyle}>
-          Funding Goal (USD) <span aria-hidden="true" style={{ color: 'var(--color-status-error)' }}>*</span>
+          Funding Goal (USD){' '}
+          <span aria-hidden="true" style={{ color: 'var(--color-status-error)' }}>
+            *
+          </span>
         </label>
         <div style={{ position: 'relative' }}>
           <span
@@ -137,12 +140,26 @@ export function FundingSection({ campaign, onChange }: FundingSectionProps): Rea
             Minimum funding goal is $1,000,000
           </p>
         )}
-        {goalInput && !isNaN(goalNum) && (
-          <p style={{ fontFamily: 'var(--font-data)', fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '4px' }}>
+        {goalInput && !Number.isNaN(goalNum) && (
+          <p
+            style={{
+              fontFamily: 'var(--font-data)',
+              fontSize: '11px',
+              color: 'var(--color-text-tertiary)',
+              marginTop: '4px',
+            }}
+          >
             {formatPreview(goalInput)}
           </p>
         )}
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '11px',
+            color: 'var(--color-text-tertiary)',
+            marginTop: '2px',
+          }}
+        >
           Minimum: $1,000,000
         </p>
       </div>
@@ -178,12 +195,26 @@ export function FundingSection({ campaign, onChange }: FundingSectionProps): Rea
             style={{ ...inputStyle, paddingLeft: '24px' }}
           />
         </div>
-        {capInput && !isNaN(parseFloat(capInput)) && (
-          <p style={{ fontFamily: 'var(--font-data)', fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '4px' }}>
+        {capInput && !Number.isNaN(parseFloat(capInput)) && (
+          <p
+            style={{
+              fontFamily: 'var(--font-data)',
+              fontSize: '11px',
+              color: 'var(--color-text-tertiary)',
+              marginTop: '4px',
+            }}
+          >
             {formatPreview(capInput)}
           </p>
         )}
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '2px' }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '11px',
+            color: 'var(--color-text-tertiary)',
+            marginTop: '2px',
+          }}
+        >
           Optional. Must be greater than or equal to funding goal.
         </p>
       </div>
@@ -191,7 +222,10 @@ export function FundingSection({ campaign, onChange }: FundingSectionProps): Rea
       {/* Deadline */}
       <div>
         <label htmlFor="campaign-deadline" style={labelStyle}>
-          Funding Deadline <span aria-hidden="true" style={{ color: 'var(--color-status-error)' }}>*</span>
+          Funding Deadline{' '}
+          <span aria-hidden="true" style={{ color: 'var(--color-status-error)' }}>
+            *
+          </span>
         </label>
         <input
           id="campaign-deadline"
@@ -204,7 +238,14 @@ export function FundingSection({ campaign, onChange }: FundingSectionProps): Rea
           style={inputStyle}
           aria-required="true"
         />
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '4px' }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '11px',
+            color: 'var(--color-text-tertiary)',
+            marginTop: '4px',
+          }}
+        >
           Must be at least 7 days from submission, within 1 year.
         </p>
       </div>

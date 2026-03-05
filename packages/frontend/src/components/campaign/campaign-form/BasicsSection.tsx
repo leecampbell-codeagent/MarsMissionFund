@@ -1,8 +1,8 @@
-import { type ReactElement, type ChangeEvent } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
 import {
+  CAMPAIGN_CATEGORY_LABELS,
   type Campaign,
   type CampaignCategory,
-  CAMPAIGN_CATEGORY_LABELS,
 } from '../../../types/campaign';
 
 interface BasicsSectionProps {
@@ -63,7 +63,10 @@ export function BasicsSection({ campaign, onChange }: BasicsSectionProps): React
       {/* Title */}
       <div>
         <label htmlFor="campaign-title" style={labelStyle}>
-          Campaign Title <span aria-hidden="true" style={{ color: 'var(--color-status-error)' }}>*</span>
+          Campaign Title{' '}
+          <span aria-hidden="true" style={{ color: 'var(--color-status-error)' }}>
+            *
+          </span>
         </label>
         <input
           id="campaign-title"
@@ -76,7 +79,14 @@ export function BasicsSection({ campaign, onChange }: BasicsSectionProps): React
           style={inputStyle}
           aria-required="true"
         />
-        <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: 'var(--color-text-tertiary)', marginTop: '4px' }}>
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '11px',
+            color: 'var(--color-text-tertiary)',
+            marginTop: '4px',
+          }}
+        >
           {campaign.title.length}/200 characters
         </p>
       </div>

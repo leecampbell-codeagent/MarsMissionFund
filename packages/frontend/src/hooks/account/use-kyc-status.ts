@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
+import type { ApiError } from '../../api/client';
 import { getKycStatus, type KycStatusResponse } from '../../api/kyc-api';
-import { type ApiError } from '../../api/client';
 
 export const KYC_STATUS_QUERY_KEY = ['kyc', 'status'] as const;
 

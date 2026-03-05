@@ -1,16 +1,16 @@
-import { Campaign, type UpdateCampaignInput } from '../domain/models/campaign.js';
-import type { CampaignCategory } from '../domain/value-objects/campaign-category.js';
-import type { CampaignStatus } from '../domain/value-objects/campaign-status.js';
-import {
-  CampaignAlreadyClaimedError,
-  CampaignNotFoundError,
-} from '../domain/errors/campaign-errors.js';
 import type {
   CategoryStats,
   PublicCampaignDetail,
   PublicSearchOptions,
   PublicSearchResult,
 } from '../application/campaign-app-service.js';
+import {
+  CampaignAlreadyClaimedError,
+  CampaignNotFoundError,
+} from '../domain/errors/campaign-errors.js';
+import { Campaign, type UpdateCampaignInput } from '../domain/models/campaign.js';
+import type { CampaignCategory } from '../domain/value-objects/campaign-category.js';
+import type { CampaignStatus } from '../domain/value-objects/campaign-status.js';
 import type {
   CampaignRepository,
   CampaignStatusUpdate,
@@ -48,9 +48,7 @@ export class InMemoryCampaignRepository implements CampaignRepository {
   }
 
   async findSubmittedOrderedBySubmittedAt(options?: ListCampaignOptions): Promise<Campaign[]> {
-    const submitted = Array.from(this.campaigns.values()).filter(
-      (c) => c.status === 'submitted',
-    );
+    const submitted = Array.from(this.campaigns.values()).filter((c) => c.status === 'submitted');
     // Sort by submittedAt ASC (FIFO)
     submitted.sort((a, b) => {
       const aTime = a.submittedAt?.getTime() ?? 0;
@@ -97,27 +95,20 @@ export class InMemoryCampaignRepository implements CampaignRepository {
       alignmentStatement: existing.alignmentStatement,
       tags: existing.tags,
       status: toStatus,
-      rejectionReason: updates?.rejectionReason !== undefined
-        ? updates.rejectionReason
-        : existing.rejectionReason,
-      resubmissionGuidance: updates?.resubmissionGuidance !== undefined
-        ? updates.resubmissionGuidance
-        : existing.resubmissionGuidance,
-      reviewNotes: updates?.reviewNotes !== undefined
-        ? updates.reviewNotes
-        : existing.reviewNotes,
-      reviewedByUserId: updates?.reviewedByUserId !== undefined
-        ? updates.reviewedByUserId
-        : existing.reviewedByUserId,
-      reviewedAt: updates?.reviewedAt !== undefined
-        ? updates.reviewedAt
-        : existing.reviewedAt,
-      submittedAt: updates?.submittedAt !== undefined
-        ? updates.submittedAt
-        : existing.submittedAt,
-      launchedAt: updates?.launchedAt !== undefined
-        ? updates.launchedAt
-        : existing.launchedAt,
+      rejectionReason:
+        updates?.rejectionReason !== undefined ? updates.rejectionReason : existing.rejectionReason,
+      resubmissionGuidance:
+        updates?.resubmissionGuidance !== undefined
+          ? updates.resubmissionGuidance
+          : existing.resubmissionGuidance,
+      reviewNotes: updates?.reviewNotes !== undefined ? updates.reviewNotes : existing.reviewNotes,
+      reviewedByUserId:
+        updates?.reviewedByUserId !== undefined
+          ? updates.reviewedByUserId
+          : existing.reviewedByUserId,
+      reviewedAt: updates?.reviewedAt !== undefined ? updates.reviewedAt : existing.reviewedAt,
+      submittedAt: updates?.submittedAt !== undefined ? updates.submittedAt : existing.submittedAt,
+      launchedAt: updates?.launchedAt !== undefined ? updates.launchedAt : existing.launchedAt,
       createdAt: existing.createdAt,
       updatedAt: new Date(),
     });
@@ -212,7 +203,7 @@ export class InMemoryCampaignRepository implements CampaignRepository {
     // Apply categories filter
     if (options.categories && options.categories.length > 0) {
       results = results.filter(
-        (c) => c.category !== null && options.categories!.includes(c.category),
+        (c) => c.category !== null && options.categories?.includes(c.category),
       );
     }
 
@@ -228,8 +219,8 @@ export class InMemoryCampaignRepository implements CampaignRepository {
       // Exclude campaigns with null deadline
       results = results.filter((c) => c.deadline !== null);
       results.sort((a, b) => {
-        const aTime = a.deadline!.getTime();
-        const bTime = b.deadline!.getTime();
+        const aTime = a.deadline?.getTime() ?? 0;
+        const bTime = b.deadline?.getTime() ?? 0;
         return aTime - bTime;
       });
     } else if (sort === 'most_funded') {
@@ -300,9 +291,7 @@ export class InMemoryCampaignRepository implements CampaignRepository {
   async getCategoryStats(category: CampaignCategory): Promise<CategoryStats> {
     const campaigns = Array.from(this.campaigns.values());
     const inCategory = campaigns.filter((c) => c.category === category);
-    const campaignCount = inCategory.filter((c) =>
-      ['live', 'funded'].includes(c.status),
-    ).length;
+    const campaignCount = inCategory.filter((c) => ['live', 'funded'].includes(c.status)).length;
     const activeCampaignCount = inCategory.filter((c) => c.status === 'live').length;
 
     return {

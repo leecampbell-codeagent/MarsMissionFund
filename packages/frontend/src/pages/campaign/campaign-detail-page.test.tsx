@@ -1,10 +1,10 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import CampaignDetailPage from './campaign-detail-page';
-import { type Campaign } from '../../types/campaign';
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../api/client';
+import type { Campaign } from '../../types/campaign';
+import CampaignDetailPage from './campaign-detail-page';
 
 // Mock hooks
 vi.mock('../../hooks/campaign/use-campaign', () => ({
@@ -17,9 +17,9 @@ vi.mock('../../hooks/account/use-current-user', () => ({
   useCurrentUser: vi.fn(),
 }));
 
+import { useCurrentUser } from '../../hooks/account/use-current-user';
 import { useCampaign } from '../../hooks/campaign/use-campaign';
 import { useCampaignActions } from '../../hooks/campaign/use-campaign-actions';
-import { useCurrentUser } from '../../hooks/account/use-current-user';
 
 const mockCampaign: Campaign = {
   id: '550e8400-e29b-41d4-a716-446655440001',
@@ -33,11 +33,37 @@ const mockCampaign: Campaign = {
   fundingCapCents: '200000000',
   deadline: '2027-01-15T00:00:00.000Z',
   milestones: [
-    { id: '550e8400-e29b-41d4-a716-446655440011', title: 'Design Phase', description: 'Complete engineering design', fundingBasisPoints: 3000, targetDate: null },
-    { id: '550e8400-e29b-41d4-a716-446655440012', title: 'Prototype', description: 'Build working prototype', fundingBasisPoints: 7000, targetDate: null },
+    {
+      id: '550e8400-e29b-41d4-a716-446655440011',
+      title: 'Design Phase',
+      description: 'Complete engineering design',
+      fundingBasisPoints: 3000,
+      targetDate: null,
+    },
+    {
+      id: '550e8400-e29b-41d4-a716-446655440012',
+      title: 'Prototype',
+      description: 'Build working prototype',
+      fundingBasisPoints: 7000,
+      targetDate: null,
+    },
   ],
-  teamMembers: [{ id: '550e8400-e29b-41d4-a716-446655440003', name: 'Alice', role: 'Chief Engineer', bio: null, linkedInUrl: null }],
-  riskDisclosures: [{ id: '550e8400-e29b-41d4-a716-446655440099', risk: 'Tech Risk', mitigation: 'Mitigation plan in place' }],
+  teamMembers: [
+    {
+      id: '550e8400-e29b-41d4-a716-446655440003',
+      name: 'Alice',
+      role: 'Chief Engineer',
+      bio: null,
+      linkedInUrl: null,
+    },
+  ],
+  riskDisclosures: [
+    {
+      id: '550e8400-e29b-41d4-a716-446655440099',
+      risk: 'Tech Risk',
+      mitigation: 'Mitigation plan in place',
+    },
+  ],
   budgetBreakdown: [],
   alignmentStatement: 'Advances Mars propulsion capability.',
   tags: [],
@@ -111,7 +137,12 @@ describe('CampaignDetailPage', () => {
   });
 
   it('shows loading state', () => {
-    vi.mocked(useCampaign).mockReturnValue({ campaign: null, isLoading: true, isError: false, error: null });
+    vi.mocked(useCampaign).mockReturnValue({
+      campaign: null,
+      isLoading: true,
+      isError: false,
+      error: null,
+    });
     renderDetailPage();
     expect(screen.getByRole('status', { name: 'Loading campaign' })).toBeInTheDocument();
   });
@@ -131,9 +162,16 @@ describe('CampaignDetailPage', () => {
   });
 
   it('renders campaign title and status badge', () => {
-    vi.mocked(useCampaign).mockReturnValue({ campaign: mockCampaign, isLoading: false, isError: false, error: null });
+    vi.mocked(useCampaign).mockReturnValue({
+      campaign: mockCampaign,
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
     renderDetailPage();
-    expect(screen.getByRole('heading', { name: 'Ion Drive Propulsion System', level: 1 })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Ion Drive Propulsion System', level: 1 }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('status', { name: 'Campaign status: Draft' })).toBeInTheDocument();
   });
 
@@ -145,7 +183,12 @@ describe('CampaignDetailPage', () => {
       resubmissionGuidance: 'Add detailed engineering specs.',
       reviewedAt: '2026-02-01T10:00:00Z',
     };
-    vi.mocked(useCampaign).mockReturnValue({ campaign: rejectedCampaign, isLoading: false, isError: false, error: null });
+    vi.mocked(useCampaign).mockReturnValue({
+      campaign: rejectedCampaign,
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
     renderDetailPage();
     expect(screen.getByRole('region', { name: 'Rejection feedback' })).toBeInTheDocument();
     expect(screen.getByText('Technical specs are insufficient.')).toBeInTheDocument();
@@ -159,7 +202,12 @@ describe('CampaignDetailPage', () => {
       resubmissionGuidance: 'Improve it.',
       reviewedAt: '2026-02-01T10:00:00Z',
     };
-    vi.mocked(useCampaign).mockReturnValue({ campaign: rejectedCampaign, isLoading: false, isError: false, error: null });
+    vi.mocked(useCampaign).mockReturnValue({
+      campaign: rejectedCampaign,
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
     // Different user (not creator)
     vi.mocked(useCurrentUser).mockReturnValue({
       user: {
@@ -174,7 +222,14 @@ describe('CampaignDetailPage', () => {
         kycStatus: 'verified',
         onboardingCompleted: true,
         onboardingStep: null,
-        notificationPrefs: { campaignUpdates: true, milestoneCompletions: true, contributionConfirmations: true, recommendations: false, securityAlerts: true, platformAnnouncements: false },
+        notificationPrefs: {
+          campaignUpdates: true,
+          milestoneCompletions: true,
+          contributionConfirmations: true,
+          recommendations: false,
+          securityAlerts: true,
+          platformAnnouncements: false,
+        },
         lastSeenAt: null,
         createdAt: '2026-01-01T00:00:00Z',
         updatedAt: '2026-01-01T00:00:00Z',

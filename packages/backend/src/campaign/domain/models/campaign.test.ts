@@ -36,8 +36,20 @@ function makeSubmittedCampaignData(): CampaignData {
     fundingCapCents: '200000000',
     deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     milestones: [
-      { id: 'ms-1', title: 'Phase 1', description: 'First', fundingBasisPoints: 5000, targetDate: '2026-06-01' },
-      { id: 'ms-2', title: 'Phase 2', description: 'Second', fundingBasisPoints: 5000, targetDate: '2026-12-01' },
+      {
+        id: 'ms-1',
+        title: 'Phase 1',
+        description: 'First',
+        fundingBasisPoints: 5000,
+        targetDate: '2026-06-01',
+      },
+      {
+        id: 'ms-2',
+        title: 'Phase 2',
+        description: 'Second',
+        fundingBasisPoints: 5000,
+        targetDate: '2026-12-01',
+      },
     ],
     teamMembers: [{ id: 'tm-1', name: 'Dr. Ada', role: 'Lead', bio: 'Expert' }],
     riskDisclosures: [{ id: 'rd-1', risk: 'Radiation', mitigation: 'Shielding' }],
@@ -62,9 +74,7 @@ describe('Campaign.create()', () => {
     const campaign = makeDraft();
 
     expect(campaign.id).toBeDefined();
-    expect(campaign.id).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
-    );
+    expect(campaign.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
     expect(campaign.creatorUserId).toBe(VALID_CREATOR_ID);
     expect(campaign.title).toBe(VALID_TITLE);
     expect(campaign.status).toBe('draft');

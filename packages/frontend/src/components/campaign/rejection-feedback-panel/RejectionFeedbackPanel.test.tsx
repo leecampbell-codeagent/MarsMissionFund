@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { RejectionFeedbackPanel } from './RejectionFeedbackPanel';
 
 describe('RejectionFeedbackPanel', () => {
@@ -16,7 +16,9 @@ describe('RejectionFeedbackPanel', () => {
 
   it('renders resubmission guidance', () => {
     render(<RejectionFeedbackPanel {...defaultProps} />);
-    expect(screen.getByText('Please add detailed engineering diagrams and material specifications.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Please add detailed engineering diagrams and material specifications.'),
+    ).toBeInTheDocument();
   });
 
   it('renders reviewed date when provided', () => {

@@ -42,31 +42,3 @@ export function getClerkAuth(req: Request): { userId: string } | null {
   if (!auth.userId) return null;
   return { userId: auth.userId };
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

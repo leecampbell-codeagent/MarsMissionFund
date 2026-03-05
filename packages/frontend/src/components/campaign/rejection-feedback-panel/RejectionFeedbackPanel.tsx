@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface RejectionFeedbackPanelProps {
   readonly rejectionReason: string;
@@ -129,7 +129,8 @@ export function RejectionFeedbackPanel({
           borderRadius: 'var(--radius-input)',
         }}
       >
-        Address the feedback above, then click <strong>Edit Campaign</strong> to revise your proposal and resubmit.
+        Address the feedback above, then click <strong>Edit Campaign</strong> to revise your
+        proposal and resubmit.
       </p>
     </div>
   );

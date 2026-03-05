@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { Button } from '../../ui/Button';
 
 interface OnboardingWelcomeStepProps {
@@ -55,41 +55,9 @@ export function OnboardingWelcomeStep({ onNext }: OnboardingWelcomeStepProps): R
         Welcome to Mars Mission Fund. Back the missions that matter, support the engineering that
         gets us there, and be part of the most ambitious journey humanity has ever taken.
       </p>
-      <Button
-        variant="primary"
-        onClick={onNext}
-        type="button"
-      >
+      <Button variant="primary" onClick={onNext} type="button">
         Get Started
       </Button>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

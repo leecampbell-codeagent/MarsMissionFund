@@ -85,7 +85,10 @@ export class KycAppService {
         triggerReason: 'user_submission',
       });
     } catch (auditErr) {
-      this.logger.error({ err: auditErr, clerkUserId }, 'Failed to write KYC audit event for pending transition');
+      this.logger.error(
+        { err: auditErr, clerkUserId },
+        'Failed to write KYC audit event for pending transition',
+      );
     }
 
     // Step 6: Call KYC provider
@@ -95,7 +98,11 @@ export class KycAppService {
     if (result.outcome === 'approved') {
       // Step 7a-i: Transition to verified — DB update first (G-019)
       try {
-        await this.userRepository.updateKycStatus(clerkUserId, KycStatus.Pending, KycStatus.Verified);
+        await this.userRepository.updateKycStatus(
+          clerkUserId,
+          KycStatus.Pending,
+          KycStatus.Verified,
+        );
       } catch (conflictErr) {
         if (conflictErr instanceof KycTransitionConflictError) {
           this.logger.warn(
@@ -119,7 +126,10 @@ export class KycAppService {
           metadata: { sessionId: result.sessionId },
         });
       } catch (auditErr) {
-        this.logger.error({ err: auditErr, clerkUserId }, 'Failed to write KYC audit event for verified transition');
+        this.logger.error(
+          { err: auditErr, clerkUserId },
+          'Failed to write KYC audit event for verified transition',
+        );
       }
     } else if (result.outcome === 'declined') {
       // Transition to rejected
@@ -136,7 +146,10 @@ export class KycAppService {
           triggerReason: 'stub_declined',
         });
       } catch (auditErr) {
-        this.logger.error({ err: auditErr, clerkUserId }, 'Failed to write KYC audit event for rejected transition');
+        this.logger.error(
+          { err: auditErr, clerkUserId },
+          'Failed to write KYC audit event for rejected transition',
+        );
       }
     }
     // If outcome === 'pending' (future real provider): do not update beyond pending, fall through

@@ -1,5 +1,5 @@
-import { type ReactElement } from 'react';
-import { type Milestone, formatBasisPoints } from '../../../types/campaign';
+import type { ReactElement } from 'react';
+import { formatBasisPoints, type Milestone } from '../../../types/campaign';
 
 interface MilestoneListProps {
   readonly milestones: Milestone[];

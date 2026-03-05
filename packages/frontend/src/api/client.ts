@@ -62,7 +62,7 @@ async function makeRequest<T>(options: RequestOptions, isRetry: boolean): Promis
     try {
       const token = await tokenGetter();
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers.Authorization = `Bearer ${token}`;
       }
     } catch {
       // Token retrieval failed — proceed without auth (server will return 401)
@@ -106,31 +106,3 @@ async function makeRequest<T>(options: RequestOptions, isRetry: boolean): Promis
 
   return response.json() as Promise<T>;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

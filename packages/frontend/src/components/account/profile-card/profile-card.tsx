@@ -1,5 +1,5 @@
 import { type ReactElement, useState } from 'react';
-import { type UserProfile } from '../../../api/account-api';
+import type { UserProfile } from '../../../api/account-api';
 
 interface ProfileCardProps {
   readonly user: UserProfile | null;
@@ -22,7 +22,10 @@ function getInitials(displayName: string | null, email: string): string {
 type RoleBadgeVariant = 'backer' | 'creator' | 'reviewer' | 'administrator' | 'super_administrator';
 
 function RoleBadge({ role }: { readonly role: RoleBadgeVariant }): ReactElement {
-  const badgeConfig: Record<RoleBadgeVariant, { bg: string; color: string; border: string; dot: string; label: string }> = {
+  const badgeConfig: Record<
+    RoleBadgeVariant,
+    { bg: string; color: string; border: string; dot: string; label: string }
+  > = {
     backer: {
       bg: 'var(--color-status-new-bg)',
       color: 'var(--color-text-secondary)',
@@ -119,8 +122,15 @@ function KycBadge({ status }: { readonly status: UserProfile['kycStatus'] }): Re
   return null;
 }
 
-function AccountStatusBadge({ status }: { readonly status: UserProfile['accountStatus'] }): ReactElement {
-  const config: Record<UserProfile['accountStatus'], { bg: string; color: string; border: string; label: string }> = {
+function AccountStatusBadge({
+  status,
+}: {
+  readonly status: UserProfile['accountStatus'];
+}): ReactElement {
+  const config: Record<
+    UserProfile['accountStatus'],
+    { bg: string; color: string; border: string; label: string }
+  > = {
     active: {
       bg: 'var(--color-status-success-bg)',
       color: 'var(--color-status-success)',
@@ -197,7 +207,11 @@ function SkeletonBlock({
  * ProfileCard — displays user profile data.
  * Handles loading skeleton, error state, and populated state.
  */
-export function ProfileCard({ user, isLoading = false, isError = false }: ProfileCardProps): ReactElement {
+export function ProfileCard({
+  user,
+  isLoading = false,
+  isError = false,
+}: ProfileCardProps): ReactElement {
   const [imgError, setImgError] = useState(false);
 
   const cardStyle: React.CSSProperties = {
@@ -266,11 +280,7 @@ export function ProfileCard({ user, isLoading = false, isError = false }: Profil
 
   if (isLoading || !user) {
     return (
-      <div
-        style={cardStyle}
-        aria-busy="true"
-        aria-label="Loading profile"
-      >
+      <div style={cardStyle} aria-busy="true" aria-label="Loading profile">
         <div style={topAccentStyle} />
         <style>{`
           @keyframes skeletonPulse {
@@ -417,31 +427,3 @@ export function ProfileCard({ user, isLoading = false, isError = false }: Profil
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

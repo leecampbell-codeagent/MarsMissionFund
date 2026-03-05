@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { UserProfile } from '../../api/account-api';
 import { assignCreatorRole } from '../../api/campaign-api';
-import { type UserProfile } from '../../api/account-api';
-import { type ApiError } from '../../api/client';
+import type { ApiError } from '../../api/client';
 import { CURRENT_USER_QUERY_KEY } from './use-current-user';
 
 export interface UseAssignCreatorRoleResult {

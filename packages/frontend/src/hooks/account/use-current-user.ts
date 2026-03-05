@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCurrentUser, type UserProfile } from '../../api/account-api';
-import { type ApiError } from '../../api/client';
+import type { ApiError } from '../../api/client';
 
 export const CURRENT_USER_QUERY_KEY = ['me'] as const;
 
@@ -33,31 +33,3 @@ export function useCurrentUser(): UseCurrentUserResult {
     error: isError ? (error as ApiError) : null,
   };
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,4 +1,4 @@
-import { type ReactElement, useState, useCallback, useRef } from 'react';
+import { type ReactElement, useCallback, useRef, useState } from 'react';
 import { Button } from '../../ui/Button';
 
 interface OnboardingRoleStepProps {
@@ -47,12 +47,7 @@ function BothIcon(): ReactElement {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M8 12H16M12 8V16"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <path d="M8 12H16M12 8V16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -86,39 +81,36 @@ export function OnboardingRoleStep({ onNext, onBack }: OnboardingRoleStepProps):
   const [selected, setSelected] = useState<RoleSelection>(null);
   const groupRef = useRef<HTMLDivElement>(null);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent, cardId: RoleSelection & string) => {
-      if (e.key === ' ' || e.key === 'Enter') {
-        e.preventDefault();
-        setSelected(cardId);
-      } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-        e.preventDefault();
-        const currentIndex = ROLE_CARDS.findIndex((c) => c.id === cardId);
-        const nextIndex = (currentIndex + 1) % ROLE_CARDS.length;
-        const nextCard = ROLE_CARDS[nextIndex];
-        if (nextCard) {
-          setSelected(nextCard.id);
-          const nextEl = groupRef.current?.querySelector(
-            `[data-card-id="${nextCard.id}"]`,
-          ) as HTMLElement | null;
-          nextEl?.focus();
-        }
-      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-        e.preventDefault();
-        const currentIndex = ROLE_CARDS.findIndex((c) => c.id === cardId);
-        const prevIndex = (currentIndex - 1 + ROLE_CARDS.length) % ROLE_CARDS.length;
-        const prevCard = ROLE_CARDS[prevIndex];
-        if (prevCard) {
-          setSelected(prevCard.id);
-          const prevEl = groupRef.current?.querySelector(
-            `[data-card-id="${prevCard.id}"]`,
-          ) as HTMLElement | null;
-          prevEl?.focus();
-        }
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, cardId: RoleSelection & string) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      setSelected(cardId);
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      const currentIndex = ROLE_CARDS.findIndex((c) => c.id === cardId);
+      const nextIndex = (currentIndex + 1) % ROLE_CARDS.length;
+      const nextCard = ROLE_CARDS[nextIndex];
+      if (nextCard) {
+        setSelected(nextCard.id);
+        const nextEl = groupRef.current?.querySelector(
+          `[data-card-id="${nextCard.id}"]`,
+        ) as HTMLElement | null;
+        nextEl?.focus();
       }
-    },
-    [],
-  );
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const currentIndex = ROLE_CARDS.findIndex((c) => c.id === cardId);
+      const prevIndex = (currentIndex - 1 + ROLE_CARDS.length) % ROLE_CARDS.length;
+      const prevCard = ROLE_CARDS[prevIndex];
+      if (prevCard) {
+        setSelected(prevCard.id);
+        const prevEl = groupRef.current?.querySelector(
+          `[data-card-id="${prevCard.id}"]`,
+        ) as HTMLElement | null;
+        prevEl?.focus();
+      }
+    }
+  }, []);
 
   return (
     <div>
@@ -182,9 +174,7 @@ export function OnboardingRoleStep({ onNext, onBack }: OnboardingRoleStepProps):
               onClick={() => setSelected(card.id)}
               onKeyDown={(e) => handleKeyDown(e, card.id)}
               style={{
-                background: isSelected
-                  ? 'var(--color-bg-elevated)'
-                  : 'var(--color-bg-surface)',
+                background: isSelected ? 'var(--color-bg-elevated)' : 'var(--color-bg-surface)',
                 border: isSelected
                   ? '2px solid var(--color-action-primary)'
                   : '1px solid var(--color-border-subtle)',
@@ -192,7 +182,8 @@ export function OnboardingRoleStep({ onNext, onBack }: OnboardingRoleStepProps):
                 padding: '24px',
                 cursor: 'pointer',
                 boxShadow: isSelected ? '0 0 0 3px rgba(255,92,26,0.15)' : 'none',
-                transition: 'background-color var(--motion-hover), border-color var(--motion-hover)',
+                transition:
+                  'background-color var(--motion-hover), border-color var(--motion-hover)',
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '16px',
@@ -249,43 +240,10 @@ export function OnboardingRoleStep({ onNext, onBack }: OnboardingRoleStepProps):
         <Button variant="ghost" onClick={onBack} type="button">
           Back
         </Button>
-        <Button
-          variant="primary"
-          onClick={onNext}
-          disabled={selected === null}
-          type="button"
-        >
+        <Button variant="primary" onClick={onNext} disabled={selected === null} type="button">
           Continue →
         </Button>
       </div>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

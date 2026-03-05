@@ -1,14 +1,14 @@
-import { type ReactElement, useState, type ChangeEvent } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useCampaign } from '../../hooks/campaign/use-campaign';
-import { useCampaignActions } from '../../hooks/campaign/use-campaign-actions';
-import { useCurrentUser } from '../../hooks/account/use-current-user';
+import { type ChangeEvent, type ReactElement, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { CampaignStatusBadge } from '../../components/campaign/campaign-status-badge/CampaignStatusBadge';
 import { MilestoneList } from '../../components/campaign/milestone-list/MilestoneList';
-import { ReviewActionPanel } from '../../components/campaign/review-action-panel/ReviewActionPanel';
 import { RejectionFeedbackPanel } from '../../components/campaign/rejection-feedback-panel/RejectionFeedbackPanel';
-import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
+import { ReviewActionPanel } from '../../components/campaign/review-action-panel/ReviewActionPanel';
 import { Button } from '../../components/ui/Button';
+import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
+import { useCurrentUser } from '../../hooks/account/use-current-user';
+import { useCampaign } from '../../hooks/campaign/use-campaign';
+import { useCampaignActions } from '../../hooks/campaign/use-campaign-actions';
 import { CAMPAIGN_CATEGORY_LABELS, formatCents } from '../../types/campaign';
 
 /**
@@ -33,7 +33,15 @@ export default function CampaignDetailPage(): ReactElement {
   // Loading
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'var(--color-bg-page)' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          background: 'var(--color-bg-page)',
+        }}
+      >
         <LoadingSpinner size="lg" label="Loading campaign" />
       </div>
     );
@@ -64,7 +72,14 @@ export default function CampaignDetailPage(): ReactElement {
           >
             Campaign Not Found
           </h1>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 24px' }}>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              color: 'var(--color-text-secondary)',
+              margin: '0 0 24px',
+            }}
+          >
             This campaign doesn&apos;t exist or you don&apos;t have access to view it.
           </p>
           <Button variant="secondary" onClick={() => navigate('/me/campaigns')}>
@@ -82,15 +97,13 @@ export default function CampaignDetailPage(): ReactElement {
       new Date(isoString),
     );
 
-  const canCreatorArchive =
-    campaign.status === 'draft' || campaign.status === 'rejected';
+  const canCreatorArchive = campaign.status === 'draft' || campaign.status === 'rejected';
   const canCreatorEdit = campaign.status === 'draft' || campaign.status === 'rejected';
   const canCreatorLaunch = campaign.status === 'approved';
 
   return (
     <div style={{ background: 'var(--color-bg-page)', minHeight: '100vh', padding: '0 24px 48px' }}>
       <div style={{ maxWidth: '960px', margin: '0 auto' }}>
-
         {/* Hero band */}
         <div
           style={{
@@ -115,7 +128,15 @@ export default function CampaignDetailPage(): ReactElement {
 
         {/* Campaign header */}
         <div style={{ marginBottom: '40px' }}>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              alignItems: 'center',
+              marginBottom: '12px',
+              flexWrap: 'wrap',
+            }}
+          >
             <CampaignStatusBadge status={campaign.status} />
             {categoryLabel && (
               <span
@@ -178,11 +199,21 @@ export default function CampaignDetailPage(): ReactElement {
         {/* Two-column layout */}
         <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
           {/* Left column */}
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          <div
+            style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '32px' }}
+          >
             {/* Description */}
             {campaign.description && (
               <section aria-label="Campaign description">
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', textTransform: 'uppercase', color: 'var(--color-text-primary)', margin: '0 0 16px' }}>
+                <h2
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '24px',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-primary)',
+                    margin: '0 0 16px',
+                  }}
+                >
                   About This Mission
                 </h2>
                 {/* Rendered as plain text with white-space: pre-wrap (G-028, EC-040) */}
@@ -204,7 +235,15 @@ export default function CampaignDetailPage(): ReactElement {
             {/* Team members */}
             {campaign.teamMembers.length > 0 && (
               <section aria-label="Team members">
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', textTransform: 'uppercase', color: 'var(--color-text-primary)', margin: '0 0 16px' }}>
+                <h2
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '24px',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-primary)',
+                    margin: '0 0 16px',
+                  }}
+                >
                   Team
                 </h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -218,14 +257,37 @@ export default function CampaignDetailPage(): ReactElement {
                         padding: '16px',
                       }}
                     >
-                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '4px' }}>
+                      <div
+                        style={{
+                          fontFamily: 'var(--font-body)',
+                          fontSize: '14px',
+                          fontWeight: 700,
+                          color: 'var(--color-text-primary)',
+                          marginBottom: '4px',
+                        }}
+                      >
                         {member.name}
                       </div>
-                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-accent)', marginBottom: '8px' }}>
+                      <div
+                        style={{
+                          fontFamily: 'var(--font-body)',
+                          fontSize: '13px',
+                          color: 'var(--color-text-accent)',
+                          marginBottom: '8px',
+                        }}
+                      >
                         {member.role}
                       </div>
                       {member.bio && (
-                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                        <p
+                          style={{
+                            fontFamily: 'var(--font-body)',
+                            fontSize: '13px',
+                            color: 'var(--color-text-secondary)',
+                            margin: 0,
+                            lineHeight: 1.5,
+                          }}
+                        >
                           {member.bio}
                         </p>
                       )}
@@ -238,21 +300,66 @@ export default function CampaignDetailPage(): ReactElement {
             {/* Risk disclosures */}
             {campaign.riskDisclosures.length > 0 && (
               <section aria-label="Risk disclosures">
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', textTransform: 'uppercase', color: 'var(--color-text-primary)', margin: '0 0 16px' }}>
+                <h2
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '24px',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-primary)',
+                    margin: '0 0 16px',
+                  }}
+                >
                   Risks
                 </h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {campaign.riskDisclosures.map((risk, i) => (
-                    <div key={i} style={{ background: 'var(--color-bg-elevated)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-card)', padding: '16px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+                    <div
+                      key={i}
+                      style={{
+                        background: 'var(--color-bg-elevated)',
+                        border: '1px solid var(--color-border-subtle)',
+                        borderRadius: 'var(--radius-card)',
+                        padding: '16px',
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          marginBottom: '6px',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontFamily: 'var(--font-body)',
+                            fontSize: '14px',
+                            fontWeight: 700,
+                            color: 'var(--color-text-primary)',
+                          }}
+                        >
                           Risk
                         </span>
                       </div>
-                      <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                      <p
+                        style={{
+                          fontFamily: 'var(--font-body)',
+                          fontSize: '13px',
+                          color: 'var(--color-text-secondary)',
+                          margin: 0,
+                          lineHeight: 1.5,
+                        }}
+                      >
                         {risk.risk}
                       </p>
-                      <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-tertiary)', margin: '4px 0 0', lineHeight: 1.5 }}>
+                      <p
+                        style={{
+                          fontFamily: 'var(--font-body)',
+                          fontSize: '12px',
+                          color: 'var(--color-text-tertiary)',
+                          margin: '4px 0 0',
+                          lineHeight: 1.5,
+                        }}
+                      >
                         <strong>Mitigation:</strong> {risk.mitigation}
                       </p>
                     </div>
@@ -264,17 +371,60 @@ export default function CampaignDetailPage(): ReactElement {
             {/* Budget */}
             {campaign.budgetBreakdown.length > 0 && (
               <section aria-label="Budget breakdown">
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', textTransform: 'uppercase', color: 'var(--color-text-primary)', margin: '0 0 16px' }}>
+                <h2
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '24px',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-primary)',
+                    margin: '0 0 16px',
+                  }}
+                >
                   Budget Breakdown
                 </h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {campaign.budgetBreakdown.map((item, i) => (
-                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: 'var(--color-bg-elevated)', borderRadius: 'var(--radius-input)', border: '1px solid var(--color-border-subtle)' }}>
+                    <div
+                      key={i}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        padding: '10px 14px',
+                        background: 'var(--color-bg-elevated)',
+                        borderRadius: 'var(--radius-input)',
+                        border: '1px solid var(--color-border-subtle)',
+                      }}
+                    >
                       <div>
-                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '13px', fontWeight: 600, color: 'var(--color-text-primary)' }}>{item.category}</span>
-                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', marginLeft: '8px' }}>{item.description}</span>
+                        <span
+                          style={{
+                            fontFamily: 'var(--font-body)',
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            color: 'var(--color-text-primary)',
+                          }}
+                        >
+                          {item.category}
+                        </span>
+                        <span
+                          style={{
+                            fontFamily: 'var(--font-body)',
+                            fontSize: '12px',
+                            color: 'var(--color-text-secondary)',
+                            marginLeft: '8px',
+                          }}
+                        >
+                          {item.description}
+                        </span>
                       </div>
-                      <span style={{ fontFamily: 'var(--font-data)', fontSize: '13px', color: 'var(--color-text-primary)', fontWeight: 600 }}>
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-data)',
+                          fontSize: '13px',
+                          color: 'var(--color-text-primary)',
+                          fontWeight: 600,
+                        }}
+                      >
                         {formatCents(item.estimatedCents)}
                       </span>
                     </div>
@@ -286,10 +436,26 @@ export default function CampaignDetailPage(): ReactElement {
             {/* Alignment statement */}
             {campaign.alignmentStatement && (
               <section aria-label="Mars mission alignment">
-                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', textTransform: 'uppercase', color: 'var(--color-text-primary)', margin: '0 0 12px' }}>
+                <h2
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '24px',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-primary)',
+                    margin: '0 0 12px',
+                  }}
+                >
                   Mars Mission Alignment
                 </h2>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.6 }}>
+                <p
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: '14px',
+                    color: 'var(--color-text-secondary)',
+                    margin: 0,
+                    lineHeight: 1.6,
+                  }}
+                >
                   {campaign.alignmentStatement}
                 </p>
               </section>
@@ -322,30 +488,79 @@ export default function CampaignDetailPage(): ReactElement {
             >
               {campaign.fundingGoalCents && (
                 <div>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-text-tertiary)', margin: '0 0 4px' }}>
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: '11px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      color: 'var(--color-text-tertiary)',
+                      margin: '0 0 4px',
+                    }}
+                  >
                     Funding Goal
                   </p>
-                  <p style={{ fontFamily: 'var(--font-data)', fontSize: '20px', fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-data)',
+                      fontSize: '20px',
+                      fontWeight: 700,
+                      color: 'var(--color-text-primary)',
+                      margin: 0,
+                    }}
+                  >
                     {formatCents(campaign.fundingGoalCents)}
                   </p>
                 </div>
               )}
               {campaign.fundingCapCents && (
                 <div>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-text-tertiary)', margin: '0 0 4px' }}>
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: '11px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      color: 'var(--color-text-tertiary)',
+                      margin: '0 0 4px',
+                    }}
+                  >
                     Funding Cap
                   </p>
-                  <p style={{ fontFamily: 'var(--font-data)', fontSize: '16px', color: 'var(--color-text-primary)', margin: 0 }}>
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-data)',
+                      fontSize: '16px',
+                      color: 'var(--color-text-primary)',
+                      margin: 0,
+                    }}
+                  >
                     {formatCents(campaign.fundingCapCents)}
                   </p>
                 </div>
               )}
               {campaign.deadline && (
                 <div>
-                  <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-text-tertiary)', margin: '0 0 4px' }}>
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: '11px',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      color: 'var(--color-text-tertiary)',
+                      margin: '0 0 4px',
+                    }}
+                  >
                     Deadline
                   </p>
-                  <p style={{ fontFamily: 'var(--font-data)', fontSize: '14px', color: 'var(--color-text-primary)', margin: 0 }}>
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-data)',
+                      fontSize: '14px',
+                      color: 'var(--color-text-primary)',
+                      margin: 0,
+                    }}
+                  >
                     {formatDate(campaign.deadline)}
                   </p>
                 </div>
@@ -355,7 +570,15 @@ export default function CampaignDetailPage(): ReactElement {
             {/* Milestones */}
             {campaign.milestones.length > 0 && (
               <div>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', textTransform: 'uppercase', color: 'var(--color-text-primary)', margin: '0 0 12px' }}>
+                <h3
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '18px',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-text-primary)',
+                    margin: '0 0 12px',
+                  }}
+                >
                   Milestones
                 </h3>
                 <MilestoneList milestones={campaign.milestones} />
@@ -366,7 +589,11 @@ export default function CampaignDetailPage(): ReactElement {
             {isCreator && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {canCreatorEdit && (
-                  <Button variant="primary" size="md" onClick={() => navigate(`/campaigns/${campaign.id}/edit`)}>
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={() => navigate(`/campaigns/${campaign.id}/edit`)}
+                  >
                     Edit Campaign
                   </Button>
                 )}
@@ -416,7 +643,14 @@ export default function CampaignDetailPage(): ReactElement {
                 {campaign.status === 'under_review' && (
                   <>
                     {campaign.reviewedByUserId && !isAssignedReviewer && !isAdmin && (
-                      <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0 }}>
+                      <p
+                        style={{
+                          fontFamily: 'var(--font-body)',
+                          fontSize: '13px',
+                          color: 'var(--color-text-secondary)',
+                          margin: 0,
+                        }}
+                      >
                         Claimed by reviewer {campaign.reviewedByUserId.substring(0, 8)}...
                       </p>
                     )}
@@ -425,7 +659,10 @@ export default function CampaignDetailPage(): ReactElement {
                         campaignId={campaign.id}
                         onApprove={(notes) => actions.approve.mutate({ reviewNotes: notes })}
                         onReject={(reason, guidance) =>
-                          actions.reject.mutate({ rejectionReason: reason, resubmissionGuidance: guidance })
+                          actions.reject.mutate({
+                            rejectionReason: reason,
+                            resubmissionGuidance: guidance,
+                          })
                         }
                         isLoading={actions.approve.isLoading || actions.reject.isLoading}
                       />
@@ -437,21 +674,45 @@ export default function CampaignDetailPage(): ReactElement {
                 {isAdmin && campaign.status === 'under_review' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {!showReassignForm ? (
-                      <Button variant="secondary" size="sm" onClick={() => setShowReassignForm(true)}>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setShowReassignForm(true)}
+                      >
                         Reassign Reviewer
                       </Button>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <label htmlFor="reassign-user-id" style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', fontWeight: 600 }}>
+                        <label
+                          htmlFor="reassign-user-id"
+                          style={{
+                            fontFamily: 'var(--font-body)',
+                            fontSize: '12px',
+                            color: 'var(--color-text-secondary)',
+                            fontWeight: 600,
+                          }}
+                        >
                           New Reviewer User ID
                         </label>
                         <input
                           id="reassign-user-id"
                           type="text"
                           value={reassignUserId}
-                          onChange={(e: ChangeEvent<HTMLInputElement>) => setReassignUserId(e.target.value)}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            setReassignUserId(e.target.value)
+                          }
                           placeholder="Reviewer UUID"
-                          style={{ width: '100%', background: 'var(--color-bg-elevated)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-input)', color: 'var(--color-text-primary)', fontFamily: 'var(--font-body)', fontSize: '13px', padding: '8px 12px', boxSizing: 'border-box' }}
+                          style={{
+                            width: '100%',
+                            background: 'var(--color-bg-elevated)',
+                            border: '1px solid var(--color-border-subtle)',
+                            borderRadius: 'var(--radius-input)',
+                            color: 'var(--color-text-primary)',
+                            fontFamily: 'var(--font-body)',
+                            fontSize: '13px',
+                            padding: '8px 12px',
+                            boxSizing: 'border-box',
+                          }}
                         />
                         <div style={{ display: 'flex', gap: '8px' }}>
                           <Button
@@ -469,7 +730,14 @@ export default function CampaignDetailPage(): ReactElement {
                           >
                             Confirm Reassign
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => { setShowReassignForm(false); setReassignUserId(''); }}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setShowReassignForm(false);
+                              setReassignUserId('');
+                            }}
+                          >
                             Cancel
                           </Button>
                         </div>
@@ -495,13 +763,38 @@ export default function CampaignDetailPage(): ReactElement {
             )}
 
             {/* Action errors */}
-            {(actions.claim.error || actions.approve.error || actions.reject.error || actions.launch.error || actions.archive.error) && (
+            {(actions.claim.error ||
+              actions.approve.error ||
+              actions.reject.error ||
+              actions.launch.error ||
+              actions.archive.error) && (
               <div
                 role="alert"
-                style={{ background: 'color-mix(in srgb, var(--color-status-error) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-status-error) 30%, transparent)', borderRadius: 'var(--radius-card)', padding: '12px' }}
+                style={{
+                  background: 'color-mix(in srgb, var(--color-status-error) 10%, transparent)',
+                  border:
+                    '1px solid color-mix(in srgb, var(--color-status-error) 30%, transparent)',
+                  borderRadius: 'var(--radius-card)',
+                  padding: '12px',
+                }}
               >
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-status-error)', margin: 0 }}>
-                  {(actions.claim.error ?? actions.approve.error ?? actions.reject.error ?? actions.launch.error ?? actions.archive.error)?.message}
+                <p
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: '13px',
+                    color: 'var(--color-status-error)',
+                    margin: 0,
+                  }}
+                >
+                  {
+                    (
+                      actions.claim.error ??
+                      actions.approve.error ??
+                      actions.reject.error ??
+                      actions.launch.error ??
+                      actions.archive.error
+                    )?.message
+                  }
                 </p>
               </div>
             )}
@@ -509,15 +802,18 @@ export default function CampaignDetailPage(): ReactElement {
         </div>
 
         {/* Rejection feedback panel (shown to creator when rejected) */}
-        {campaign.status === 'rejected' && isCreator && campaign.rejectionReason && campaign.resubmissionGuidance && (
-          <div style={{ marginTop: '40px' }}>
-            <RejectionFeedbackPanel
-              rejectionReason={campaign.rejectionReason}
-              resubmissionGuidance={campaign.resubmissionGuidance}
-              reviewedAt={campaign.reviewedAt}
-            />
-          </div>
-        )}
+        {campaign.status === 'rejected' &&
+          isCreator &&
+          campaign.rejectionReason &&
+          campaign.resubmissionGuidance && (
+            <div style={{ marginTop: '40px' }}>
+              <RejectionFeedbackPanel
+                rejectionReason={campaign.rejectionReason}
+                resubmissionGuidance={campaign.resubmissionGuidance}
+                reviewedAt={campaign.reviewedAt}
+              />
+            </div>
+          )}
 
         {/* Reviewer notes (shown to reviewer/admin when approved/rejected) */}
         {campaign.reviewNotes && (isReviewer || isAdmin) && !isCreator && (
@@ -530,10 +826,26 @@ export default function CampaignDetailPage(): ReactElement {
               padding: '20px',
             }}
           >
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', textTransform: 'uppercase', color: 'var(--color-text-primary)', margin: '0 0 12px' }}>
+            <h3
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '18px',
+                textTransform: 'uppercase',
+                color: 'var(--color-text-primary)',
+                margin: '0 0 12px',
+              }}
+            >
               Review Notes
             </h3>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.6 }}>
+            <p
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '14px',
+                color: 'var(--color-text-secondary)',
+                margin: 0,
+                lineHeight: 1.6,
+              }}
+            >
               {campaign.reviewNotes}
             </p>
           </div>

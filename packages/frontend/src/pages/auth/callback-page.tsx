@@ -1,9 +1,9 @@
+import { useMutation } from '@tanstack/react-query';
 import { type ReactElement, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
 import { syncUser } from '../../api/account-api';
-import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { Button } from '../../components/ui/Button';
+import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 
 /**
  * AuthCallbackPage — /auth/callback
@@ -27,7 +27,7 @@ export default function AuthCallbackPage(): ReactElement {
   useEffect(() => {
     mutation.mutate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mutation.mutate]);
 
   const handleRetry = () => {
     mutation.mutate();
@@ -127,31 +127,3 @@ export default function AuthCallbackPage(): ReactElement {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

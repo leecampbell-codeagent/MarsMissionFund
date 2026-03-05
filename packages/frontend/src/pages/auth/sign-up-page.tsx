@@ -1,5 +1,5 @@
-import { type ReactElement } from 'react';
 import { SignUp } from '@clerk/clerk-react';
+import type { ReactElement } from 'react';
 
 const CLERK_APPEARANCE = {
   variables: {
@@ -89,31 +89,3 @@ export default function SignUpPage(): ReactElement {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

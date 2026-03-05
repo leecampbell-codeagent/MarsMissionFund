@@ -1,10 +1,10 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useReviewQueue } from '../../hooks/campaign/use-review-queue';
-import { useCurrentUser } from '../../hooks/account/use-current-user';
 import { CampaignCard } from '../../components/campaign/campaign-card/CampaignCard';
-import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { Button } from '../../components/ui/Button';
+import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
+import { useCurrentUser } from '../../hooks/account/use-current-user';
+import { useReviewQueue } from '../../hooks/campaign/use-review-queue';
 
 const SLA_DAYS = 5; // Campaigns older than this show an overdue indicator
 
@@ -28,7 +28,15 @@ export default function ReviewQueuePage(): ReactElement {
 
   if (userLoading || isLoading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'var(--color-bg-page)' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          background: 'var(--color-bg-page)',
+        }}
+      >
         <LoadingSpinner size="lg" label="Loading review queue" />
       </div>
     );
@@ -37,12 +45,36 @@ export default function ReviewQueuePage(): ReactElement {
   // Role check — redirect if no access
   if (!hasAccess) {
     return (
-      <div style={{ background: 'var(--color-bg-page)', minHeight: '100vh', padding: '48px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div
+        style={{
+          background: 'var(--color-bg-page)',
+          minHeight: '100vh',
+          padding: '48px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <div style={{ textAlign: 'center', maxWidth: '400px' }}>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', textTransform: 'uppercase', color: 'var(--color-text-primary)', margin: '0 0 16px' }}>
+          <h1
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '32px',
+              textTransform: 'uppercase',
+              color: 'var(--color-text-primary)',
+              margin: '0 0 16px',
+            }}
+          >
             Access Restricted
           </h1>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: '0 0 24px' }}>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              color: 'var(--color-text-secondary)',
+              margin: '0 0 24px',
+            }}
+          >
             The review queue is only accessible to Reviewers and Administrators.
           </p>
           <Button variant="secondary" onClick={() => navigate('/')}>
@@ -55,9 +87,26 @@ export default function ReviewQueuePage(): ReactElement {
 
   if (isError) {
     return (
-      <div style={{ background: 'var(--color-bg-page)', minHeight: '100vh', padding: '48px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div
+        style={{
+          background: 'var(--color-bg-page)',
+          minHeight: '100vh',
+          padding: '48px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <div style={{ textAlign: 'center', maxWidth: '400px' }}>
-          <p role="alert" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-status-error)', marginBottom: '16px' }}>
+          <p
+            role="alert"
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              color: 'var(--color-status-error)',
+              marginBottom: '16px',
+            }}
+          >
             {error?.message ?? 'Failed to load review queue.'}
           </p>
           <Button variant="secondary" onClick={() => window.location.reload()}>
@@ -75,17 +124,40 @@ export default function ReviewQueuePage(): ReactElement {
   return (
     <div style={{ background: 'var(--color-bg-page)', minHeight: '100vh', padding: '48px 24px' }}>
       <div style={{ maxWidth: '960px', margin: '0 auto' }}>
-
         {/* Page header */}
         <div style={{ marginBottom: '40px' }}>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--color-text-accent)', margin: '0 0 8px' }}>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '12px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              color: 'var(--color-text-accent)',
+              margin: '0 0 8px',
+            }}
+          >
             Review Pipeline
           </p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '40px', textTransform: 'uppercase', color: 'var(--color-text-primary)', margin: '0 0 8px', lineHeight: 1 }}>
+          <h1
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '40px',
+              textTransform: 'uppercase',
+              color: 'var(--color-text-primary)',
+              margin: '0 0 8px',
+              lineHeight: 1,
+            }}
+          >
             Review Queue
           </h1>
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <span style={{ fontFamily: 'var(--font-data)', fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+            <span
+              style={{
+                fontFamily: 'var(--font-data)',
+                fontSize: '13px',
+                color: 'var(--color-text-secondary)',
+              }}
+            >
               {campaigns.length} campaign{campaigns.length !== 1 ? 's' : ''} awaiting review
             </span>
             {overdueCount > 0 && (
@@ -95,7 +167,8 @@ export default function ReviewQueuePage(): ReactElement {
                   fontSize: '12px',
                   color: 'var(--color-status-error)',
                   background: 'color-mix(in srgb, var(--color-status-error) 15%, transparent)',
-                  border: '1px solid color-mix(in srgb, var(--color-status-error) 30%, transparent)',
+                  border:
+                    '1px solid color-mix(in srgb, var(--color-status-error) 30%, transparent)',
                   borderRadius: 'var(--radius-pill)',
                   padding: '2px 10px',
                 }}
@@ -117,10 +190,25 @@ export default function ReviewQueuePage(): ReactElement {
               borderRadius: 'var(--radius-card)',
             }}
           >
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '24px', textTransform: 'uppercase', color: 'var(--color-text-primary)', margin: '0 0 8px' }}>
+            <p
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '24px',
+                textTransform: 'uppercase',
+                color: 'var(--color-text-primary)',
+                margin: '0 0 8px',
+              }}
+            >
               Queue is Clear
             </p>
-            <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--color-text-secondary)', margin: 0 }}>
+            <p
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '14px',
+                color: 'var(--color-text-secondary)',
+                margin: 0,
+              }}
+            >
               No campaigns awaiting review.
             </p>
           </div>
@@ -145,7 +233,8 @@ export default function ReviewQueuePage(): ReactElement {
                         background: 'var(--color-bg-elevated)',
                         padding: '2px 8px',
                         borderRadius: 'var(--radius-pill)',
-                        border: '1px solid color-mix(in srgb, var(--color-status-error) 30%, transparent)',
+                        border:
+                          '1px solid color-mix(in srgb, var(--color-status-error) 30%, transparent)',
                       }}
                       aria-label={`Overdue by ${daysAgo - SLA_DAYS} days`}
                     >
@@ -157,7 +246,10 @@ export default function ReviewQueuePage(): ReactElement {
                       display: 'flex',
                       gap: '12px',
                       alignItems: 'flex-start',
-                      borderBottom: index < campaigns.length - 1 ? '1px solid var(--color-border-subtle)' : 'none',
+                      borderBottom:
+                        index < campaigns.length - 1
+                          ? '1px solid var(--color-border-subtle)'
+                          : 'none',
                       padding: '4px 0',
                     }}
                   >

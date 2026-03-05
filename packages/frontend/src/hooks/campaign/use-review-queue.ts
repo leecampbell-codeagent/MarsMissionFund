@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getReviewQueue } from '../../api/campaign-api';
-import { type CampaignSummary } from '../../types/campaign';
-import { type ApiError } from '../../api/client';
+import type { ApiError } from '../../api/client';
+import type { CampaignSummary } from '../../types/campaign';
 
 export const REVIEW_QUEUE_QUERY_KEY = ['reviewQueue'] as const;
 

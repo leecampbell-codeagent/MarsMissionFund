@@ -1,7 +1,7 @@
-import { type ReactElement, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAppAuth } from './lib/auth';
+import { lazy, type ReactElement, Suspense } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
+import { useAppAuth } from './lib/auth';
 
 // Lazy load pages for code splitting
 const SignInPage = lazy(() => import('./pages/auth/sign-in-page'));
@@ -239,28 +239,3 @@ export function AppRoutes(): ReactElement {
     </Suspense>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

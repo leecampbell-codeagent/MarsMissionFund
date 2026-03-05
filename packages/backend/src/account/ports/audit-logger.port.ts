@@ -25,31 +25,3 @@ export interface AuditEntry {
 export interface AuditLoggerPort {
   log(entry: AuditEntry): Promise<void>;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

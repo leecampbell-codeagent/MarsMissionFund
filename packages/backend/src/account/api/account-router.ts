@@ -229,7 +229,10 @@ export function createAccountRouter(accountAppService: AccountAppService): Route
       }
 
       // Reject any request body fields
-      const parseResult = z.object({}).strict().safeParse(req.body ?? {});
+      const parseResult = z
+        .object({})
+        .strict()
+        .safeParse(req.body ?? {});
       if (!parseResult.success) {
         res.status(400).json({
           error: {
@@ -291,31 +294,3 @@ export function createAccountRouter(accountAppService: AccountAppService): Route
 
   return router;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -17,31 +17,31 @@ export const CampaignStatus = {
 export type CampaignStatus = (typeof CampaignStatus)[keyof typeof CampaignStatus];
 
 export const CampaignCategory = {
-  Propulsion:               'propulsion',
-  EntryDescentLanding:      'entry_descent_landing',
-  PowerEnergy:              'power_energy',
-  HabitatsConstruction:     'habitats_construction',
-  LifeSupportCrewHealth:    'life_support_crew_health',
-  FoodWaterProduction:      'food_water_production',
-  InSituResourceUtilisation:'in_situ_resource_utilisation',
-  RadiationProtection:      'radiation_protection',
-  RoboticsAutomation:       'robotics_automation',
+  Propulsion: 'propulsion',
+  EntryDescentLanding: 'entry_descent_landing',
+  PowerEnergy: 'power_energy',
+  HabitatsConstruction: 'habitats_construction',
+  LifeSupportCrewHealth: 'life_support_crew_health',
+  FoodWaterProduction: 'food_water_production',
+  InSituResourceUtilisation: 'in_situ_resource_utilisation',
+  RadiationProtection: 'radiation_protection',
+  RoboticsAutomation: 'robotics_automation',
   CommunicationsNavigation: 'communications_navigation',
 } as const;
 
 export type CampaignCategory = (typeof CampaignCategory)[keyof typeof CampaignCategory];
 
 export const CAMPAIGN_CATEGORY_LABELS: Record<CampaignCategory, string> = {
-  propulsion:                 'Propulsion',
-  entry_descent_landing:      'Entry, Descent & Landing',
-  power_energy:               'Power & Energy',
-  habitats_construction:      'Habitats & Construction',
-  life_support_crew_health:   'Life Support & Crew Health',
-  food_water_production:      'Food & Water Production',
+  propulsion: 'Propulsion',
+  entry_descent_landing: 'Entry, Descent & Landing',
+  power_energy: 'Power & Energy',
+  habitats_construction: 'Habitats & Construction',
+  life_support_crew_health: 'Life Support & Crew Health',
+  food_water_production: 'Food & Water Production',
   in_situ_resource_utilisation: 'In-Situ Resource Utilisation',
-  radiation_protection:       'Radiation Protection',
-  robotics_automation:        'Robotics & Automation',
-  communications_navigation:  'Communications & Navigation',
+  radiation_protection: 'Radiation Protection',
+  robotics_automation: 'Robotics & Automation',
+  communications_navigation: 'Communications & Navigation',
 };
 
 export interface Milestone {
@@ -49,7 +49,7 @@ export interface Milestone {
   readonly title: string;
   readonly description: string;
   readonly fundingBasisPoints: number; // integer, sum must = 10000 at submission
-  readonly targetDate: string | null;  // YYYY-MM-DD date string or null
+  readonly targetDate: string | null; // YYYY-MM-DD date string or null
 }
 
 export interface TeamMember {
@@ -62,16 +62,16 @@ export interface TeamMember {
 
 export interface RiskDisclosure {
   readonly id: string;
-  readonly risk: string;        // max 500 chars
-  readonly mitigation: string;  // max 500 chars
+  readonly risk: string; // max 500 chars
+  readonly mitigation: string; // max 500 chars
 }
 
 export interface BudgetItem {
   readonly id: string;
-  readonly category: string;        // max 100 chars
-  readonly description: string;     // max 500 chars
-  readonly estimatedCents: string;  // integer cents as string — never parse to Number (G-024)
-  readonly notes?: string;          // max 200 chars
+  readonly category: string; // max 100 chars
+  readonly description: string; // max 500 chars
+  readonly estimatedCents: string; // integer cents as string — never parse to Number (G-024)
+  readonly notes?: string; // max 200 chars
 }
 
 export interface Campaign {
@@ -82,9 +82,9 @@ export interface Campaign {
   readonly description: string | null;
   readonly category: CampaignCategory | null;
   readonly heroImageUrl: string | null;
-  readonly fundingGoalCents: string | null;   // string — never parse to Number (G-024)
-  readonly fundingCapCents: string | null;    // string — never parse to Number (G-024)
-  readonly deadline: string | null;           // ISO 8601 UTC string
+  readonly fundingGoalCents: string | null; // string — never parse to Number (G-024)
+  readonly fundingCapCents: string | null; // string — never parse to Number (G-024)
+  readonly deadline: string | null; // ISO 8601 UTC string
   readonly milestones: Milestone[];
   readonly teamMembers: TeamMember[];
   readonly riskDisclosures: RiskDisclosure[];
@@ -168,19 +168,19 @@ export interface PublicCampaignListItem {
   readonly category: string | null;
   readonly heroImageUrl: string | null;
   readonly status: 'live' | 'funded';
-  readonly fundingGoalCents: string | null;    // string — never parse to Number (G-024)
-  readonly totalRaisedCents: string;           // string — never parse to Number (G-024)
+  readonly fundingGoalCents: string | null; // string — never parse to Number (G-024)
+  readonly totalRaisedCents: string; // string — never parse to Number (G-024)
   readonly contributorCount: number;
   readonly fundingPercentage: number | null;
-  readonly deadline: string | null;            // ISO 8601 UTC string
+  readonly deadline: string | null; // ISO 8601 UTC string
   readonly daysRemaining: number | null;
-  readonly launchedAt: string | null;          // ISO 8601 UTC string
+  readonly launchedAt: string | null; // ISO 8601 UTC string
   readonly creatorName: string | null;
 }
 
 export interface PublicCampaignDetail extends PublicCampaignListItem {
   readonly description: string | null;
-  readonly fundingCapCents: string | null;     // string — never parse to Number (G-024)
+  readonly fundingCapCents: string | null; // string — never parse to Number (G-024)
   readonly milestones: Milestone[];
   readonly teamMembers: TeamMember[];
   readonly riskDisclosures: RiskDisclosure[];
@@ -211,6 +211,6 @@ export interface PublicCategoryStats {
   readonly category: string;
   readonly campaignCount: number;
   readonly activeCampaignCount: number;
-  readonly totalRaisedCents: string;   // Always '0' in feat-004
-  readonly contributorCount: number;   // Always 0 in feat-004
+  readonly totalRaisedCents: string; // Always '0' in feat-004
+  readonly contributorCount: number; // Always 0 in feat-004
 }

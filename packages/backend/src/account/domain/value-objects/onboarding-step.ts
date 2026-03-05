@@ -7,31 +7,3 @@ export const OnboardingStep = {
 } as const;
 
 export type OnboardingStep = (typeof OnboardingStep)[keyof typeof OnboardingStep];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

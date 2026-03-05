@@ -63,31 +63,3 @@ export function createServices(
 
   return { accountAppService, kycAppService, campaignAppService };
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

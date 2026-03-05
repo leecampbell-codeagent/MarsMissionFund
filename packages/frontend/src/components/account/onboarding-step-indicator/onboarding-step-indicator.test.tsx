@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { OnboardingStepIndicator } from './onboarding-step-indicator';
 
 describe('OnboardingStepIndicator', () => {
@@ -33,31 +33,3 @@ describe('OnboardingStepIndicator', () => {
     expect(screen.getByText('STEP 2 OF 3')).toBeInTheDocument();
   });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

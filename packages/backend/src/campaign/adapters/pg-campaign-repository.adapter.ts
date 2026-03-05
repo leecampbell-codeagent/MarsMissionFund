@@ -1,17 +1,21 @@
 import type { Pool } from 'pg';
-import { Campaign, type CampaignData, type UpdateCampaignInput } from '../domain/models/campaign.js';
-import type { CampaignCategory } from '../domain/value-objects/campaign-category.js';
-import type { CampaignStatus } from '../domain/value-objects/campaign-status.js';
-import {
-  CampaignAlreadyClaimedError,
-  CampaignNotFoundError,
-} from '../domain/errors/campaign-errors.js';
 import type {
   CategoryStats,
   PublicCampaignDetail,
   PublicSearchOptions,
   PublicSearchResult,
 } from '../application/campaign-app-service.js';
+import {
+  CampaignAlreadyClaimedError,
+  CampaignNotFoundError,
+} from '../domain/errors/campaign-errors.js';
+import {
+  Campaign,
+  type CampaignData,
+  type UpdateCampaignInput,
+} from '../domain/models/campaign.js';
+import type { CampaignCategory } from '../domain/value-objects/campaign-category.js';
+import type { CampaignStatus } from '../domain/value-objects/campaign-status.js';
 import type {
   CampaignRepository,
   CampaignStatusUpdate,
@@ -28,7 +32,7 @@ interface CampaignRow {
   category: string | null;
   hero_image_url: string | null;
   funding_goal_cents: string | null; // BIGINT returned as string by pg (G-024)
-  funding_cap_cents: string | null;  // BIGINT returned as string by pg
+  funding_cap_cents: string | null; // BIGINT returned as string by pg
   deadline: Date | string | null;
   milestones: unknown;
   team_members: unknown;
@@ -70,10 +74,16 @@ function rowToDomain(row: CampaignRow): Campaign {
     fundingGoalCents: row.funding_goal_cents ?? null,
     fundingCapCents: row.funding_cap_cents ?? null,
     deadline: toNullableDate(row.deadline),
-    milestones: Array.isArray(row.milestones) ? row.milestones as CampaignData['milestones'] : [],
-    teamMembers: Array.isArray(row.team_members) ? row.team_members as CampaignData['teamMembers'] : [],
-    riskDisclosures: Array.isArray(row.risk_disclosures) ? row.risk_disclosures as CampaignData['riskDisclosures'] : [],
-    budgetBreakdown: Array.isArray(row.budget_breakdown) ? row.budget_breakdown as CampaignData['budgetBreakdown'] : [],
+    milestones: Array.isArray(row.milestones) ? (row.milestones as CampaignData['milestones']) : [],
+    teamMembers: Array.isArray(row.team_members)
+      ? (row.team_members as CampaignData['teamMembers'])
+      : [],
+    riskDisclosures: Array.isArray(row.risk_disclosures)
+      ? (row.risk_disclosures as CampaignData['riskDisclosures'])
+      : [],
+    budgetBreakdown: Array.isArray(row.budget_breakdown)
+      ? (row.budget_breakdown as CampaignData['budgetBreakdown'])
+      : [],
     alignmentStatement: row.alignment_statement,
     tags: row.tags ?? [],
     status: row.status as CampaignStatus,
@@ -104,10 +114,9 @@ export class PgCampaignRepository implements CampaignRepository {
   }
 
   async findById(id: string): Promise<Campaign | null> {
-    const result = await this.pool.query<CampaignRow>(
-      'SELECT * FROM campaigns WHERE id = $1',
-      [id],
-    );
+    const result = await this.pool.query<CampaignRow>('SELECT * FROM campaigns WHERE id = $1', [
+      id,
+    ]);
     if (result.rows.length === 0) return null;
     const row = result.rows[0];
     if (!row) return null;
@@ -212,7 +221,12 @@ export class PgCampaignRepository implements CampaignRepository {
       tags: 'tags',
     };
 
-    const jsonbFields = new Set(['milestones', 'teamMembers', 'riskDisclosures', 'budgetBreakdown']);
+    const jsonbFields = new Set([
+      'milestones',
+      'teamMembers',
+      'riskDisclosures',
+      'budgetBreakdown',
+    ]);
 
     const setClauses: string[] = [];
     const values: unknown[] = [campaignId]; // $1 = campaignId
@@ -260,9 +274,8 @@ export class PgCampaignRepository implements CampaignRepository {
   async searchPublicCampaigns(options: PublicSearchOptions): Promise<PublicSearchResult> {
     const q = options.q ?? '';
     const statusFilter = options.status ?? null;
-    const categories = options.categories && options.categories.length > 0
-      ? Array.from(options.categories)
-      : null;
+    const categories =
+      options.categories && options.categories.length > 0 ? Array.from(options.categories) : null;
     const sort = options.sort ?? 'newest';
     const { limit, offset } = options;
 
@@ -457,10 +470,18 @@ export class PgCampaignRepository implements CampaignRepository {
       totalRaisedCents: '0',
       contributorCount: 0,
       fundingPercentage: row.funding_goal_cents !== null ? 0 : null,
-      milestones: Array.isArray(row.milestones) ? row.milestones as CampaignData['milestones'] : [],
-      teamMembers: Array.isArray(row.team_members) ? row.team_members as CampaignData['teamMembers'] : [],
-      riskDisclosures: Array.isArray(row.risk_disclosures) ? row.risk_disclosures as CampaignData['riskDisclosures'] : [],
-      budgetBreakdown: Array.isArray(row.budget_breakdown) ? row.budget_breakdown as CampaignData['budgetBreakdown'] : [],
+      milestones: Array.isArray(row.milestones)
+        ? (row.milestones as CampaignData['milestones'])
+        : [],
+      teamMembers: Array.isArray(row.team_members)
+        ? (row.team_members as CampaignData['teamMembers'])
+        : [],
+      riskDisclosures: Array.isArray(row.risk_disclosures)
+        ? (row.risk_disclosures as CampaignData['riskDisclosures'])
+        : [],
+      budgetBreakdown: Array.isArray(row.budget_breakdown)
+        ? (row.budget_breakdown as CampaignData['budgetBreakdown'])
+        : [],
       alignmentStatement: row.alignment_statement,
       tags: row.tags ?? [],
     };

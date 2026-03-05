@@ -3,13 +3,9 @@
  * Maps to endpoints defined in feat-003-spec-api.md.
  */
 
+import type { Campaign, CampaignSummary, UpdateCampaignInput } from '../types/campaign';
+import type { UserProfile } from './account-api';
 import { apiClient } from './client';
-import { type UserProfile } from './account-api';
-import {
-  type Campaign,
-  type CampaignSummary,
-  type UpdateCampaignInput,
-} from '../types/campaign';
 
 interface CampaignResponse {
   readonly data: Campaign;
@@ -120,7 +116,10 @@ export async function claimCampaign(id: string): Promise<Campaign> {
  * Approves a campaign under review.
  * Requires the assigned reviewer or Admin.
  */
-export async function approveCampaign(id: string, input: { reviewNotes: string }): Promise<Campaign> {
+export async function approveCampaign(
+  id: string,
+  input: { reviewNotes: string },
+): Promise<Campaign> {
   const response = await apiClient<CampaignResponse>({
     method: 'POST',
     path: `/campaigns/${id}/approve`,
@@ -177,7 +176,10 @@ export async function archiveCampaign(id: string): Promise<Campaign> {
  * Reassigns the reviewer for an under_review campaign.
  * Admin only.
  */
-export async function reassignReviewer(id: string, input: { reviewerUserId: string }): Promise<Campaign> {
+export async function reassignReviewer(
+  id: string,
+  input: { reviewerUserId: string },
+): Promise<Campaign> {
   const response = await apiClient<CampaignResponse>({
     method: 'POST',
     path: `/campaigns/${id}/reassign`,

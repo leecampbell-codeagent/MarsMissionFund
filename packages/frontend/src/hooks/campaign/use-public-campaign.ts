@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
+import type { ApiError } from '../../api/client';
 import { getPublicCampaign } from '../../api/public-campaign-api';
-import { type PublicCampaignDetail } from '../../types/campaign';
-import { type ApiError } from '../../api/client';
+import type { PublicCampaignDetail } from '../../types/campaign';
 
 export function publicCampaignQueryKey(id: string): readonly [string, string] {
   return ['publicCampaign', id] as const;

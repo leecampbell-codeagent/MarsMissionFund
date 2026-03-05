@@ -1,13 +1,13 @@
-import { type ReactElement, useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { type ReactElement, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { updateProfile } from '../../api/account-api';
-import { useCurrentUser, CURRENT_USER_QUERY_KEY } from '../../hooks/account/use-current-user';
-import { useKycStatus } from '../../hooks/account/use-kyc-status';
-import { SettingsNav } from '../../components/account/settings-nav';
+import { KycVerificationPanel } from '../../components/account/kyc-verification-panel';
 import { ProfileCard } from '../../components/account/profile-card';
 import { ProfileEditForm } from '../../components/account/profile-edit-form';
-import { KycVerificationPanel } from '../../components/account/kyc-verification-panel';
+import { SettingsNav } from '../../components/account/settings-nav';
+import { CURRENT_USER_QUERY_KEY, useCurrentUser } from '../../hooks/account/use-current-user';
+import { useKycStatus } from '../../hooks/account/use-kyc-status';
 
 /**
  * SettingsProfilePage — /settings/profile
@@ -17,7 +17,12 @@ export default function SettingsProfilePage(): ReactElement {
   const location = useLocation();
   const queryClient = useQueryClient();
   const { user, isLoading, isError } = useCurrentUser();
-  const { kycStatus, isLoading: isKycLoading, isError: isKycError, error: kycError } = useKycStatus();
+  const {
+    kycStatus,
+    isLoading: isKycLoading,
+    isError: isKycError,
+    error: kycError,
+  } = useKycStatus();
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -154,25 +159,3 @@ export default function SettingsProfilePage(): ReactElement {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

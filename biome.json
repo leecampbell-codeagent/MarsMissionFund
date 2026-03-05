@@ -42,7 +42,21 @@
         "noUnusedVariables": "error"
       },
       "suspicious": {
-        "noConsole": "error"
+        "noConsole": "error",
+        "noArrayIndexKey": "warn",
+        "useIterableCallbackReturn": "warn",
+        "noUnknownAtRules": "warn"
+      },
+      "style": {
+        "noNonNullAssertion": "warn"
+      },
+      "a11y": {
+        "useSemanticElements": "warn",
+        "useAriaPropsSupportedByRole": "warn",
+        "noRedundantAlt": "warn"
+      },
+      "complexity": {
+        "noUselessFragments": "warn"
       }
     }
   },
@@ -62,31 +76,3 @@
     }
   ]
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

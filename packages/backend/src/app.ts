@@ -13,8 +13,8 @@ import { createAccountRouter } from './account/api/account-router.js';
 import { createWebhookRouter } from './account/api/webhook-router.js';
 import type { AccountAppService } from './account/application/account-app-service.js';
 import { createCampaignRouter } from './campaign/api/campaign-router.js';
-import { createPublicCampaignRouter } from './campaign/api/public-campaign-router.js';
 import { serializeCampaignSummary } from './campaign/api/campaign-serializer.js';
+import { createPublicCampaignRouter } from './campaign/api/public-campaign-router.js';
 import type { CampaignAppService } from './campaign/application/campaign-app-service.js';
 import { createKycRouter } from './kyc/api/kyc-router.js';
 import type { KycAppService } from './kyc/application/kyc-app-service.js';
@@ -77,7 +77,10 @@ export function createApp(services: AppServices): Application {
 
   // NEW: Public campaign routes — no requireAuth (G-036)
   // clerkMiddleware() is already global and populates req.auth for all requests
-  app.use('/api/v1/public/campaigns', createPublicCampaignRouter(services.campaignAppService, logger));
+  app.use(
+    '/api/v1/public/campaigns',
+    createPublicCampaignRouter(services.campaignAppService, logger),
+  );
 
   // GET /api/v1/me/campaigns — served directly here since campaign router is mounted at /campaigns
   // This avoids cross-context contamination in the account router.
@@ -106,31 +109,3 @@ export function createApp(services: AppServices): Application {
 
   return app;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

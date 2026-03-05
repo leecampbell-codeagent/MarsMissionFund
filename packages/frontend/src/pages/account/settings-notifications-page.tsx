@@ -1,9 +1,9 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { useLocation } from 'react-router-dom';
-import { type NotificationPrefs } from '../../api/account-api';
-import { useNotificationPrefs } from '../../hooks/account/use-notification-prefs';
-import { SettingsNav } from '../../components/account/settings-nav';
+import type { NotificationPrefs } from '../../api/account-api';
 import { NotificationPrefsForm } from '../../components/account/notification-prefs-form';
+import { SettingsNav } from '../../components/account/settings-nav';
+import { useNotificationPrefs } from '../../hooks/account/use-notification-prefs';
 
 /**
  * SettingsNotificationsPage — /settings/notifications
@@ -85,31 +85,3 @@ export default function SettingsNotificationsPage(): ReactElement {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

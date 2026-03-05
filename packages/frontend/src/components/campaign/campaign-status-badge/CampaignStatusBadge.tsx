@@ -1,5 +1,5 @@
-import { type ReactElement } from 'react';
-import { type CampaignStatus } from '../../../types/campaign';
+import type { ReactElement } from 'react';
+import type { CampaignStatus } from '../../../types/campaign';
 
 interface CampaignStatusBadgeProps {
   readonly status: CampaignStatus;

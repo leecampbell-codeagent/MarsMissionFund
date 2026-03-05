@@ -13,9 +13,9 @@ import { correlationIdMiddleware } from '../../shared/middleware/auth.js';
 import { createErrorHandler } from '../../shared/middleware/error-handler.js';
 import { InMemoryCampaignAuditRepository } from '../adapters/in-memory-campaign-audit-repository.adapter.js';
 import { InMemoryCampaignRepository } from '../adapters/in-memory-campaign-repository.adapter.js';
+import { CampaignAppService } from '../application/campaign-app-service.js';
 import { Campaign } from '../domain/models/campaign.js';
 import { CampaignStatus } from '../domain/value-objects/campaign-status.js';
-import { CampaignAppService } from '../application/campaign-app-service.js';
 import { createPublicCampaignRouter } from './public-campaign-router.js';
 
 // Mock @clerk/express to avoid real Clerk JWT validation in tests (G-012)
@@ -82,20 +82,42 @@ function makeLiveCampaign(creatorUserId: string): Campaign {
     category: 'propulsion',
     heroImageUrl: 'https://example.com/hero.jpg',
     fundingGoalCents: '100000000', // $1M
-    fundingCapCents: '200000000',  // $2M
+    fundingCapCents: '200000000', // $2M
     deadline,
     milestones: [
-      { id: crypto.randomUUID(), title: 'Phase 1', description: 'Initial phase', fundingBasisPoints: 5000, targetDate: null },
-      { id: crypto.randomUUID(), title: 'Phase 2', description: 'Final phase', fundingBasisPoints: 5000, targetDate: null },
+      {
+        id: crypto.randomUUID(),
+        title: 'Phase 1',
+        description: 'Initial phase',
+        fundingBasisPoints: 5000,
+        targetDate: null,
+      },
+      {
+        id: crypto.randomUUID(),
+        title: 'Phase 2',
+        description: 'Final phase',
+        fundingBasisPoints: 5000,
+        targetDate: null,
+      },
     ],
     teamMembers: [
-      { id: crypto.randomUUID(), name: 'Alice', role: 'Lead Engineer', bio: 'Expert in propulsion' },
+      {
+        id: crypto.randomUUID(),
+        name: 'Alice',
+        role: 'Lead Engineer',
+        bio: 'Expert in propulsion',
+      },
     ],
     riskDisclosures: [
       { id: crypto.randomUUID(), risk: 'Technical risk', mitigation: 'Redundant systems' },
     ],
     budgetBreakdown: [
-      { id: crypto.randomUUID(), category: 'R&D', description: 'Research', estimatedCents: '50000000' },
+      {
+        id: crypto.randomUUID(),
+        category: 'R&D',
+        description: 'Research',
+        estimatedCents: '50000000',
+      },
     ],
     alignmentStatement: 'This mission aligns with Mars colonization goals',
     tags: ['propulsion', 'nuclear'],
@@ -228,9 +250,7 @@ describe('Public Campaign Router', () => {
   describe('GET /api/v1/public/campaigns', () => {
     it('returns 200 with paginated results for anonymous users (no auth header)', async () => {
       // No x-test-user-id header — anonymous request
-      const response = await request(app)
-        .get('/api/v1/public/campaigns')
-        .expect(200);
+      const response = await request(app).get('/api/v1/public/campaigns').expect(200);
 
       expect(response.body).toHaveProperty('data');
       expect(response.body).toHaveProperty('pagination');
@@ -238,9 +258,7 @@ describe('Public Campaign Router', () => {
     });
 
     it('returns only live and funded campaigns (not draft)', async () => {
-      const response = await request(app)
-        .get('/api/v1/public/campaigns')
-        .expect(200);
+      const response = await request(app).get('/api/v1/public/campaigns').expect(200);
 
       const ids = response.body.data.map((c: { id: string }) => c.id);
       expect(ids).toContain(liveCampaign.id);
@@ -249,9 +267,7 @@ describe('Public Campaign Router', () => {
     });
 
     it('returns correct list item fields', async () => {
-      const response = await request(app)
-        .get('/api/v1/public/campaigns')
-        .expect(200);
+      const response = await request(app).get('/api/v1/public/campaigns').expect(200);
 
       const liveItem = response.body.data.find((c: { id: string }) => c.id === liveCampaign.id);
       expect(liveItem).toBeDefined();
@@ -291,9 +307,7 @@ describe('Public Campaign Router', () => {
     });
 
     it('filters by status=active (live campaigns only)', async () => {
-      const response = await request(app)
-        .get('/api/v1/public/campaigns?status=active')
-        .expect(200);
+      const response = await request(app).get('/api/v1/public/campaigns?status=active').expect(200);
 
       const statuses = response.body.data.map((c: { status: string }) => c.status);
       expect(statuses).not.toContain('funded');
@@ -301,9 +315,7 @@ describe('Public Campaign Router', () => {
     });
 
     it('filters by status=funded (funded campaigns only)', async () => {
-      const response = await request(app)
-        .get('/api/v1/public/campaigns?status=funded')
-        .expect(200);
+      const response = await request(app).get('/api/v1/public/campaigns?status=funded').expect(200);
 
       const statuses = response.body.data.map((c: { status: string }) => c.status);
       expect(statuses).not.toContain('live');
@@ -338,9 +350,7 @@ describe('Public Campaign Router', () => {
     });
 
     it('returns 400 when limit exceeds 100', async () => {
-      const response = await request(app)
-        .get('/api/v1/public/campaigns?limit=101')
-        .expect(400);
+      const response = await request(app).get('/api/v1/public/campaigns?limit=101').expect(400);
 
       expect(response.body.error.code).toBe('VALIDATION_ERROR');
     });
@@ -355,9 +365,7 @@ describe('Public Campaign Router', () => {
     });
 
     it('returns totalRaisedCents as string "0" for all items (feat-004 stub)', async () => {
-      const response = await request(app)
-        .get('/api/v1/public/campaigns')
-        .expect(200);
+      const response = await request(app).get('/api/v1/public/campaigns').expect(200);
 
       for (const item of response.body.data) {
         expect(item.totalRaisedCents).toBe('0');
@@ -401,9 +409,7 @@ describe('Public Campaign Router', () => {
     });
 
     it('returns 400 when category is missing', async () => {
-      const response = await request(app)
-        .get('/api/v1/public/campaigns/stats')
-        .expect(400);
+      const response = await request(app).get('/api/v1/public/campaigns/stats').expect(400);
 
       expect(response.body.error.code).toBe('VALIDATION_ERROR');
     });

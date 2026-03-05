@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
+import { describe, expect, it } from 'vitest';
+import type { PublicCampaignListItem } from '../../../types/campaign';
 import { PublicCampaignCard } from './PublicCampaignCard';
-import { type PublicCampaignListItem } from '../../../types/campaign';
 
 const mockCampaign: PublicCampaignListItem = {
   id: '550e8400-e29b-41d4-a716-446655440001',
@@ -37,7 +37,9 @@ describe('PublicCampaignCard', () => {
 
   it('renders short description', () => {
     renderCard();
-    expect(screen.getByText('Next-generation ion drive for deep space missions.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Next-generation ion drive for deep space missions.'),
+    ).toBeInTheDocument();
   });
 
   it('renders category label', () => {
@@ -57,7 +59,9 @@ describe('PublicCampaignCard', () => {
       fundingPercentage: 100,
     };
     renderCard(fundedCampaign);
-    expect(screen.getByRole('status', { name: 'Campaign status: Fully Funded' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('status', { name: 'Campaign status: Fully Funded' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('Fully Funded')).toBeInTheDocument();
   });
 
@@ -67,7 +71,9 @@ describe('PublicCampaignCard', () => {
       daysRemaining: 5,
     };
     renderCard(endingSoon);
-    expect(screen.getByRole('status', { name: 'Campaign status: Ending Soon' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('status', { name: 'Campaign status: Ending Soon' }),
+    ).toBeInTheDocument();
   });
 
   it('does NOT render "Ending Soon" when daysRemaining > 7', () => {
@@ -94,7 +100,9 @@ describe('PublicCampaignCard', () => {
     const noDesc: PublicCampaignListItem = { ...mockCampaign, shortDescription: null };
     renderCard(noDesc);
     expect(screen.getByText('Advanced Ion Drive Propulsion System')).toBeInTheDocument();
-    expect(screen.queryByText('Next-generation ion drive for deep space missions.')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Next-generation ion drive for deep space missions.'),
+    ).not.toBeInTheDocument();
   });
 
   it('does not show goal amount when fundingGoalCents is null', () => {

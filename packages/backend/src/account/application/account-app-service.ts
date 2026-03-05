@@ -1,4 +1,5 @@
 import type { Logger } from 'pino';
+import { KycNotVerifiedError } from '../../campaign/domain/errors/campaign-errors.js';
 import {
   AccountNotActiveError,
   AccountSuspendedError,
@@ -10,7 +11,6 @@ import { type UpdateProfileInput, User } from '../domain/models/user.js';
 import { AccountStatus } from '../domain/value-objects/account-status.js';
 import type { NotificationPreferences } from '../domain/value-objects/notification-preferences.js';
 import { Role } from '../domain/value-objects/role.js';
-import { KycNotVerifiedError } from '../../campaign/domain/errors/campaign-errors.js';
 import { AuditActions, type AuditLoggerPort } from '../ports/audit-logger.port.js';
 import type { ClerkAuthPort } from '../ports/clerk-auth.port.js';
 import type { UserRepository } from '../ports/user-repository.port.js';
@@ -279,7 +279,9 @@ export class AccountAppService {
 
     // Step 7: Sync Clerk metadata (best-effort)
     try {
-      await this.clerkAuth.setPublicMetadata(clerkUserId, { role: updatedUser.roles[0] ?? 'backer' });
+      await this.clerkAuth.setPublicMetadata(clerkUserId, {
+        role: updatedUser.roles[0] ?? 'backer',
+      });
     } catch (err) {
       this.logger.warn(
         { clerkUserId, err },
@@ -453,31 +455,3 @@ export class AccountAppService {
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

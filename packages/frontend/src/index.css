@@ -120,9 +120,9 @@
   --gradient-achievement: linear-gradient(135deg, #e8edf5, #c8d0dc, #8a96a8);
 
   /* Typography (font families defined in Tailwind config) */
-  --font-display: 'Bebas Neue', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
-  --font-data: 'Space Mono', monospace;
+  --font-display: "Bebas Neue", sans-serif;
+  --font-body: "DM Sans", sans-serif;
+  --font-data: "Space Mono", monospace;
 
   /* Layout */
   --radius-button: var(--radius-full);
@@ -144,9 +144,9 @@
 /* Reduced motion overrides */
 @media (prefers-reduced-motion: reduce) {
   * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
   }
 }
 
@@ -172,31 +172,3 @@ body {
   outline: 2px solid var(--color-action-primary-hover);
   outline-offset: 2px;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

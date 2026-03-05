@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { CategoryFilter } from './CategoryFilter';
 
 describe('CategoryFilter', () => {
@@ -9,7 +9,9 @@ describe('CategoryFilter', () => {
     render(<CategoryFilter selected={[]} onChange={onChange} />);
     expect(screen.getByRole('button', { name: /Propulsion/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Robotics & Automation/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Communications & Navigation/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /Communications & Navigation/i }),
+    ).toBeInTheDocument();
   });
 
   it('shows active state for selected categories', () => {
@@ -43,9 +45,17 @@ describe('CategoryFilter', () => {
   it('supports multiple selected categories', () => {
     const onChange = vi.fn();
     render(<CategoryFilter selected={['propulsion', 'robotics_automation']} onChange={onChange} />);
-    expect(screen.getByRole('button', { name: /Filter by Propulsion/i })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: /Filter by Robotics & Automation/i })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: /Filter by Power & Energy/i })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: /Filter by Propulsion/i })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(
+      screen.getByRole('button', { name: /Filter by Robotics & Automation/i }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /Filter by Power & Energy/i })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
   });
 
   it('renders "Category" legend', () => {

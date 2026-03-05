@@ -10,31 +10,3 @@ export interface ClerkAuthPort {
   getUserMetadata(clerkUserId: string): Promise<ClerkUserMetadata>;
   setPublicMetadata(clerkUserId: string, metadata: { role: string }): Promise<void>;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

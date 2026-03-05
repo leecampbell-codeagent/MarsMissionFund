@@ -33,10 +33,7 @@ export class AccountNotActiveError extends DomainError {
 export class AccountSuspendedError extends DomainError {
   readonly code = 'ACCOUNT_SUSPENDED';
   constructor() {
-    super(
-      'ACCOUNT_SUSPENDED',
-      'Your account has been suspended. Please contact support.',
-    );
+    super('ACCOUNT_SUSPENDED', 'Your account has been suspended. Please contact support.');
   }
 }
 
@@ -102,7 +99,10 @@ export class CampaignNotClaimableError extends DomainError {
 export class CampaignAlreadyClaimedError extends DomainError {
   readonly code = 'CAMPAIGN_ALREADY_CLAIMED';
   constructor() {
-    super('CAMPAIGN_ALREADY_CLAIMED', 'This campaign has already been claimed by another reviewer.');
+    super(
+      'CAMPAIGN_ALREADY_CLAIMED',
+      'This campaign has already been claimed by another reviewer.',
+    );
   }
 }
 

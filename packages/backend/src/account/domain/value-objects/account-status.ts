@@ -7,31 +7,3 @@ export const AccountStatus = {
 } as const;
 
 export type AccountStatus = (typeof AccountStatus)[keyof typeof AccountStatus];
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

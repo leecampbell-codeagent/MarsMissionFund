@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { NavLink } from 'react-router-dom';
 
 interface SettingsNavProps {
@@ -107,9 +107,7 @@ export function SettingsNav({ activeRoute }: SettingsNavProps): ReactElement {
               <NavLink
                 key={item.path}
                 to={item.path}
-                className={({ isActive }) =>
-                  `settings-nav-link${isActive ? ' active' : ''}`
-                }
+                className={({ isActive }) => `settings-nav-link${isActive ? ' active' : ''}`}
                 aria-current={activeRoute === item.path ? 'page' : undefined}
               >
                 {item.label}
@@ -132,9 +130,7 @@ export function SettingsNav({ activeRoute }: SettingsNavProps): ReactElement {
           <NavLink
             key={item.path}
             to={item.path}
-            className={({ isActive }) =>
-              `settings-nav-tab${isActive ? ' active' : ''}`
-            }
+            className={({ isActive }) => `settings-nav-tab${isActive ? ' active' : ''}`}
             aria-current={activeRoute === item.path ? 'page' : undefined}
           >
             {item.label}
@@ -144,31 +140,3 @@ export function SettingsNav({ activeRoute }: SettingsNavProps): ReactElement {
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

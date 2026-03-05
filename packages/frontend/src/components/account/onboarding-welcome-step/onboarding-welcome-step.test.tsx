@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { OnboardingWelcomeStep } from './onboarding-welcome-step';
 
 describe('OnboardingWelcomeStep', () => {
@@ -11,7 +11,9 @@ describe('OnboardingWelcomeStep', () => {
 
   it('renders the heading', () => {
     render(<OnboardingWelcomeStep onNext={vi.fn()} />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('YOUR MISSION STARTS HERE.');
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      'YOUR MISSION STARTS HERE.',
+    );
   });
 
   it('renders the welcome body text', () => {
@@ -32,28 +34,3 @@ describe('OnboardingWelcomeStep', () => {
     expect(onNext).toHaveBeenCalledOnce();
   });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

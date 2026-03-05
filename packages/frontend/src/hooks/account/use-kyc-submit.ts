@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { ApiError } from '../../api/client';
 import { submitKyc } from '../../api/kyc-api';
-import { type ApiError } from '../../api/client';
 import { CURRENT_USER_QUERY_KEY } from './use-current-user';
 import { KYC_STATUS_QUERY_KEY } from './use-kyc-status';
 

@@ -1,7 +1,7 @@
 import { type ReactElement, useEffect, useRef } from 'react';
-import { type NotificationPrefs } from '../../../api/account-api';
-import { NotificationToggleRow } from '../notification-toggle-row/notification-toggle-row';
+import type { NotificationPrefs } from '../../../api/account-api';
 import { LoadingSpinner } from '../../ui/LoadingSpinner';
+import { NotificationToggleRow } from '../notification-toggle-row/notification-toggle-row';
 
 interface NotificationPrefsFormProps {
   readonly prefs: NotificationPrefs | null;
@@ -196,10 +196,7 @@ export function NotificationPrefsForm({
         }}
       />
 
-      <fieldset
-        aria-busy={isLoading}
-        style={{ border: 'none', padding: 0, margin: 0 }}
-      >
+      <fieldset aria-busy={isLoading} style={{ border: 'none', padding: 0, margin: 0 }}>
         <legend
           style={{
             position: 'absolute',
@@ -213,55 +210,23 @@ export function NotificationPrefsForm({
           Notification preferences
         </legend>
 
-        {isLoading || !prefs ? (
-          <>
-            {PREF_ROWS.map((row, index) => (
+        {isLoading || !prefs
+          ? PREF_ROWS.map((row, index) => (
               <SkeletonRow key={row.key} isLast={index === PREF_ROWS.length - 1} />
+            ))
+          : PREF_ROWS.map((row, index) => (
+              <NotificationToggleRow
+                key={row.key}
+                id={row.key}
+                label={row.label}
+                description={row.description}
+                checked={prefs[row.key] as boolean}
+                locked={row.locked}
+                onChange={(value) => onToggle(row.key, value)}
+                isLast={index === PREF_ROWS.length - 1}
+              />
             ))}
-          </>
-        ) : (
-          PREF_ROWS.map((row, index) => (
-            <NotificationToggleRow
-              key={row.key}
-              id={row.key}
-              label={row.label}
-              description={row.description}
-              checked={prefs[row.key] as boolean}
-              locked={row.locked}
-              onChange={(value) => onToggle(row.key, value)}
-              isLast={index === PREF_ROWS.length - 1}
-            />
-          ))
-        )}
       </fieldset>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

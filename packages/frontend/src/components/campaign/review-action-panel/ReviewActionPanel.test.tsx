@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { ReviewActionPanel } from './ReviewActionPanel';
 
 const defaultProps = {
@@ -54,22 +54,34 @@ describe('ReviewActionPanel', () => {
   it('reject button is disabled when only rejection reason is filled', async () => {
     render(<ReviewActionPanel {...defaultProps} />);
     await userEvent.click(screen.getByRole('tab', { name: /Reject/i }));
-    await userEvent.type(screen.getByRole('textbox', { name: /Rejection Reason/i }), 'Missing data');
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /Rejection Reason/i }),
+      'Missing data',
+    );
     expect(screen.getByRole('button', { name: 'Reject this campaign' })).toBeDisabled();
   });
 
   it('reject button is disabled when only guidance is filled', async () => {
     render(<ReviewActionPanel {...defaultProps} />);
     await userEvent.click(screen.getByRole('tab', { name: /Reject/i }));
-    await userEvent.type(screen.getByRole('textbox', { name: /Resubmission Guidance/i }), 'Add more details');
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /Resubmission Guidance/i }),
+      'Add more details',
+    );
     expect(screen.getByRole('button', { name: 'Reject this campaign' })).toBeDisabled();
   });
 
   it('reject button is enabled when both fields are non-empty', async () => {
     render(<ReviewActionPanel {...defaultProps} />);
     await userEvent.click(screen.getByRole('tab', { name: /Reject/i }));
-    await userEvent.type(screen.getByRole('textbox', { name: /Rejection Reason/i }), 'Missing data');
-    await userEvent.type(screen.getByRole('textbox', { name: /Resubmission Guidance/i }), 'Add more details');
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /Rejection Reason/i }),
+      'Missing data',
+    );
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /Resubmission Guidance/i }),
+      'Add more details',
+    );
     expect(screen.getByRole('button', { name: 'Reject this campaign' })).not.toBeDisabled();
   });
 
@@ -77,8 +89,14 @@ describe('ReviewActionPanel', () => {
     const onReject = vi.fn();
     render(<ReviewActionPanel {...defaultProps} onReject={onReject} />);
     await userEvent.click(screen.getByRole('tab', { name: /Reject/i }));
-    await userEvent.type(screen.getByRole('textbox', { name: /Rejection Reason/i }), 'Not enough detail');
-    await userEvent.type(screen.getByRole('textbox', { name: /Resubmission Guidance/i }), 'Add technical specs');
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /Rejection Reason/i }),
+      'Not enough detail',
+    );
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /Resubmission Guidance/i }),
+      'Add technical specs',
+    );
     await userEvent.click(screen.getByRole('button', { name: 'Reject this campaign' }));
     expect(onReject).toHaveBeenCalledWith('Not enough detail', 'Add technical specs');
   });

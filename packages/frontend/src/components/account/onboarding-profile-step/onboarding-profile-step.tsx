@@ -1,4 +1,4 @@
-import { type ReactElement, useState, useId } from 'react';
+import { type ReactElement, useId, useState } from 'react';
 import { Button } from '../../ui/Button';
 
 interface OnboardingProfileStepProps {
@@ -134,8 +134,8 @@ export function OnboardingProfileStep({
           marginTop: 0,
         }}
       >
-        Your profile appears on campaigns you back and missions you create. You can always update
-        it later.
+        Your profile appears on campaigns you back and missions you create. You can always update it
+        later.
       </p>
 
       <form onSubmit={handleSubmit}>
@@ -157,9 +157,7 @@ export function OnboardingProfileStep({
               ...inputStyle,
               borderColor: displayNameError ? 'var(--color-status-error)' : undefined,
             }}
-            aria-describedby={
-              displayNameError ? displayNameErrorId : undefined
-            }
+            aria-describedby={displayNameError ? displayNameErrorId : undefined}
             maxLength={DISPLAY_NAME_MAX + 10}
           />
           {displayNameError ? (
@@ -298,12 +296,7 @@ export function OnboardingProfileStep({
           >
             Skip for now
           </Button>
-          <Button
-            variant="primary"
-            type="submit"
-            isLoading={isSaving}
-            disabled={isSaving}
-          >
+          <Button variant="primary" type="submit" isLoading={isSaving} disabled={isSaving}>
             {isSaving ? 'Saving…' : 'Save and continue →'}
           </Button>
         </div>
@@ -311,31 +304,3 @@ export function OnboardingProfileStep({
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

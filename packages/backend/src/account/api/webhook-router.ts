@@ -116,31 +116,3 @@ export function createWebhookRouter(accountAppService: AccountAppService, logger
 
   return router;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

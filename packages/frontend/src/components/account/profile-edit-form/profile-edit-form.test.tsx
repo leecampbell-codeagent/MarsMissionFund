@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import type { UserProfile } from '../../../api/account-api';
 import { ProfileEditForm } from './profile-edit-form';
-import { type UserProfile } from '../../../api/account-api';
 
 const mockUser: UserProfile = {
   id: 'usr_01',
@@ -93,31 +93,3 @@ describe('ProfileEditForm', () => {
     expect(screen.getByRole('form', { name: 'Edit profile' })).toBeInTheDocument();
   });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

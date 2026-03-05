@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../../api/client';
 import { KycVerificationPanel } from './kyc-verification-panel';
 
@@ -31,7 +31,9 @@ describe('KycVerificationPanel', () => {
     it('renders loading skeleton when isLoading=true', () => {
       const { container } = render(<KycVerificationPanel isLoading />);
       expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument();
-      expect(container.querySelector('[aria-label="Loading identity verification status"]')).toBeInTheDocument();
+      expect(
+        container.querySelector('[aria-label="Loading identity verification status"]'),
+      ).toBeInTheDocument();
     });
 
     it('does not render CTA button in loading state', () => {
