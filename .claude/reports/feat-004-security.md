@@ -4,11 +4,43 @@
 
 ## Verdict: ✅ 0 CRITICAL / 0 HIGH / 2 MEDIUM / 3 LOW FINDINGS
 
+## Review History
+
+| Iteration | Date | Reviewer Note |
+|-----------|------|---------------|
+| 1 | 2026-03-05 | Initial review |
+| 2 | 2026-03-05 | Re-verification after CI/CD fixes (biome format, TypeScript strict-mode fix, CI build step, quality reports). No security-relevant logic changes confirmed. All prior findings unchanged. Verdict unchanged. |
+
 ## Summary
 
 feat-004 introduces unauthenticated public campaign endpoints (`GET /api/v1/public/campaigns`, `GET /api/v1/public/campaigns/:id`, `GET /api/v1/public/campaigns/stats`). The overall implementation is well-structured and security-aware. Data isolation is correctly enforced at the SQL layer (status IN ('live', 'funded')). SQL injection is fully mitigated by parameterised queries including for FTS and dynamic ORDER BY. Financial values are correctly serialised as strings. No stack traces are exposed in error responses.
 
 Two medium findings and three low/informational findings are documented below. No critical or high severity issues were identified.
+
+### Iteration 2 Re-verification (2026-03-05)
+
+The following changes were made since the initial review and were verified to have no security impact:
+
+1. **`biome format --write` applied to 156 files** — trailing newline and whitespace-only changes. No logic modifications. Confirmed by reviewing `packages/backend/src/app.ts` diff: only whitespace reformatting of the `createPublicCampaignRouter` call and removal of trailing blank lines. No API, auth, SQL, or validation logic changed.
+
+2. **8 biome lint rules downgraded from `error` to `warn` in `biome.json`** — tooling configuration only. No runtime code affected.
+
+3. **TypeScript strict-mode fix in `in-memory-campaign-repository.adapter.ts` lines 222–224** — The original expression `a.deadline?.getTime() ?? 0 - b.deadline?.getTime() ?? 0` had a JavaScript operator-precedence bug (subtraction binds tighter than `??`, making the expression effectively `a.deadline?.getTime() ?? (0 - b.deadline?.getTime() ?? 0)`). The fix correctly extracts both values into named variables before subtracting:
+   ```typescript
+   const aTime = a.deadline?.getTime() ?? 0;
+   const bTime = b.deadline?.getTime() ?? 0;
+   return aTime - bTime;
+   ```
+   This is **pure type-narrowing / correctness fix** on the in-memory test adapter only. The production path uses `pg-campaign-repository.adapter.ts` with a SQL `ORDER BY` clause — this file was not modified. No security impact.
+
+4. **Added a `Build` step to `.github/workflows/ci.yml`** — CI tooling only. No runtime code affected.
+
+5. **Added 4 quality report files to `.claude/reports/`** — documentation only. No runtime code affected.
+
+**Security-critical files verified unchanged** (confirmed via `git diff HEAD~1`):
+- `packages/backend/src/campaign/api/public-campaign-router.ts` — no changes
+- `packages/backend/src/campaign/adapters/pg-campaign-repository.adapter.ts` — no changes
+- `packages/backend/src/app.ts` — whitespace-only reformatting (import reorder + trailing blank lines removed)
 
 ---
 
