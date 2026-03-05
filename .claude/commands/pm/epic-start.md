@@ -66,12 +66,11 @@ Only runs if the feature is not yet specced.
    - Update backlog with "❌ BLOCKED — spec validation failed"
    - Exit with report
 7. Update backlog to "✅ SPECCED"
-8. Create feature branch and commit spec artifacts (using `BASE_BRANCH` resolved in step 1b):
+8. Commit and push:
    ```bash
-   git checkout -b ralph/feat-XXX-[name] <BASE_BRANCH>
-   git add .claude/prds/feat-XXX-* .claude/backlog.md
+   git add .claude/prds/
    git commit -m "chore: spec feat-XXX [name]"
-   git push -u origin ralph/feat-XXX-[name]
+   git push origin HEAD
    ```
 
 ### 3. Pre-Implementation Setup
@@ -87,13 +86,11 @@ Only runs if the feature is not yet specced.
    - `.claude/context/patterns.md` — established code patterns to follow
    - `.claude/context/gotchas.md` — known pitfalls to avoid
 
-3. **Verify feature branch** (already created in step 2.8, or handle `--skip-spec`):
-   - If coming from step 2.8: branch `ralph/feat-XXX-[name]` already exists and is checked out
-   - If `--skip-spec` was used (skipped step 2): create the branch now:
-     ```bash
-     git fetch upstream main
-     git checkout -b ralph/feat-XXX-[name] <BASE_BRANCH>
-     ```
+3. **Create feature branch** (using `BASE_BRANCH` and `PR_TARGET` resolved in step 1b):
+   ```bash
+   git fetch upstream main
+   git checkout -b ralph/feat-XXX-[name] <BASE_BRANCH>
+   ```
 
 4. **Update backlog:**
    - Mark feature as "🔨 BUILDING" in `.claude/backlog.md`

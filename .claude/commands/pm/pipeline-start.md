@@ -62,37 +62,23 @@ You are the **Pipeline Orchestrator**. Your job is to run the continuous product
      - If FAIL: re-run the failing agent with revision instructions, then re-validate
      - If PASS: update backlog status to "✅ SPECCED"
 
-5b. **Commit and push spec artifacts:**
-    Resolve the base branch (same logic as step 6 below), create the feature branch, and commit the PRDs immediately so spec work survives agent crashes:
-    - Read this feature's dependencies from `.claude/backlog.md`
-    - **If all dependencies are SHIPPED (or feature has none):** Base = `upstream/main`, `PR_TARGET = "main"`
-    - **If any dependency has an unmerged branch from this run:** Base = `PREVIOUS_FEATURE_BRANCH`, `PR_TARGET` = that branch name
-    ```bash
-    git checkout -b ralph/feat-XXX-[name] <resolved-base>
-    git add .claude/prds/feat-XXX-* .claude/backlog.md
-    git commit -m "chore: spec feat-XXX [name]"
-    git push -u origin ralph/feat-XXX-[name]
-    ```
-
 ### Phase 3: Implementation Track — Build the Feature
 
-6. **Verify feature branch (already created in step 5b):**
-   - If on a loop iteration where step 5b already created the branch, verify you are checked out to `ralph/feat-XXX-[name]`
-   - If the feature was already specced (skipped step 5), resolve the base branch and create the branch now:
-     - Read this feature's dependencies from `.claude/backlog.md`
-     - For each dependency:
-       - If status is "SHIPPED" → already in upstream/main, skip
-       - If it was built in this pipeline run and has an unmerged branch → candidate
-     - **If all dependencies are SHIPPED (or feature has none):**
-       - Base = `upstream/main`
-       - `PR_TARGET = "main"`
-     - **If any dependency has an unmerged branch from this run:**
-       - Base = `PREVIOUS_FEATURE_BRANCH` (the last-built feature's branch, which contains all stacked work)
-       - `PR_TARGET` = that branch name
-     - Create the branch:
-       ```bash
-       git checkout -b ralph/feat-XXX-[name] <resolved-base>
-       ```
+6. **Resolve base branch and create feature branch:**
+   - Read this feature's dependencies from `.claude/backlog.md`
+   - For each dependency:
+     - If status is "SHIPPED" → already in upstream/main, skip
+     - If it was built in this pipeline run and has an unmerged branch → candidate
+   - **If all dependencies are SHIPPED (or feature has none):**
+     - Base = `upstream/main`
+     - `PR_TARGET = "main"`
+   - **If any dependency has an unmerged branch from this run:**
+     - Base = `PREVIOUS_FEATURE_BRANCH` (the last-built feature's branch, which contains all stacked work)
+     - `PR_TARGET` = that branch name
+   - Create the branch:
+     ```bash
+     git checkout -b ralph/feat-XXX-[name] <resolved-base>
+     ```
 
 7. **Run Implementation agents in parallel (or sequential if dependencies exist):**
    - **Backend Engineer** (read `.claude/agents/backend-engineer.md`)
