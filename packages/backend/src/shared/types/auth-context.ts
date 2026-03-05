@@ -1,4 +1,4 @@
-import type { AccountStatus } from '../../account/domain/account.js';
+import type { AccountStatus, OnboardingStep } from '../../account/domain/account.js';
 
 export interface AuthContext {
   readonly userId: string;
@@ -8,4 +8,5 @@ export interface AuthContext {
   readonly roles: readonly string[];
   readonly accountStatus: AccountStatus;
   readonly onboardingCompleted: boolean;
+  readonly onboardingStep: OnboardingStep;
 }

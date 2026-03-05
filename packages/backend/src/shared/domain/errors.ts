@@ -29,3 +29,24 @@ export class AccountDeletedError extends DomainError {
     this.name = 'AccountDeletedError';
   }
 }
+
+export class InvalidAccountDataError extends DomainError {
+  constructor(message: string) {
+    super('INVALID_ACCOUNT_DATA', message);
+    this.name = 'InvalidAccountDataError';
+  }
+}
+
+export class InvalidOnboardingStepError extends DomainError {
+  constructor(message: string) {
+    super('INVALID_ONBOARDING_STEP', message);
+    this.name = 'InvalidOnboardingStepError';
+  }
+}
+
+export class AccountNotFoundError extends DomainError {
+  constructor(message = 'Account not found.') {
+    super('ACCOUNT_NOT_FOUND', message);
+    this.name = 'AccountNotFoundError';
+  }
+}

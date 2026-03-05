@@ -1,5 +1,6 @@
 import express from 'express';
 import pinoHttp from 'pino-http';
+import { createAccountRouter } from './account/api/account-router.js';
 import { createAuthRouter } from './account/api/auth-router.js';
 import { createWebhookRouter } from './account/api/webhook-router.js';
 import type { AccountAppService } from './account/application/account-app-service.js';
@@ -62,6 +63,10 @@ function createApp(deps?: AppDependencies): express.Express {
     // Auth routes
     const authRouter = createAuthRouter();
     app.use(requireAuth, enrichContext, authRouter);
+
+    // Account routes (new for feat-004)
+    const accountRouter = createAccountRouter(deps.accountAppService);
+    app.use(requireAuth, enrichContext, accountRouter);
   } else {
     // No deps = simple mode (e.g., health-only tests)
     app.use(express.json({ limit: '1mb' }));

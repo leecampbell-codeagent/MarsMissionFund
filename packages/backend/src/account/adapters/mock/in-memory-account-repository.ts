@@ -13,6 +13,10 @@ export class InMemoryAccountRepository implements AccountRepository {
     return Promise.resolve(null);
   }
 
+  findById(id: string): Promise<Account | null> {
+    return Promise.resolve(this.accounts.get(id) ?? null);
+  }
+
   async save(account: Account): Promise<void> {
     // Emulate ON CONFLICT (clerk_user_id) DO UPDATE behaviour
     const existing = await this.findByClerkUserId(account.clerkUserId);
@@ -23,9 +27,13 @@ export class InMemoryAccountRepository implements AccountRepository {
         clerkUserId: existing.clerkUserId,
         email: account.email,
         displayName: account.displayName,
+        bio: existing.bio,
+        avatarUrl: existing.avatarUrl,
         status: existing.status,
         roles: existing.roles,
         onboardingCompleted: existing.onboardingCompleted,
+        onboardingStep: existing.onboardingStep,
+        notificationPreferences: existing.notificationPreferences,
         createdAt: existing.createdAt,
         updatedAt: new Date(),
       });
@@ -35,17 +43,26 @@ export class InMemoryAccountRepository implements AccountRepository {
     }
   }
 
+  async update(account: Account): Promise<void> {
+    this.accounts.set(account.id, account);
+  }
+
   async upsertFromWebhook(input: WebhookAccountInput): Promise<void> {
     const existing = await this.findByClerkUserId(input.clerkUserId);
     if (existing) {
+      // Only update display name if current value is null (COALESCE behaviour)
       const updated = Account.reconstitute({
         id: existing.id,
         clerkUserId: existing.clerkUserId,
         email: input.email,
-        displayName: input.displayName,
+        displayName: existing.displayName ?? input.displayName,
+        bio: existing.bio,
+        avatarUrl: existing.avatarUrl,
         status: existing.status,
         roles: existing.roles,
         onboardingCompleted: existing.onboardingCompleted,
+        onboardingStep: existing.onboardingStep,
+        notificationPreferences: existing.notificationPreferences,
         createdAt: existing.createdAt,
         updatedAt: new Date(),
       });
@@ -68,9 +85,13 @@ export class InMemoryAccountRepository implements AccountRepository {
         clerkUserId: existing.clerkUserId,
         email: existing.email,
         displayName: existing.displayName,
+        bio: existing.bio,
+        avatarUrl: existing.avatarUrl,
         status,
         roles: existing.roles,
         onboardingCompleted: existing.onboardingCompleted,
+        onboardingStep: existing.onboardingStep,
+        notificationPreferences: existing.notificationPreferences,
         createdAt: existing.createdAt,
         updatedAt: new Date(),
       });

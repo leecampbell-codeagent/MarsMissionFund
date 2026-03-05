@@ -6,7 +6,8 @@ import request from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { InMemoryAccountRepository } from '../account/adapters/mock/in-memory-account-repository.js';
 import { AccountAppService } from '../account/application/account-app-service.js';
-import { Account } from '../account/domain/account.js';
+import { Account, DEFAULT_NOTIFICATION_PREFERENCES } from '../account/domain/account.js';
+import { InMemoryEventStore } from '../shared/adapters/mock/in-memory-event-store.js';
 import {
   type AuthClaimsExtractor,
   createEnrichAuthContext,
@@ -72,7 +73,7 @@ describe('enrichAuthContext middleware', () => {
 
   beforeEach(() => {
     accountRepo = new InMemoryAccountRepository();
-    accountAppService = new AccountAppService(accountRepo, testLogger);
+    accountAppService = new AccountAppService(accountRepo, new InMemoryEventStore(), testLogger);
   });
 
   it('creates account via JIT on first request', async () => {
@@ -123,9 +124,13 @@ describe('enrichAuthContext middleware', () => {
       clerkUserId: 'user_suspended_001',
       email: 'suspended@marsmission.fund',
       displayName: null,
+      bio: null,
+      avatarUrl: null,
       status: 'suspended',
       roles: ['backer'],
       onboardingCompleted: false,
+      onboardingStep: 'welcome',
+      notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -154,9 +159,13 @@ describe('enrichAuthContext middleware', () => {
       clerkUserId: 'user_deactivated_001',
       email: 'deactivated@marsmission.fund',
       displayName: null,
+      bio: null,
+      avatarUrl: null,
       status: 'deactivated',
       roles: ['backer'],
       onboardingCompleted: false,
+      onboardingStep: 'welcome',
+      notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -182,9 +191,13 @@ describe('enrichAuthContext middleware', () => {
       clerkUserId: 'user_deleted_001',
       email: 'deleted@marsmission.fund',
       displayName: null,
+      bio: null,
+      avatarUrl: null,
       status: 'deleted',
       roles: ['backer'],
       onboardingCompleted: false,
+      onboardingStep: 'welcome',
+      notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

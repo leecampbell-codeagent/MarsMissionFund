@@ -6,7 +6,9 @@ import { PublicOnlyRoute } from './components/auth/public-only-route';
 import { LandingPlaceholder } from './components/layout/landing-placeholder';
 import { PageShell } from './components/layout/page-shell';
 import DashboardPlaceholder from './pages/dashboard';
-import OnboardingPlaceholder from './pages/onboarding';
+import OnboardingPage from './pages/onboarding';
+import ProfileSettingsPage from './pages/settings-profile';
+import PreferencesSettingsPage from './pages/settings-preferences';
 import SignInPage from './pages/sign-in';
 import SignUpPage from './pages/sign-up';
 
@@ -43,7 +45,23 @@ export function App(): ReactElement {
           path="/onboarding"
           element={
             <ProtectedRoute>
-              <OnboardingPlaceholder />
+              <OnboardingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings/profile"
+          element={
+            <ProtectedRoute>
+              <ProfileSettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings/preferences"
+          element={
+            <ProtectedRoute>
+              <PreferencesSettingsPage />
             </ProtectedRoute>
           }
         />

@@ -7,8 +7,9 @@ import { InMemoryAccountRepository } from '../account/adapters/mock/in-memory-ac
 import { MockAuthAdapter } from '../account/adapters/mock/mock-auth-adapter.js';
 import { MockWebhookVerificationAdapter } from '../account/adapters/mock/mock-webhook-verification-adapter.js';
 import { AccountAppService } from '../account/application/account-app-service.js';
-import { Account } from '../account/domain/account.js';
+import { Account, DEFAULT_NOTIFICATION_PREFERENCES } from '../account/domain/account.js';
 import { type AppDependencies, createApp } from '../app.js';
+import { InMemoryEventStore } from '../shared/adapters/mock/in-memory-event-store.js';
 import type { AuthClaimsExtractor } from '../shared/middleware/enrich-auth-context.js';
 import type { AuthExtractor } from '../shared/middleware/require-authentication.js';
 
@@ -49,10 +50,11 @@ function createMockExtractor(): AuthExtractor & AuthClaimsExtractor {
 
 function createTestDeps(accountRepo: InMemoryAccountRepository): AppDependencies {
   const extractor = createMockExtractor();
+  const eventStore = new InMemoryEventStore();
   return {
     authPort: new MockAuthAdapter(),
     webhookVerifier: new MockWebhookVerificationAdapter(),
-    accountAppService: new AccountAppService(accountRepo, testLogger),
+    accountAppService: new AccountAppService(accountRepo, eventStore, testLogger),
     authExtractor: extractor,
     claimsExtractor: extractor,
   };
@@ -108,9 +110,13 @@ describe('GET /api/v1/auth/me', () => {
       clerkUserId: 'user_mock_001',
       email: 'mock@example.com',
       displayName: 'Mock User',
+      bio: null,
+      avatarUrl: null,
       status: 'suspended',
       roles: ['backer'],
       onboardingCompleted: false,
+      onboardingStep: 'welcome',
+      notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -128,9 +134,13 @@ describe('GET /api/v1/auth/me', () => {
       clerkUserId: 'user_mock_001',
       email: 'mock@example.com',
       displayName: 'Mock User',
+      bio: null,
+      avatarUrl: null,
       status: 'deleted',
       roles: ['backer'],
       onboardingCompleted: false,
+      onboardingStep: 'welcome',
+      notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -179,8 +189,8 @@ describe('POST /api/webhooks/clerk', () => {
     expect(accounts[0]?.displayName).toBe('Webhook User');
   });
 
-  it('user.updated event updates account row', async () => {
-    // First create via user.created
+  it('user.updated event updates email but preserves existing display name (COALESCE)', async () => {
+    // First create via user.created — this sets displayName to 'Original Name'
     const createEvent = {
       type: 'user.created',
       data: {
@@ -196,7 +206,7 @@ describe('POST /api/webhooks/clerk', () => {
       .set('Content-Type', 'application/json')
       .send(JSON.stringify(createEvent));
 
-    // Then update
+    // Then update — email is updated, but displayName should be preserved via COALESCE
     const updateEvent = {
       type: 'user.updated',
       data: {
@@ -217,7 +227,8 @@ describe('POST /api/webhooks/clerk', () => {
     const accounts = accountRepo.getAll();
     expect(accounts.length).toBe(1);
     expect(accounts[0]?.email).toBe('updated@marsmission.fund');
-    expect(accounts[0]?.displayName).toBe('Updated Name');
+    // displayName is preserved via COALESCE — webhook does not overwrite existing MMF-set display name
+    expect(accounts[0]?.displayName).toBe('Original Name');
   });
 
   it('user.deleted event sets status to deleted', async () => {
@@ -381,8 +392,8 @@ describe('InMemoryAccountRepository', () => {
     expect(found?.email).toBe('save@marsmission.fund');
   });
 
-  it('upsertFromWebhook inserts when new, updates when existing', async () => {
-    // Insert
+  it('upsertFromWebhook inserts when new, updates email but preserves existing display name (COALESCE)', async () => {
+    // Insert with display name
     await repo.upsertFromWebhook({
       clerkUserId: 'user_repo_003',
       email: 'upsert-original@marsmission.fund',
@@ -392,8 +403,9 @@ describe('InMemoryAccountRepository', () => {
     let found = await repo.findByClerkUserId('user_repo_003');
     expect(found).not.toBeNull();
     expect(found?.email).toBe('upsert-original@marsmission.fund');
+    expect(found?.displayName).toBe('Original');
 
-    // Update
+    // Update via webhook — email updates but existing displayName is preserved (COALESCE)
     await repo.upsertFromWebhook({
       clerkUserId: 'user_repo_003',
       email: 'upsert-updated@marsmission.fund',
@@ -403,9 +415,29 @@ describe('InMemoryAccountRepository', () => {
     found = await repo.findByClerkUserId('user_repo_003');
     expect(found).not.toBeNull();
     expect(found?.email).toBe('upsert-updated@marsmission.fund');
-    expect(found?.displayName).toBe('Updated');
+    // displayName should remain 'Original' because COALESCE preserves the existing non-null value
+    expect(found?.displayName).toBe('Original');
 
     // Still only one account
     expect(repo.getAll().length).toBe(1);
+  });
+
+  it('upsertFromWebhook sets display name when current is null', async () => {
+    // Insert without display name (null)
+    await repo.upsertFromWebhook({
+      clerkUserId: 'user_repo_004',
+      email: 'null-name@marsmission.fund',
+      displayName: null,
+    });
+
+    // Update with a display name — should be set since current is null
+    await repo.upsertFromWebhook({
+      clerkUserId: 'user_repo_004',
+      email: 'null-name@marsmission.fund',
+      displayName: 'New Name',
+    });
+
+    const found = await repo.findByClerkUserId('user_repo_004');
+    expect(found?.displayName).toBe('New Name');
   });
 });

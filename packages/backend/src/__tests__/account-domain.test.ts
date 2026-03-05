@@ -1,11 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { Account, InvalidAccountDataError } from '../account/domain/account.js';
+import { Account, DEFAULT_NOTIFICATION_PREFERENCES } from '../account/domain/account.js';
 import {
   AccountDeletedError,
   AccountSuspendedError,
   AuthenticationError,
   DomainError,
+  InvalidAccountDataError,
 } from '../shared/domain/errors.js';
+
+const BASE_RECONSTITUTE_PROPS = {
+  bio: null,
+  avatarUrl: null,
+  onboardingStep: 'welcome' as const,
+  notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
+};
 
 describe('Account entity', () => {
   describe('create()', () => {
@@ -115,6 +123,7 @@ describe('Account entity', () => {
         clerkUserId: 'user_2xaB3cDeFgH',
         email: 'pioneer@marsmission.fund',
         displayName: 'Jane Pioneer',
+        ...BASE_RECONSTITUTE_PROPS,
         status: 'suspended',
         roles: ['backer', 'creator'],
         onboardingCompleted: true,
@@ -141,6 +150,7 @@ describe('Account entity', () => {
         clerkUserId: '',
         email: '',
         displayName: null,
+        ...BASE_RECONSTITUTE_PROPS,
         status: 'active',
         roles: [],
         onboardingCompleted: false,
@@ -161,6 +171,7 @@ describe('Account entity', () => {
         clerkUserId: 'user_abc',
         email: 'test@example.com',
         displayName: null,
+        ...BASE_RECONSTITUTE_PROPS,
         status: 'active',
         roles: ['backer'],
         onboardingCompleted: false,
@@ -177,6 +188,7 @@ describe('Account entity', () => {
         clerkUserId: 'user_abc',
         email: 'test@example.com',
         displayName: null,
+        ...BASE_RECONSTITUTE_PROPS,
         status: 'suspended',
         roles: ['backer'],
         onboardingCompleted: false,
@@ -193,6 +205,7 @@ describe('Account entity', () => {
         clerkUserId: 'user_abc',
         email: 'test@example.com',
         displayName: null,
+        ...BASE_RECONSTITUTE_PROPS,
         status: 'pending_verification',
         roles: ['backer'],
         onboardingCompleted: false,
@@ -211,6 +224,7 @@ describe('Account entity', () => {
         clerkUserId: 'user_abc',
         email: 'test@example.com',
         displayName: null,
+        ...BASE_RECONSTITUTE_PROPS,
         status: 'suspended',
         roles: ['backer'],
         onboardingCompleted: false,
@@ -227,6 +241,7 @@ describe('Account entity', () => {
         clerkUserId: 'user_abc',
         email: 'test@example.com',
         displayName: null,
+        ...BASE_RECONSTITUTE_PROPS,
         status: 'deactivated',
         roles: ['backer'],
         onboardingCompleted: false,
@@ -243,6 +258,7 @@ describe('Account entity', () => {
         clerkUserId: 'user_abc',
         email: 'test@example.com',
         displayName: null,
+        ...BASE_RECONSTITUTE_PROPS,
         status: 'active',
         roles: ['backer'],
         onboardingCompleted: false,
@@ -259,6 +275,7 @@ describe('Account entity', () => {
         clerkUserId: 'user_abc',
         email: 'test@example.com',
         displayName: null,
+        ...BASE_RECONSTITUTE_PROPS,
         status: 'deleted',
         roles: ['backer'],
         onboardingCompleted: false,
