@@ -390,3 +390,9 @@ This agent runs in a Ralph loop until all completion criteria are met. Each iter
 7. Self-check: do all tests pass? Is the real service actually connected? Are status files updated?
 
 If not, iterate. If yes, signal completion to the orchestrator.
+
+
+
+
+
+

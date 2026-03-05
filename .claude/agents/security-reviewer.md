@@ -293,3 +293,9 @@ This agent runs in a Ralph loop until all completion criteria are met. Each iter
 6. Self-check: did you check every query for data isolation? Every endpoint for auth? Every input for validation?
 
 If not, iterate. If yes, signal completion to the orchestrator.
+
+
+
+
+
+

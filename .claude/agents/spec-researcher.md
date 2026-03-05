@@ -230,3 +230,9 @@ This agent runs in a Ralph loop until all completion criteria are met. Each iter
 5. Self-check: are all completion criteria met? Is the edge case list comprehensive?
 
 If not, iterate. If yes, signal completion to the orchestrator.
+
+
+
+
+
+

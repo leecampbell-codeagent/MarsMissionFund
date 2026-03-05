@@ -1,14 +1,42 @@
 {
   "name": "mars-mission-fund",
   "private": true,
+  "workspaces": [
+    "packages/shared",
+    "packages/backend",
+    "packages/frontend"
+  ],
   "description": "Sample crowdfunding app for Autonomous Agentic Coding workshops",
   "scripts": {
     "lint": "biome check .",
     "format": "biome check --formatter-enabled=true --linter-enabled=false .",
-    "typecheck": "echo 'No workspaces to typecheck yet'",
-    "test": "echo 'No workspaces to test yet'"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspace=packages/backend && npm run test --workspace=packages/frontend",
+    "build": "npm run build --workspace=packages/shared && npm run build --workspace=packages/backend && npm run build --workspace=packages/frontend"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.5"
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

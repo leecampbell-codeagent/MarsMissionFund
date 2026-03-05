@@ -48,9 +48,9 @@ Implement every data model change from the feature spec. The Backend Engineer ma
 
 BEGIN;
 
--- ============================================================
+-- --------------------------------------------------------
 -- New tables
--- ============================================================
+-- --------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS [table_name] (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -66,24 +66,24 @@ CREATE TABLE IF NOT EXISTS [table_name] (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
+-- --------------------------------------------------------
 -- Indexes
--- ============================================================
+-- --------------------------------------------------------
 
 CREATE INDEX idx_[table]_user_id ON [table_name](user_id);
 -- FK indexes
 -- Query pattern indexes (columns used in WHERE/ORDER BY)
 
--- ============================================================
+-- --------------------------------------------------------
 -- Constraints
--- ============================================================
+-- --------------------------------------------------------
 
 -- CHECK constraints for domain invariants
 -- UNIQUE constraints where specified
 
--- ============================================================
+-- --------------------------------------------------------
 -- Triggers
--- ============================================================
+-- --------------------------------------------------------
 
 -- Auto-update updated_at on row modification
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -423,3 +423,9 @@ This agent runs in a Ralph loop until all completion criteria are met. Each iter
 5. Self-check: are all migrations correct? Is every resource tagged? Are manual tasks documented? Is `.env.example` updated?
 
 If not, iterate. If yes, signal completion to the orchestrator.
+
+
+
+
+
+

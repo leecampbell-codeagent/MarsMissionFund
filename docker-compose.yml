@@ -1,0 +1,130 @@
+# --------------------------------------------------------
+# Mars Mission Fund — Local Development Docker Compose
+# --------------------------------------------------------
+# For human developers running outside the autonomous agent container.
+# Usage:
+#   docker compose up -d postgres       — start only the database
+#   docker compose run --rm migrate     — run dbmate migrations
+#   docker compose up                   — start all services
+#
+# Prerequisites:
+#   cp .env.example .env
+#   (edit .env with your Clerk keys before starting backend/frontend)
+# --------------------------------------------------------
+
+services:
+  # ----------------------------------------------------------
+  # PostgreSQL — primary database
+  # Credentials must match DATABASE_URL in .env
+  # ----------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mmf
+      POSTGRES_PASSWORD: mmf_password
+      POSTGRES_DB: mmf_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mmf -d mmf_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  # ----------------------------------------------------------
+  # dbmate — database migration runner
+  # Run once to apply all pending migrations:
+  #   docker compose run --rm migrate
+  # ----------------------------------------------------------
+  migrate:
+    image: amacneil/dbmate:2
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://mmf:mmf_password@postgres:5432/mmf_dev?sslmode=disable
+    volumes:
+      - ./db:/db
+    command: up
+    profiles:
+      - migrate
+
+  # ----------------------------------------------------------
+  # Backend — Express API server (tsx watch)
+  # Requires .env to be configured with Clerk keys.
+  # ----------------------------------------------------------
+  backend:
+    build:
+      context: .
+      dockerfile: packages/backend/Dockerfile.dev
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://mmf:mmf_password@postgres:5432/mmf_dev?sslmode=disable
+      NODE_ENV: development
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./packages/backend:/app/packages/backend
+      - ./packages/backend/node_modules:/app/packages/backend/node_modules
+    profiles:
+      - app
+
+  # ----------------------------------------------------------
+  # Frontend — Vite dev server
+  # ----------------------------------------------------------
+  frontend:
+    build:
+      context: .
+      dockerfile: packages/frontend/Dockerfile.dev
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      VITE_API_URL: http://localhost:3001
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./packages/frontend:/app/packages/frontend
+      - ./packages/frontend/node_modules:/app/packages/frontend/node_modules
+    profiles:
+      - app
+
+volumes:
+  postgres_data:
+    driver: local
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -53,9 +53,40 @@
         "rules": {
           "suspicious": {
             "noConsole": "off"
+          },
+          "style": {
+            "noNonNullAssertion": "off"
           }
         }
       }
     }
   ]
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
