@@ -29,7 +29,10 @@ const updatePreferencesSchema = z
 const advanceOnboardingSchema = z
   .object({
     step: z.enum(['role_selection', 'profile', 'preferences', 'completed']),
-    roles: z.array(z.enum(['backer', 'creator'])).min(1).optional(),
+    roles: z
+      .array(z.enum(['backer', 'creator']))
+      .min(1)
+      .optional(),
   })
   .strict();
 
@@ -50,14 +53,16 @@ function formatAccount(account: import('../domain/account.js').Account) {
 
 function zodErrorMessage(error: z.ZodError): string {
   // Zod v4 uses .issues, Zod v3 uses .errors — support both
-  const issues = (error as unknown as { issues?: { message: string }[] }).issues ??
+  const issues =
+    (error as unknown as { issues?: { message: string }[] }).issues ??
     (error as unknown as { errors?: { message: string }[] }).errors ??
     [];
   return issues[0]?.message ?? 'Validation failed.';
 }
 
 function zodErrorDetails(error: z.ZodError): unknown[] {
-  const issues = (error as unknown as { issues?: unknown[] }).issues ??
+  const issues =
+    (error as unknown as { issues?: unknown[] }).issues ??
     (error as unknown as { errors?: unknown[] }).errors ??
     [];
   return issues;
@@ -93,7 +98,11 @@ export function createAccountRouter(accountAppService: AccountAppService): Route
       const accountId = req.authContext?.userId;
       if (!accountId) {
         res.status(401).json({
-          error: { code: 'UNAUTHENTICATED', message: 'Authentication required.', correlation_id: req.id },
+          error: {
+            code: 'UNAUTHENTICATED',
+            message: 'Authentication required.',
+            correlation_id: req.id,
+          },
         });
         return;
       }
@@ -101,7 +110,11 @@ export function createAccountRouter(accountAppService: AccountAppService): Route
       const account = await accountAppService.getAccountById(accountId);
       if (!account) {
         res.status(404).json({
-          error: { code: 'ACCOUNT_NOT_FOUND', message: 'Account not found.', correlation_id: req.id },
+          error: {
+            code: 'ACCOUNT_NOT_FOUND',
+            message: 'Account not found.',
+            correlation_id: req.id,
+          },
         });
         return;
       }
@@ -118,7 +131,11 @@ export function createAccountRouter(accountAppService: AccountAppService): Route
       const accountId = req.authContext?.userId;
       if (!accountId) {
         res.status(401).json({
-          error: { code: 'UNAUTHENTICATED', message: 'Authentication required.', correlation_id: req.id },
+          error: {
+            code: 'UNAUTHENTICATED',
+            message: 'Authentication required.',
+            correlation_id: req.id,
+          },
         });
         return;
       }
@@ -172,7 +189,11 @@ export function createAccountRouter(accountAppService: AccountAppService): Route
       const accountId = req.authContext?.userId;
       if (!accountId) {
         res.status(401).json({
-          error: { code: 'UNAUTHENTICATED', message: 'Authentication required.', correlation_id: req.id },
+          error: {
+            code: 'UNAUTHENTICATED',
+            message: 'Authentication required.',
+            correlation_id: req.id,
+          },
         });
         return;
       }
@@ -213,7 +234,11 @@ export function createAccountRouter(accountAppService: AccountAppService): Route
       const accountId = req.authContext?.userId;
       if (!accountId) {
         res.status(401).json({
-          error: { code: 'UNAUTHENTICATED', message: 'Authentication required.', correlation_id: req.id },
+          error: {
+            code: 'UNAUTHENTICATED',
+            message: 'Authentication required.',
+            correlation_id: req.id,
+          },
         });
         return;
       }

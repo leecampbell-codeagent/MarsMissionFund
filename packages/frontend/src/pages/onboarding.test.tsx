@@ -74,9 +74,7 @@ describe('OnboardingPage', () => {
     renderWithProviders();
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-        'WELCOME TO THE MISSION',
-      );
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('WELCOME TO THE MISSION');
     });
   });
 
@@ -165,9 +163,7 @@ describe('OnboardingPage', () => {
     renderWithProviders();
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-        "YOU'RE READY FOR MARS",
-      );
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent("YOU'RE READY FOR MARS");
     });
   });
 });

@@ -80,9 +80,7 @@ describe('ProfileSettingsPage', () => {
       expect(screen.getByLabelText(/display name/i)).toHaveValue('Mission Operative');
     });
     expect(screen.getByLabelText(/bio/i)).toHaveValue('Passionate about interplanetary travel.');
-    expect(screen.getByLabelText(/avatar url/i)).toHaveValue(
-      'https://example.com/avatar.jpg',
-    );
+    expect(screen.getByLabelText(/avatar url/i)).toHaveValue('https://example.com/avatar.jpg');
   });
 
   it('shows email as read-only', async () => {

@@ -1,6 +1,6 @@
+import type { TransactionClient } from '../../../shared/ports/event-store-port.js';
 import { Account, type AccountStatus } from '../../domain/account.js';
 import type { AccountRepository, WebhookAccountInput } from '../../ports/account-repository.js';
-import type { TransactionClient } from '../../../shared/ports/event-store-port.js';
 
 export class InMemoryAccountRepository implements AccountRepository {
   private readonly accounts = new Map<string, Account>();

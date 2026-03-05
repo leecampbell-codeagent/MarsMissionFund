@@ -116,7 +116,9 @@ export async function createDependencies(): Promise<AppDependencies> {
     './account/adapters/clerk/clerk-webhook-verification-adapter.js'
   );
   const { PgAccountRepository } = await import('./account/adapters/pg/pg-account-repository.js');
-  const { PgEventStoreAdapter, PgTransactionAdapter } = await import('./shared/adapters/pg/pg-event-store-adapter.js');
+  const { PgEventStoreAdapter, PgTransactionAdapter } = await import(
+    './shared/adapters/pg/pg-event-store-adapter.js'
+  );
   const { Pool } = await import('pg');
 
   const pool = new Pool({
@@ -128,7 +130,12 @@ export async function createDependencies(): Promise<AppDependencies> {
   const accountRepository = new PgAccountRepository(pool);
   const eventStore = new PgEventStoreAdapter(pool);
   const transactionPort = new PgTransactionAdapter(pool);
-  const accountAppService = new AccountAppService(accountRepository, eventStore, logger, transactionPort);
+  const accountAppService = new AccountAppService(
+    accountRepository,
+    eventStore,
+    logger,
+    transactionPort,
+  );
   const extractor = await createClerkAuthExtractor();
 
   return {

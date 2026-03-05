@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { type Account, type AdvanceOnboardingInput } from '../../api/account-api';
+import type { Account, AdvanceOnboardingInput } from '../../api/account-api';
 import { useApiClient } from '../use-api-client';
 
 export function useAdvanceOnboarding() {

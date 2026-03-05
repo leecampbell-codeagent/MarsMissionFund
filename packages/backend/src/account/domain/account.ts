@@ -7,12 +7,7 @@ export type AccountStatus =
   | 'deactivated'
   | 'deleted';
 
-export type OnboardingStep =
-  | 'welcome'
-  | 'role_selection'
-  | 'profile'
-  | 'preferences'
-  | 'completed';
+export type OnboardingStep = 'welcome' | 'role_selection' | 'profile' | 'preferences' | 'completed';
 
 export type AccountRole =
   | 'backer'

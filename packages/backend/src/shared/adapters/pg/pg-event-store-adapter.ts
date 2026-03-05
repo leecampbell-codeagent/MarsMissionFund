@@ -1,5 +1,10 @@
 import type { Pool, PoolClient } from 'pg';
-import type { AppendEventInput, EventStorePort, TransactionClient, TransactionPort } from '../../ports/event-store-port.js';
+import type {
+  AppendEventInput,
+  EventStorePort,
+  TransactionClient,
+  TransactionPort,
+} from '../../ports/event-store-port.js';
 
 // PoolClient wrapped as a branded TransactionClient to keep pg out of domain/application code
 interface PgTransactionClient extends TransactionClient {

@@ -12,7 +12,6 @@ import {
   InvalidOnboardingStepError,
 } from '../shared/domain/errors.js';
 
-
 // ─── Helper ──────────────────────────────────────────────────────────────────
 
 function makeAccount(overrides: Partial<Parameters<typeof Account.reconstitute>[0]> = {}): Account {
@@ -86,7 +85,11 @@ describe('Account.create() — new onboarding fields', () => {
 describe('Account.withProfile()', () => {
   it('updates display name, bio, and avatar URL', () => {
     const account = makeAccount();
-    const updated = account.withProfile('Jane Pioneer', 'Mars enthusiast', 'https://example.com/avatar.jpg');
+    const updated = account.withProfile(
+      'Jane Pioneer',
+      'Mars enthusiast',
+      'https://example.com/avatar.jpg',
+    );
 
     expect(updated.displayName).toBe('Jane Pioneer');
     expect(updated.bio).toBe('Mars enthusiast');
@@ -106,7 +109,11 @@ describe('Account.withProfile()', () => {
   });
 
   it('accepts null values (clearing fields)', () => {
-    const account = makeAccount({ displayName: 'Jane', bio: 'Bio', avatarUrl: 'https://example.com/a.jpg' });
+    const account = makeAccount({
+      displayName: 'Jane',
+      bio: 'Bio',
+      avatarUrl: 'https://example.com/a.jpg',
+    });
     const updated = account.withProfile(null, null, null);
 
     expect(updated.displayName).toBeNull();
@@ -158,7 +165,9 @@ describe('Account.withProfile()', () => {
 
   it('rejects avatar URL without https', () => {
     const account = makeAccount();
-    expect(() => account.withProfile(null, null, 'http://example.com/avatar.jpg')).toThrow(InvalidAccountDataError);
+    expect(() => account.withProfile(null, null, 'http://example.com/avatar.jpg')).toThrow(
+      InvalidAccountDataError,
+    );
   });
 
   it('accepts avatar URL with https', () => {
@@ -215,13 +224,27 @@ describe('Account.withRoles()', () => {
 
   it('rejects invalid role values', () => {
     const account = makeAccount();
-    expect(() => account.withRoles(['backer', 'invalid_role' as never])).toThrow(InvalidAccountDataError);
+    expect(() => account.withRoles(['backer', 'invalid_role' as never])).toThrow(
+      InvalidAccountDataError,
+    );
   });
 
   it('accepts all valid role values', () => {
     const account = makeAccount();
-    const updated = account.withRoles(['backer', 'creator', 'reviewer', 'administrator', 'super_administrator']);
-    expect(updated.roles).toEqual(['backer', 'creator', 'reviewer', 'administrator', 'super_administrator']);
+    const updated = account.withRoles([
+      'backer',
+      'creator',
+      'reviewer',
+      'administrator',
+      'super_administrator',
+    ]);
+    expect(updated.roles).toEqual([
+      'backer',
+      'creator',
+      'reviewer',
+      'administrator',
+      'super_administrator',
+    ]);
   });
 });
 
@@ -278,7 +301,9 @@ describe('Account.withOnboardingStep()', () => {
 
   it('rejects invalid step value', () => {
     const account = makeAccount({ onboardingStep: 'welcome' });
-    expect(() => account.withOnboardingStep('invalid_step' as never)).toThrow(InvalidOnboardingStepError);
+    expect(() => account.withOnboardingStep('invalid_step' as never)).toThrow(
+      InvalidOnboardingStepError,
+    );
   });
 
   it('returns a new Account instance', () => {

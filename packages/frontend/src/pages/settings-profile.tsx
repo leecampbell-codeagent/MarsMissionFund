@@ -1,5 +1,5 @@
-import { type ReactElement, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/clerk-react';
+import { type ReactElement, useEffect, useRef, useState } from 'react';
 import { useAccount } from '../hooks/account/use-account';
 import { useUpdateProfile } from '../hooks/account/use-update-profile';
 
@@ -125,9 +125,9 @@ export default function ProfileSettingsPage(): ReactElement {
           <h1 className="settings-page__heading">YOUR PROFILE</h1>
 
           {successMessage && (
-            <div className="settings-page__success" role="status" aria-live="polite">
+            <output className="settings-page__success" aria-live="polite">
               {successMessage}
-            </div>
+            </output>
           )}
 
           {saveError && (
@@ -146,9 +146,7 @@ export default function ProfileSettingsPage(): ReactElement {
             {/* Email (read-only) */}
             <div className="form-field">
               <p className="form-label">EMAIL</p>
-              <div className="form-readonly" aria-label="Email address">
-                {account?.email ?? '—'}
-              </div>
+              <p className="form-readonly">{account?.email ?? '—'}</p>
               <p className="form-helper">Email is managed through your Clerk account settings.</p>
             </div>
 

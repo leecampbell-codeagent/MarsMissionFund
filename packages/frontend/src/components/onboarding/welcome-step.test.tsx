@@ -36,10 +36,12 @@ describe('WelcomeStep', () => {
   });
 
   it('shows error message when error is provided', () => {
-    render(<WelcomeStep onContinue={vi.fn()} error="Something went wrong. Let's try that again." />);
-    expect(
-      screen.getByRole('alert'),
-    ).toHaveTextContent("Something went wrong. Let's try that again.");
+    render(
+      <WelcomeStep onContinue={vi.fn()} error="Something went wrong. Let's try that again." />,
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      "Something went wrong. Let's try that again.",
+    );
   });
 
   it('does not show error when error is null', () => {

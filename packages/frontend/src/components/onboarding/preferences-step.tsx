@@ -1,5 +1,5 @@
-import { type ReactElement } from 'react';
-import { type NotificationPreferences } from '../../api/account-api';
+import type { ReactElement } from 'react';
+import type { NotificationPreferences } from '../../api/account-api';
 import { ToggleSwitch } from '../ui/toggle-switch';
 
 interface PreferencesStepProps {
@@ -78,10 +78,7 @@ export function PreferencesStep({
             const descId = `pref-desc-${row.key}`;
 
             return (
-              <div
-                key={row.key}
-                className={`pref-row${!isLast ? ' pref-row--bordered' : ''}`}
-              >
+              <div key={row.key} className={`pref-row${!isLast ? ' pref-row--bordered' : ''}`}>
                 <div className="pref-row__content">
                   <div>
                     <p id={labelId} className="pref-row__label">
@@ -106,7 +103,10 @@ export function PreferencesStep({
                         </span>
                       )}
                     </p>
-                    <p id={descId} className={`pref-row__desc${row.locked ? ' pref-row__desc--locked' : ''}`}>
+                    <p
+                      id={descId}
+                      className={`pref-row__desc${row.locked ? ' pref-row__desc--locked' : ''}`}
+                    >
                       {row.description}
                     </p>
                   </div>

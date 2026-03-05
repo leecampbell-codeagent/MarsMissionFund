@@ -58,12 +58,7 @@ describe('ProfileStep', () => {
   });
 
   it('shows field-level error for displayName', () => {
-    render(
-      <ProfileStep
-        {...defaultProps}
-        errors={{ displayName: 'Display name is required.' }}
-      />,
-    );
+    render(<ProfileStep {...defaultProps} errors={{ displayName: 'Display name is required.' }} />);
     expect(screen.getByText('Display name is required.')).toBeInTheDocument();
     expect(screen.getByLabelText(/display name/i)).toHaveAttribute('aria-invalid', 'true');
   });

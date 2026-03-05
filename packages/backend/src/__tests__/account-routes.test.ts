@@ -7,10 +7,7 @@ import { InMemoryAccountRepository } from '../account/adapters/mock/in-memory-ac
 import { MockAuthAdapter } from '../account/adapters/mock/mock-auth-adapter.js';
 import { MockWebhookVerificationAdapter } from '../account/adapters/mock/mock-webhook-verification-adapter.js';
 import { AccountAppService } from '../account/application/account-app-service.js';
-import {
-  Account,
-  DEFAULT_NOTIFICATION_PREFERENCES,
-} from '../account/domain/account.js';
+import { Account, DEFAULT_NOTIFICATION_PREFERENCES } from '../account/domain/account.js';
 import { type AppDependencies, createApp } from '../app.js';
 import { InMemoryEventStore } from '../shared/adapters/mock/in-memory-event-store.js';
 import type { AuthClaimsExtractor } from '../shared/middleware/enrich-auth-context.js';
@@ -73,7 +70,15 @@ function createUnauthenticatedTestDeps(
   // Auth middleware that does NOT attach auth — getUserId returns null → 401
   const noopAuthPort = {
     verifyToken: (_token: string) => Promise.resolve(null),
-    getMiddleware: () => (_req: ExpressRequest, _res: import('express').Response, next: import('express').NextFunction) => { next(); },
+    getMiddleware:
+      () =>
+      (
+        _req: ExpressRequest,
+        _res: import('express').Response,
+        next: import('express').NextFunction,
+      ) => {
+        next();
+      },
   };
   return {
     authPort: noopAuthPort,
@@ -84,7 +89,9 @@ function createUnauthenticatedTestDeps(
   };
 }
 
-function makeFullAccount(overrides: Partial<Parameters<typeof Account.reconstitute>[0]> = {}): Account {
+function makeFullAccount(
+  overrides: Partial<Parameters<typeof Account.reconstitute>[0]> = {},
+): Account {
   return Account.reconstitute({
     id: 'test-account-id',
     clerkUserId: 'user_mock_001',
@@ -216,13 +223,11 @@ describe('PATCH /api/v1/accounts/me', () => {
   it('updates multiple fields at once — success', async () => {
     await request(app).get('/api/v1/accounts/me');
 
-    const response = await request(app)
-      .patch('/api/v1/accounts/me')
-      .send({
-        display_name: 'Jane Pioneer',
-        bio: 'Mars enthusiast from Earth',
-        avatar_url: 'https://example.com/avatar.jpg',
-      });
+    const response = await request(app).patch('/api/v1/accounts/me').send({
+      display_name: 'Jane Pioneer',
+      bio: 'Mars enthusiast from Earth',
+      avatar_url: 'https://example.com/avatar.jpg',
+    });
 
     expect(response.status).toBe(200);
     expect(response.body.data.display_name).toBe('Jane Pioneer');
@@ -231,9 +236,7 @@ describe('PATCH /api/v1/accounts/me', () => {
   });
 
   it('rejects empty body — 400', async () => {
-    const response = await request(app)
-      .patch('/api/v1/accounts/me')
-      .send({});
+    const response = await request(app).patch('/api/v1/accounts/me').send({});
 
     expect(response.status).toBe(400);
     expect(response.body.error.code).toBe('VALIDATION_ERROR');
@@ -276,9 +279,7 @@ describe('PATCH /api/v1/accounts/me', () => {
     const accounts = accountRepo.getAll();
     const accountId = accounts[0]?.id;
 
-    await request(app)
-      .patch('/api/v1/accounts/me')
-      .send({ display_name: 'Jane Pioneer' });
+    await request(app).patch('/api/v1/accounts/me').send({ display_name: 'Jane Pioneer' });
 
     const events = eventStore.getAllEvents();
     const profileUpdatedEvent = events.find((e) => e.eventType === 'account.profile_updated');
@@ -303,16 +304,14 @@ describe('PATCH /api/v1/accounts/me/preferences', () => {
 
   it('returns 401 when no auth header', async () => {
     const unauthApp = createApp(createUnauthenticatedTestDeps(accountRepo, eventStore));
-    const response = await request(unauthApp)
-      .patch('/api/v1/accounts/me/preferences')
-      .send({
-        campaign_updates: false,
-        milestone_completions: true,
-        contribution_confirmations: true,
-        new_campaign_recommendations: false,
-        security_alerts: true,
-        platform_announcements: false,
-      });
+    const response = await request(unauthApp).patch('/api/v1/accounts/me/preferences').send({
+      campaign_updates: false,
+      milestone_completions: true,
+      contribution_confirmations: true,
+      new_campaign_recommendations: false,
+      security_alerts: true,
+      platform_announcements: false,
+    });
     expect(response.status).toBe(401);
     expect(response.body.error.code).toBe('UNAUTHENTICATED');
   });
@@ -329,9 +328,7 @@ describe('PATCH /api/v1/accounts/me/preferences', () => {
   it('updates all preferences — success', async () => {
     await request(app).get('/api/v1/accounts/me');
 
-    const response = await request(app)
-      .patch('/api/v1/accounts/me/preferences')
-      .send(validPrefs);
+    const response = await request(app).patch('/api/v1/accounts/me/preferences').send(validPrefs);
 
     expect(response.status).toBe(200);
     expect(response.body.data.notification_preferences.campaign_updates).toBe(false);
@@ -341,9 +338,7 @@ describe('PATCH /api/v1/accounts/me/preferences', () => {
   it('forces security_alerts to true even when false is sent', async () => {
     await request(app).get('/api/v1/accounts/me');
 
-    const response = await request(app)
-      .patch('/api/v1/accounts/me/preferences')
-      .send(validPrefs);
+    const response = await request(app).patch('/api/v1/accounts/me/preferences').send(validPrefs);
 
     expect(response.status).toBe(200);
     expect(response.body.data.notification_preferences.security_alerts).toBe(true);
@@ -387,9 +382,7 @@ describe('PATCH /api/v1/accounts/me/preferences', () => {
     const accounts = accountRepo.getAll();
     const accountId = accounts[0]?.id;
 
-    await request(app)
-      .patch('/api/v1/accounts/me/preferences')
-      .send(validPrefs);
+    await request(app).patch('/api/v1/accounts/me/preferences').send(validPrefs);
 
     const events = eventStore.getAllEvents();
     const prefsEvent = events.find((e) => e.eventType === 'account.preferences_updated');
