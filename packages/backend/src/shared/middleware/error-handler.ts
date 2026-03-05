@@ -78,7 +78,7 @@ export function createErrorHandler(logger: Logger) {
       res.status(400).json({
         error: {
           code: err.code,
-          message: err.message,
+          message: 'The request could not be processed.',
           correlation_id: correlationId,
         },
       });

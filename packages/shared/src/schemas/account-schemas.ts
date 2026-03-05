@@ -57,7 +57,7 @@ export const syncUserSchema = z.object({}).strict();
 
 export type SyncUserInput = z.infer<typeof syncUserSchema>;
 
-// Update profile schema (PATCH /api/v1/me/profile) - WARN-003: includes onboardingCompleted + onboardingStep
+// Update profile schema (PATCH /api/v1/me/profile) — onboardingCompleted and onboardingStep removed (HIGH-003)
 export const updateProfileSchema = z
   .object({
     displayName: z
@@ -73,8 +73,6 @@ export const updateProfileSchema = z
       .optional()
       .transform((v) => (v === '' ? null : v)),
     avatarUrl: z.string().url().nullable().optional(),
-    onboardingCompleted: z.boolean().optional(),
-    onboardingStep: z.enum(['role_selection', 'profiling', 'notifications', 'complete']).optional(),
   })
   .strict()
   .refine((data) => Object.keys(data).length > 0, {
