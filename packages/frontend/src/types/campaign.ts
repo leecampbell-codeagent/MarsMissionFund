@@ -147,3 +147,70 @@ export function formatCents(cents: string): string {
 export function formatBasisPoints(basisPoints: number): string {
   return `${(basisPoints / 100).toFixed(2)}%`;
 }
+
+/**
+ * Format funding percentage for display.
+ * Returns 'N/A' for null, otherwise the percentage with no decimal.
+ */
+export function formatFundingPercentage(percentage: number | null): string {
+  if (percentage === null) return 'N/A';
+  return `${percentage.toFixed(0)}%`;
+}
+
+// ── Public Campaign Types ─────────────────────────────────────────────────────
+// These types are used for the unauthenticated public campaign discovery pages.
+// All monetary amounts (*Cents) are strings — never parse to Number (G-024).
+
+export interface PublicCampaignListItem {
+  readonly id: string;
+  readonly title: string;
+  readonly shortDescription: string | null;
+  readonly category: string | null;
+  readonly heroImageUrl: string | null;
+  readonly status: 'live' | 'funded';
+  readonly fundingGoalCents: string | null;    // string — never parse to Number (G-024)
+  readonly totalRaisedCents: string;           // string — never parse to Number (G-024)
+  readonly contributorCount: number;
+  readonly fundingPercentage: number | null;
+  readonly deadline: string | null;            // ISO 8601 UTC string
+  readonly daysRemaining: number | null;
+  readonly launchedAt: string | null;          // ISO 8601 UTC string
+  readonly creatorName: string | null;
+}
+
+export interface PublicCampaignDetail extends PublicCampaignListItem {
+  readonly description: string | null;
+  readonly fundingCapCents: string | null;     // string — never parse to Number (G-024)
+  readonly milestones: Milestone[];
+  readonly teamMembers: TeamMember[];
+  readonly riskDisclosures: RiskDisclosure[];
+  readonly budgetBreakdown: BudgetItem[];
+  readonly alignmentStatement: string | null;
+  readonly tags: string[];
+}
+
+export interface PublicCampaignSearchParams {
+  readonly q?: string;
+  readonly category?: string | string[];
+  readonly status?: 'active' | 'funded' | 'ending_soon';
+  readonly sort?: 'newest' | 'ending_soon' | 'most_funded' | 'least_funded';
+  readonly limit?: number;
+  readonly offset?: number;
+}
+
+export interface PaginatedCampaigns {
+  readonly data: PublicCampaignListItem[];
+  readonly pagination: {
+    readonly total: number;
+    readonly limit: number;
+    readonly offset: number;
+  };
+}
+
+export interface PublicCategoryStats {
+  readonly category: string;
+  readonly campaignCount: number;
+  readonly activeCampaignCount: number;
+  readonly totalRaisedCents: string;   // Always '0' in feat-004
+  readonly contributorCount: number;   // Always 0 in feat-004
+}

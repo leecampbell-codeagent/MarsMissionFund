@@ -2,7 +2,7 @@
 
 > Steps that cannot be automated — require human action in third-party dashboards.
 > Maintained by the Infrastructure Engineer agent.
-> Updated: 2026-03-05 (reviewed for feat-003 — no new tasks required)
+> Updated: 2026-03-05 (feat-004 — no new external services; deployment and seed tasks documented below)
 
 ---
 
@@ -273,6 +273,62 @@ npx ngrok http 3001
 
 - `packages/backend/src/kyc/adapters/stub-kyc-provider.adapter.ts`
 - Will be replaced by: `packages/backend/src/kyc/adapters/veriff-kyc-provider.adapter.ts`
+
+---
+
+## feat-004 — Campaign Discovery and Public Campaign Pages
+
+**No new external service integrations.** feat-004 is entirely database-backed (PostgreSQL full-text search) with no third-party service dependencies and no new environment variables.
+
+The following deployment and wiring steps require human/developer action:
+
+### Deployment Steps (post-migration)
+
+1. **Apply the search vector migration** after deploying the backend:
+   ```bash
+   docker compose run --rm migrate
+   # Applies: 20260305160000_campaign_search_vector.sql
+   ```
+   Expected output:
+   ```
+   Applying: 20260305160000_campaign_search_vector.sql
+   ```
+
+2. **Mount the public campaign router** in `packages/backend/src/app.ts` at `/api/v1/public/campaigns` WITHOUT `requireAuth`:
+   ```typescript
+   app.use('/api/v1/public/campaigns', createPublicCampaignRouter(deps));
+   ```
+   This must NOT go through the `requireAuth` middleware — the route is intentionally unauthenticated.
+
+3. **Register `createPublicCampaignRouter`** in `packages/backend/src/composition-root.ts`.
+
+### Seed Data for Local Demo Testing
+
+4. **Seed at least one campaign in `live` status** so the public browse endpoint returns results.
+
+5. **Seed at least one campaign in `funded` status** to test the funded campaign detail page.
+
+6. **Seed at least one campaign with a deadline within 7 days** to test the "Ending Soon" filter (`status=ending_soon`).
+
+### Verification
+
+```bash
+# Confirm search vector column exists and is populated
+docker compose exec postgres psql -U mmf -d mmf_dev \
+  -c "SELECT id, title, search_vector IS NOT NULL AS has_vector FROM campaigns LIMIT 5;"
+
+# Confirm GIN index exists
+docker compose exec postgres psql -U mmf -d mmf_dev \
+  -c "\d campaigns"
+
+# Confirm public endpoint is accessible without auth
+curl http://localhost:3001/api/v1/public/campaigns
+# Expect: 200 OK with { "data": [...], "pagination": { ... } }
+```
+
+### Config Required
+
+No new environment variables required for feat-004.
 
 
 

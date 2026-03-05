@@ -2,9 +2,66 @@ import type { Logger } from 'pino';
 import { UserNotFoundError } from '../../account/domain/errors/account-errors.js';
 import type { User } from '../../account/domain/models/user.js';
 import type { UserRepository } from '../../account/ports/user-repository.port.js';
-import { Campaign, type UpdateCampaignInput } from '../domain/models/campaign.js';
+import { Campaign, type BudgetItem, type Milestone, type RiskDisclosure, type TeamMember, type UpdateCampaignInput } from '../domain/models/campaign.js';
 import type { CampaignCategory } from '../domain/value-objects/campaign-category.js';
 import { CAMPAIGN_CATEGORIES } from '../domain/value-objects/campaign-category.js';
+
+// ─── Public Campaign Result Types ─────────────────────────────────────────────
+// These are read-only data transfer types for public query results.
+// NOT domain entities — they carry denormalized data from SQL JOINs.
+
+export interface PublicCampaignListItem {
+  readonly id: string;
+  readonly title: string;
+  readonly shortDescription: string | null;
+  readonly category: string | null;
+  readonly heroImageUrl: string | null;
+  readonly status: string;                  // 'live' | 'funded'
+  readonly fundingGoalCents: string | null; // BIGINT as string (G-024)
+  readonly deadline: Date | null;
+  readonly launchedAt: Date | null;
+  readonly creatorName: string | null;      // users.display_name (may be null)
+  // Funding progress — stubbed for feat-004
+  readonly totalRaisedCents: string;        // Always '0' in feat-004
+  readonly contributorCount: number;        // Always 0 in feat-004
+  readonly fundingPercentage: number | null; // null when fundingGoalCents is null
+}
+
+export interface PublicCampaignDetail extends PublicCampaignListItem {
+  readonly description: string | null;
+  readonly fundingCapCents: string | null;  // BIGINT as string (G-024)
+  readonly milestones: Milestone[];
+  readonly teamMembers: TeamMember[];
+  readonly riskDisclosures: RiskDisclosure[];
+  readonly budgetBreakdown: BudgetItem[];
+  readonly alignmentStatement: string | null;
+  readonly tags: string[];
+}
+
+export interface CategoryStats {
+  readonly category: string;
+  readonly campaignCount: number;
+  readonly activeCampaignCount: number;
+  readonly totalRaisedCents: string;   // Always '0' in feat-004
+  readonly contributorCount: number;   // Always 0 in feat-004
+}
+
+export type PublicSortOption = 'newest' | 'ending_soon' | 'most_funded' | 'least_funded';
+export type PublicStatusFilter = 'active' | 'funded' | 'ending_soon';
+
+export interface PublicSearchOptions {
+  readonly q?: string;                          // Trimmed search term; empty string = no FTS
+  readonly categories?: readonly string[];      // Validated CampaignCategory values
+  readonly status?: PublicStatusFilter;
+  readonly sort?: PublicSortOption;             // Default: 'newest'
+  readonly limit: number;                       // 1–100, default 20
+  readonly offset: number;                      // >= 0, default 0
+}
+
+export interface PublicSearchResult {
+  readonly items: PublicCampaignListItem[];
+  readonly total: number;
+}
 import {
   CREATOR_ARCHIVABLE_STATUSES,
   CampaignStatus,
@@ -770,6 +827,37 @@ export class CampaignAppService {
     }
 
     return updatedCampaign;
+  }
+
+  // ─── Public Methods (no auth required) ────────────────────────────────────
+
+  /**
+   * Search and browse public campaigns with FTS, filters, and pagination.
+   * No auth required — public endpoint.
+   */
+  async searchPublicCampaigns(options: PublicSearchOptions): Promise<PublicSearchResult> {
+    return this.campaignRepository.searchPublicCampaigns(options);
+  }
+
+  /**
+   * Returns full public campaign detail for a live or funded campaign.
+   * Returns 404 for non-public or non-existent campaigns.
+   * No auth required — public endpoint.
+   */
+  async getPublicCampaign(campaignId: string): Promise<PublicCampaignDetail> {
+    const campaign = await this.campaignRepository.findPublicById(campaignId);
+    if (!campaign) {
+      throw new CampaignNotFoundError();
+    }
+    return campaign;
+  }
+
+  /**
+   * Returns aggregate stats for a campaign category.
+   * No auth required — public endpoint.
+   */
+  async getCategoryStats(category: CampaignCategory): Promise<CategoryStats> {
+    return this.campaignRepository.getCategoryStats(category);
   }
 
   /**

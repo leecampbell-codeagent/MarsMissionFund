@@ -644,6 +644,122 @@ identical at this point; the parameter already holds the correct value.
 
 ---
 
+## Discovery / Public Campaign Gotchas
+
+### G-036: `requireAuth` Applied to Entire `/api/v1/campaigns` Mount — Cannot Add Anonymous Routes to Existing Router
+
+**Problem:** In `app.ts`, `requireAuth` is applied as middleware to the entire `/api/v1/campaigns`
+prefix before the campaign router:
+
+```typescript
+app.use('/api/v1/campaigns', requireAuth, createCampaignRouter(...));
+```
+
+Any route registered inside `createCampaignRouter()` will require authentication, regardless
+of what the route handler does. Adding a public anonymous endpoint to the existing router is
+NOT possible without either:
+a) Removing `requireAuth` from the mount (breaks all existing protected routes), or
+b) Restructuring the router to apply `requireAuth` selectively per-route.
+
+**Fix:** Mount public/anonymous campaign endpoints on a SEPARATE router prefix (e.g.,
+`/api/v1/public/campaigns`) in `app.ts` WITHOUT `requireAuth`. The existing authenticated
+router is unchanged. The public router is a separate Express Router instance.
+
+```typescript
+// Existing authenticated routes — unchanged
+app.use('/api/v1/campaigns', requireAuth, createCampaignRouter(...));
+
+// New anonymous public routes — no requireAuth
+app.use('/api/v1/public/campaigns', createPublicCampaignRouter(...));
+```
+
+`clerkMiddleware()` is already applied globally and populates `req.auth` for all requests
+(including unauthenticated ones). Anonymous requests have `req.auth.userId === null`.
+The public router handlers must NOT call `getClerkAuth()` as a gate — call it only if
+you want to personalise the response for authenticated users.
+
+**Detected in:** feat-004 research
+
+---
+
+### G-037: `websearch_to_tsquery` Returns NULL for Empty Input — Guard Required
+
+**Problem:** PostgreSQL's `websearch_to_tsquery('english', '')` returns `NULL`, not an empty
+tsquery. If the WHERE clause is `WHERE search_vector @@ websearch_to_tsquery('english', $1)`,
+a blank search term will return 0 results (NULL @@ anything = false).
+
+**Fix:** Guard the search condition:
+
+```sql
+WHERE ($1 = '' OR search_vector @@ websearch_to_tsquery('english', $1))
+```
+
+Or use a CASE expression in the WHERE clause. When `q` is blank or absent, return all
+`live`/`funded` campaigns without FTS filtering.
+
+Additionally, trim and validate the `q` parameter at the Zod boundary:
+- `q: z.string().max(200).optional().transform(v => v?.trim() ?? '')`
+- Empty string after trim → treat as "no search term" → return all results sorted by default
+
+**Detected in:** feat-004 research
+
+---
+
+### G-038: `tsvector` Trigger Cannot JOIN Other Tables Directly
+
+**Problem:** A PostgreSQL trigger function on the `campaigns` table cannot JOIN the `users`
+table to include `creator_display_name` in the `search_vector` tsvector. Trigger functions
+operate on the NEW row in isolation; JOINs require a separate query inside a PL/pgSQL
+function, which is possible but adds complexity and a second DB read on every campaign write.
+
+**Fix:** For the workshop demo, do not include creator name in the pre-computed `search_vector`.
+Instead, include the creator name match at query time via a JOIN:
+
+```sql
+SELECT c.*, u.display_name AS creator_name,
+       ts_rank(c.search_vector, websearch_to_tsquery('english', $1)) AS rank
+FROM campaigns c
+JOIN users u ON c.creator_user_id = u.id
+WHERE c.status IN ('live', 'funded')
+  AND ($1 = '' OR c.search_vector @@ websearch_to_tsquery('english', $1)
+       OR to_tsvector('english', COALESCE(u.display_name, '')) @@ websearch_to_tsquery('english', $1))
+ORDER BY rank DESC, c.launched_at DESC
+LIMIT $2 OFFSET $3
+```
+
+The `to_tsvector()` call on `display_name` at query time is not index-supported, but for
+the workshop demo dataset this is acceptable.
+
+**Detected in:** feat-004 research
+
+---
+
+### G-039: Multi-Value Category Filter — Use `= ANY($1::TEXT[])` Not Dynamic SQL
+
+**Problem:** The campaign search endpoint accepts multi-value `category` filter (e.g.,
+`?category=propulsion&category=power_energy`). Building SQL with `IN ($1, $2, $3)` requires
+dynamic query construction with variable parameter counts. Dynamic SQL construction is fragile
+and risks SQL injection if done incorrectly.
+
+**Fix:** Use PostgreSQL's array operator instead:
+
+```sql
+WHERE ($1::TEXT[] IS NULL OR category = ANY($1::TEXT[]))
+```
+
+Pass the category array as a PostgreSQL array parameter:
+```typescript
+const categoryArray = categories.length > 0 ? categories : null;
+// $1 = null means "no filter" → condition evaluates to true
+```
+
+Validate each category value against the `CAMPAIGN_CATEGORIES` enum at the Zod layer before
+passing to SQL — never pass raw user input as the array contents.
+
+**Detected in:** feat-004 research
+
+---
+
 ### G-035: `z.object()` Does NOT Reject Unknown Keys by Default
 
 **Problem:** Zod's `z.object()` silently strips unknown keys by default. Fields present in the frontend payload but absent from the Zod schema are silently dropped without a 400 error. This caused `linkedInUrl` to appear to work in the UI (no error) but never get persisted. Users lose data with no indication of the failure.

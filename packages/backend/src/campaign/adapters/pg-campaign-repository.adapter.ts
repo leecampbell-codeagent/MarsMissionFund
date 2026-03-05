@@ -7,6 +7,12 @@ import {
   CampaignNotFoundError,
 } from '../domain/errors/campaign-errors.js';
 import type {
+  CategoryStats,
+  PublicCampaignDetail,
+  PublicSearchOptions,
+  PublicSearchResult,
+} from '../application/campaign-app-service.js';
+import type {
   CampaignRepository,
   CampaignStatusUpdate,
   ListCampaignOptions,
@@ -249,5 +255,237 @@ export class PgCampaignRepository implements CampaignRepository {
     }
 
     return rowToDomain(row);
+  }
+
+  async searchPublicCampaigns(options: PublicSearchOptions): Promise<PublicSearchResult> {
+    const q = options.q ?? '';
+    const statusFilter = options.status ?? null;
+    const categories = options.categories && options.categories.length > 0
+      ? Array.from(options.categories)
+      : null;
+    const sort = options.sort ?? 'newest';
+    const { limit, offset } = options;
+
+    // Main query
+    const searchQuery = `
+      SELECT
+        c.id,
+        c.title,
+        c.short_description,
+        c.category,
+        c.hero_image_url,
+        c.status,
+        c.funding_goal_cents::TEXT AS funding_goal_cents,
+        c.deadline,
+        c.launched_at,
+        u.display_name AS creator_name,
+        CASE WHEN $1 != '' AND c.search_vector IS NOT NULL
+          THEN ts_rank(c.search_vector, websearch_to_tsquery('english', $1))
+          ELSE 0
+        END AS rank
+      FROM campaigns c
+      JOIN users u ON c.creator_user_id = u.id
+      WHERE c.status IN ('live', 'funded')
+        AND (
+          $2::TEXT IS NULL OR (
+            CASE $2::TEXT
+              WHEN 'active'      THEN c.status = 'live'
+              WHEN 'funded'      THEN c.status = 'funded'
+              WHEN 'ending_soon' THEN c.status IN ('live', 'funded')
+                                      AND c.deadline <= NOW() + INTERVAL '7 days'
+                                      AND c.deadline >= NOW()
+              ELSE TRUE
+            END
+          )
+        )
+        AND ($3::TEXT[] IS NULL OR c.category = ANY($3::TEXT[]))
+        AND (
+          $1 = ''
+          OR c.search_vector @@ websearch_to_tsquery('english', $1)
+          OR to_tsvector('english', COALESCE(u.display_name, '')) @@ websearch_to_tsquery('english', $1)
+        )
+      ORDER BY
+        CASE WHEN $4::TEXT = 'newest'      THEN NULL END DESC,
+        CASE WHEN $4::TEXT = 'newest'      THEN c.launched_at END DESC NULLS LAST,
+        CASE WHEN $4::TEXT = 'ending_soon' THEN c.deadline END ASC NULLS LAST,
+        CASE WHEN $4::TEXT = 'most_funded' THEN c.funding_goal_cents END DESC NULLS LAST,
+        CASE WHEN $4::TEXT = 'least_funded' THEN c.funding_goal_cents END ASC NULLS LAST,
+        CASE WHEN $1 != '' AND $4::TEXT IS NULL
+          THEN CASE WHEN c.search_vector IS NOT NULL
+            THEN ts_rank(c.search_vector, websearch_to_tsquery('english', $1))
+            ELSE 0
+          END
+        END DESC,
+        c.launched_at DESC NULLS LAST
+      LIMIT $5 OFFSET $6
+    `;
+
+    const countQuery = `
+      SELECT COUNT(*) AS total
+      FROM campaigns c
+      JOIN users u ON c.creator_user_id = u.id
+      WHERE c.status IN ('live', 'funded')
+        AND (
+          $2::TEXT IS NULL OR (
+            CASE $2::TEXT
+              WHEN 'active'      THEN c.status = 'live'
+              WHEN 'funded'      THEN c.status = 'funded'
+              WHEN 'ending_soon' THEN c.status IN ('live', 'funded')
+                                      AND c.deadline <= NOW() + INTERVAL '7 days'
+                                      AND c.deadline >= NOW()
+              ELSE TRUE
+            END
+          )
+        )
+        AND ($3::TEXT[] IS NULL OR c.category = ANY($3::TEXT[]))
+        AND (
+          $1 = ''
+          OR c.search_vector @@ websearch_to_tsquery('english', $1)
+          OR to_tsvector('english', COALESCE(u.display_name, '')) @@ websearch_to_tsquery('english', $1)
+        )
+    `;
+
+    const params = [q, statusFilter, categories, sort, limit, offset];
+    const countParams = [q, statusFilter, categories];
+
+    interface PublicCampaignRow {
+      id: string;
+      title: string;
+      short_description: string | null;
+      category: string | null;
+      hero_image_url: string | null;
+      status: string;
+      funding_goal_cents: string | null;
+      deadline: Date | string | null;
+      launched_at: Date | string | null;
+      creator_name: string | null;
+      rank: string | null;
+    }
+
+    const [rowsResult, countResult] = await Promise.all([
+      this.pool.query<PublicCampaignRow>(searchQuery, params),
+      this.pool.query<{ total: string }>(countQuery, countParams),
+    ]);
+
+    const total = parseInt(countResult.rows[0]?.total ?? '0', 10);
+
+    const items = rowsResult.rows.map((row) => ({
+      id: row.id,
+      title: row.title,
+      shortDescription: row.short_description,
+      category: row.category,
+      heroImageUrl: row.hero_image_url,
+      status: row.status,
+      fundingGoalCents: row.funding_goal_cents,
+      deadline: toNullableDate(row.deadline),
+      launchedAt: toNullableDate(row.launched_at),
+      creatorName: row.creator_name,
+      totalRaisedCents: '0' as string,
+      contributorCount: 0,
+      fundingPercentage: row.funding_goal_cents !== null ? 0 : null,
+    }));
+
+    return { items, total };
+  }
+
+  async findPublicById(id: string): Promise<PublicCampaignDetail | null> {
+    interface PublicCampaignDetailRow {
+      id: string;
+      title: string;
+      short_description: string | null;
+      description: string | null;
+      category: string | null;
+      hero_image_url: string | null;
+      status: string;
+      funding_goal_cents: string | null;
+      funding_cap_cents: string | null;
+      deadline: Date | string | null;
+      launched_at: Date | string | null;
+      milestones: unknown;
+      team_members: unknown;
+      risk_disclosures: unknown;
+      budget_breakdown: unknown;
+      alignment_statement: string | null;
+      tags: string[] | null;
+      creator_name: string | null;
+    }
+
+    const result = await this.pool.query<PublicCampaignDetailRow>(
+      `SELECT
+        c.id,
+        c.title,
+        c.short_description,
+        c.description,
+        c.category,
+        c.hero_image_url,
+        c.status,
+        c.funding_goal_cents::TEXT AS funding_goal_cents,
+        c.funding_cap_cents::TEXT AS funding_cap_cents,
+        c.deadline,
+        c.launched_at,
+        c.milestones,
+        c.team_members,
+        c.risk_disclosures,
+        c.budget_breakdown,
+        c.alignment_statement,
+        c.tags,
+        u.display_name AS creator_name
+      FROM campaigns c
+      JOIN users u ON c.creator_user_id = u.id
+      WHERE c.id = $1
+        AND c.status IN ('live', 'funded')`,
+      [id],
+    );
+
+    if (result.rows.length === 0) return null;
+    const row = result.rows[0];
+    if (!row) return null;
+
+    return {
+      id: row.id,
+      title: row.title,
+      shortDescription: row.short_description,
+      description: row.description,
+      category: row.category,
+      heroImageUrl: row.hero_image_url,
+      status: row.status,
+      fundingGoalCents: row.funding_goal_cents,
+      fundingCapCents: row.funding_cap_cents,
+      deadline: toNullableDate(row.deadline),
+      launchedAt: toNullableDate(row.launched_at),
+      creatorName: row.creator_name,
+      totalRaisedCents: '0',
+      contributorCount: 0,
+      fundingPercentage: row.funding_goal_cents !== null ? 0 : null,
+      milestones: Array.isArray(row.milestones) ? row.milestones as CampaignData['milestones'] : [],
+      teamMembers: Array.isArray(row.team_members) ? row.team_members as CampaignData['teamMembers'] : [],
+      riskDisclosures: Array.isArray(row.risk_disclosures) ? row.risk_disclosures as CampaignData['riskDisclosures'] : [],
+      budgetBreakdown: Array.isArray(row.budget_breakdown) ? row.budget_breakdown as CampaignData['budgetBreakdown'] : [],
+      alignmentStatement: row.alignment_statement,
+      tags: row.tags ?? [],
+    };
+  }
+
+  async getCategoryStats(category: CampaignCategory): Promise<CategoryStats> {
+    const result = await this.pool.query<{
+      campaign_count: string;
+      active_campaign_count: string;
+    }>(
+      `SELECT
+        COUNT(*) FILTER (WHERE status IN ('live', 'funded')) AS campaign_count,
+        COUNT(*) FILTER (WHERE status = 'live') AS active_campaign_count
+      FROM campaigns
+      WHERE category = $1`,
+      [category],
+    );
+
+    const row = result.rows[0];
+    return {
+      category,
+      campaignCount: parseInt(row?.campaign_count ?? '0', 10),
+      activeCampaignCount: parseInt(row?.active_campaign_count ?? '0', 10),
+      totalRaisedCents: '0',
+      contributorCount: 0,
+    };
   }
 }

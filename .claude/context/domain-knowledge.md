@@ -455,6 +455,93 @@ Never use real Clerk tokens in unit or integration tests.
 - Avoid round numbers for monetary amounts (per backend rules)
 - Use realistic names and emails in seed data
 
+---
+
+## Campaign Discovery Domain (feat-004)
+
+### Public Status Visibility
+
+Only two campaign statuses are publicly discoverable via the anonymous API:
+- `live` — accepting contributions, deadline in the future
+- `funded` — minimum goal reached, still accepting contributions until deadline or cap
+
+All other statuses (`draft`, `submitted`, `under_review`, `approved`, `rejected`, `suspended`,
+`failed`, `settlement`, `complete`, `cancelled`, `archived`) are NOT publicly accessible via
+the public endpoints. The public endpoint returns 404 for campaigns in any other status,
+including campaigns that exist but are not yet live.
+
+Note: The existing authenticated `GET /api/v1/campaigns/:id` allows broader access
+(suspended, failed, settlement, complete, cancelled are accessible to authenticated users).
+The public endpoint is strictly narrower.
+
+### PostgreSQL Full-Text Search Pattern
+
+MMF uses `tsvector`/`tsquery` for campaign search. The implementation pattern:
+
+1. Add a `search_vector TSVECTOR` column to the `campaigns` table.
+2. Add a GIN index: `CREATE INDEX idx_campaigns_search_vector ON campaigns USING GIN(search_vector)`.
+3. Add a trigger to auto-populate `search_vector` on INSERT/UPDATE:
+   ```sql
+   NEW.search_vector := to_tsvector('english',
+     COALESCE(NEW.title, '') || ' ' ||
+     COALESCE(NEW.short_description, '') || ' ' ||
+     COALESCE(NEW.description, '')
+   );
+   ```
+4. At query time, use `websearch_to_tsquery('english', $1)` for user-supplied search terms
+   (safely handles operators, quoted phrases, and arbitrary input).
+5. Include creator name match at query time via JOIN (see G-038).
+6. Guard against empty search term: `WHERE ($1 = '' OR search_vector @@ ...)` (see G-037).
+
+### Funding Progress for feat-004 (Stub)
+
+The `contributions` table does not exist until feat-005.
+For feat-004, all funding progress fields are stubbed:
+- `totalRaisedCents`: `'0'` (string, per G-024 BIGINT-as-string pattern)
+- `contributorCount`: `0` (integer — count, not monetary)
+- `fundingPercentage`: `0` (or `null` when `fundingGoalCents` is null)
+
+This is a known limitation documented in the spec, not a bug.
+
+### Anonymous Endpoint Architecture
+
+Public campaign endpoints are mounted at `/api/v1/public/campaigns` in `app.ts` WITHOUT
+the `requireAuth` middleware (see G-036).
+
+The `clerkMiddleware()` is applied globally — it runs on all requests and populates
+`req.auth` for any valid JWT present. Anonymous requests have `auth.userId === null`.
+The public router handlers do not call `getClerkAuth()` as an auth gate.
+
+New port methods added to `CampaignRepository` for feat-004:
+- `searchPublicCampaigns(options: PublicSearchOptions): Promise<PublicCampaignListItem[]>`
+- `findPublicById(id: string): Promise<Campaign | null>` — enforces `live`/`funded` filter
+- `getCategoryStats(category: CampaignCategory): Promise<CategoryStats>`
+
+### "Ending Soon" Filter Definition
+
+"Ending Soon" = `status IN ('live', 'funded') AND deadline <= NOW() + INTERVAL '7 days' AND deadline > NOW()`.
+Sorted by nearest deadline first (`ORDER BY deadline ASC`).
+This is a derived concept — not a campaign status value.
+
+### Category Aggregate Stats SQL Pattern
+
+```sql
+SELECT
+  COUNT(*) FILTER (WHERE status IN ('live', 'funded')) AS campaign_count,
+  COUNT(*) FILTER (WHERE status = 'live') AS active_campaign_count,
+  '0'::TEXT AS total_raised_cents  -- stubbed until feat-005
+FROM campaigns
+WHERE category = $1
+```
+
+The `total_raised_cents` field will be populated from a JOIN on the contributions table
+in feat-005. For feat-004, always return `'0'`.
+
+### Multi-Value Category Filter
+
+Use `= ANY($1::TEXT[])` pattern (see G-039). Pass `NULL` for "no filter" (returns all).
+Validate each category value against `CAMPAIGN_CATEGORIES` at the Zod layer.
+
 
 
 

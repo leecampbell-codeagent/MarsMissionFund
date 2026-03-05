@@ -11,11 +11,18 @@ const OnboardingPage = lazy(() => import('./pages/account/onboarding-page'));
 const SettingsProfilePage = lazy(() => import('./pages/account/settings-profile-page'));
 const SettingsNotificationsPage = lazy(() => import('./pages/account/settings-notifications-page'));
 
-// Campaign pages
+// Campaign pages — authenticated (creator/reviewer/admin views)
 const CampaignCreatePage = lazy(() => import('./pages/campaign/campaign-create-page'));
-const CampaignDetailPage = lazy(() => import('./pages/campaign/campaign-detail-page'));
 const MyCampaignsPage = lazy(() => import('./pages/campaign/my-campaigns-page'));
 const ReviewQueuePage = lazy(() => import('./pages/campaign/review-queue-page'));
+
+// Public campaign pages — no authentication required (feat-004)
+const CampaignDiscoveryPage = lazy(
+  () => import('./pages/campaign/campaign-discovery/campaign-discovery-page'),
+);
+const PublicCampaignDetailPage = lazy(
+  () => import('./pages/campaign/public-campaign-detail/public-campaign-detail-page'),
+);
 
 function FullPageSpinner(): ReactElement {
   return (
@@ -140,7 +147,13 @@ export function AppRoutes(): ReactElement {
           }
         />
 
-        {/* Campaign routes */}
+        {/* Public campaign routes — no authentication required (feat-004) */}
+        {/* /campaigns — discovery/browse page */}
+        <Route path="/campaigns" element={<CampaignDiscoveryPage />} />
+        {/* /campaigns/:id — public detail page (live/funded campaigns) */}
+        <Route path="/campaigns/:id" element={<PublicCampaignDetailPage />} />
+
+        {/* Campaign routes — authenticated (creator/reviewer/admin) */}
         <Route
           path="/campaigns/new"
           element={
@@ -157,14 +170,9 @@ export function AppRoutes(): ReactElement {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/campaigns/:id"
-          element={
-            <ProtectedRoute>
-              <CampaignDetailPage />
-            </ProtectedRoute>
-          }
-        />
+        {/* Note: /campaigns/:id is handled by the public route above (PublicCampaignDetailPage).
+            The authenticated CampaignDetailPage (for creators/reviewers managing campaigns)
+            is accessible via /me/campaigns navigation flow. */}
         <Route
           path="/me/campaigns"
           element={
