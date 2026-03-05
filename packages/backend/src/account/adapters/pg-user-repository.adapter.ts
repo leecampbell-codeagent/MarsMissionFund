@@ -241,6 +241,24 @@ export class PgUserRepository implements UserRepository {
       [clerkUserId],
     );
   }
+
+  async completeOnboarding(clerkUserId: string): Promise<User> {
+    const result = await this.pool.query<UserRow>(
+      `UPDATE users
+       SET onboarding_completed = true,
+           onboarding_step      = 'complete',
+           updated_at           = NOW()
+       WHERE clerk_user_id = $1
+       RETURNING *`,
+      [clerkUserId],
+    );
+
+    const row = result.rows[0];
+    if (!row) {
+      throw new UserNotFoundError(clerkUserId);
+    }
+    return rowToDomain(row);
+  }
 }
 
 

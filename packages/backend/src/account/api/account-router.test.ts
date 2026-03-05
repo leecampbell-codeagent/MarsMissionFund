@@ -326,6 +326,63 @@ describe('GET /api/v1/me/notifications', () => {
   });
 });
 
+describe('POST /api/v1/me/onboarding/complete', () => {
+  let app: Application;
+  let userRepository: InMemoryUserRepository;
+
+  beforeEach(() => {
+    const result = createTestApp();
+    app = result.app;
+    userRepository = result.userRepository;
+  });
+
+  it('returns 200 with onboardingCompleted=true for authenticated user', async () => {
+    seedUser(userRepository, 'user_onboarding');
+
+    const res = await request(app)
+      .post('/api/v1/me/onboarding/complete')
+      .set('x-test-user-id', 'user_onboarding')
+      .send();
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.onboardingCompleted).toBe(true);
+    expect(res.body.data.onboardingStep).toBe('complete');
+  });
+
+  it('is idempotent — second call also returns 200', async () => {
+    seedUser(userRepository, 'user_onboarding_idem');
+
+    await request(app)
+      .post('/api/v1/me/onboarding/complete')
+      .set('x-test-user-id', 'user_onboarding_idem')
+      .send();
+
+    const res = await request(app)
+      .post('/api/v1/me/onboarding/complete')
+      .set('x-test-user-id', 'user_onboarding_idem')
+      .send();
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.onboardingCompleted).toBe(true);
+  });
+
+  it('returns 401 UNAUTHENTICATED without auth header', async () => {
+    const res = await request(app).post('/api/v1/me/onboarding/complete').send();
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe('UNAUTHENTICATED');
+  });
+
+  it('returns 404 USER_NOT_FOUND for authenticated user not in DB', async () => {
+    const res = await request(app)
+      .post('/api/v1/me/onboarding/complete')
+      .set('x-test-user-id', 'user_not_in_db')
+      .send();
+
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe('USER_NOT_FOUND');
+  });
+});
+
 describe('PATCH /api/v1/me/notifications', () => {
   let app: Application;
   let userRepository: InMemoryUserRepository;

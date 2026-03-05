@@ -160,6 +160,32 @@ export function createAccountRouter(accountAppService: AccountAppService): Route
   });
 
   /**
+   * POST /api/v1/me/onboarding/complete
+   * Marks the authenticated user's onboarding as complete.
+   * Dedicated endpoint — onboardingCompleted is NOT accepted via PATCH /me/profile (HIGH-003).
+   */
+  router.post('/me/onboarding/complete', async (req, res, next) => {
+    try {
+      const auth = getClerkAuth(req);
+      if (!auth) {
+        res.status(401).json({
+          error: {
+            code: 'UNAUTHENTICATED',
+            message: 'Authentication required. Sign in to continue.',
+            correlation_id: req.correlationId ?? null,
+          },
+        });
+        return;
+      }
+
+      const user = await accountAppService.completeOnboarding(auth.userId);
+      res.status(200).json({ data: serializeUser(user) });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  /**
    * GET /api/v1/me/notifications
    * Returns the authenticated user's notification preferences.
    */

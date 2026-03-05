@@ -208,6 +208,30 @@ export class AccountAppService {
   }
 
   /**
+   * Marks onboarding as complete for the authenticated user.
+   * Called by POST /api/v1/me/onboarding/complete.
+   */
+  async completeOnboarding(clerkUserId: string): Promise<User> {
+    const user = await this.userRepository.findByClerkUserId(clerkUserId);
+    if (!user) {
+      throw new UserNotFoundError(clerkUserId);
+    }
+
+    const updatedUser = await this.userRepository.completeOnboarding(clerkUserId);
+
+    await this.auditLogger.log({
+      action: AuditActions.ProfileUpdated,
+      actorClerkUserId: clerkUserId,
+      resourceType: 'user',
+      resourceId: user.id,
+      timestamp: new Date(),
+      metadata: { fields: ['onboardingCompleted', 'onboardingStep'] },
+    });
+
+    return updatedUser;
+  }
+
+  /**
    * Handles Clerk lifecycle webhooks.
    * Called by POST /api/v1/webhooks/clerk.
    */
