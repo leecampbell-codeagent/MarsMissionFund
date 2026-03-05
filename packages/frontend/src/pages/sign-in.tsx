@@ -1,5 +1,5 @@
-import { type ReactElement } from 'react';
 import { SignIn } from '@clerk/clerk-react';
+import type { ReactElement } from 'react';
 import { AuthCentreLayout } from '../components/auth/auth-centre-layout';
 import { clerkAppearance } from '../lib/clerk-theme';
 

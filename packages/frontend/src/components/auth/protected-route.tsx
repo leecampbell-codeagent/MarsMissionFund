@@ -1,6 +1,6 @@
-import { type ReactElement, type ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
+import type { ReactElement, ReactNode } from 'react';
+import { Navigate } from 'react-router-dom';
 import { AuthLoadingScreen } from './auth-loading-screen';
 
 interface ProtectedRouteProps {

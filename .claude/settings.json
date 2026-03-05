@@ -89,9 +89,8 @@
       "Bash(npm update:*)",
       "Bash(npm view:*)",
 
-      "Bash(npx eslint:*)",
+      "Bash(npx biome:*)",
       "Bash(npx next lint:*)",
-      "Bash(npx prettier:*)",
       "Bash(npx tsc:*)",
       "Bash(npx vitest:*)",
 

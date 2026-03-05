@@ -1,16 +1,16 @@
 import express from 'express';
 import pinoHttp from 'pino-http';
-import { logger } from './logger.js';
-import { healthRouter } from './health/health.router.js';
+import { createAuthRouter } from './account/api/auth-router.js';
+import { createWebhookRouter } from './account/api/webhook-router.js';
+import type { AccountAppService } from './account/application/account-app-service.js';
 import type { AuthPort } from './account/ports/auth-port.js';
 import type { WebhookVerificationPort } from './account/ports/webhook-verification-port.js';
-import type { AccountAppService } from './account/application/account-app-service.js';
-import type { AuthExtractor } from './shared/middleware/require-authentication.js';
+import { healthRouter } from './health/health.router.js';
+import { logger } from './logger.js';
 import type { AuthClaimsExtractor } from './shared/middleware/enrich-auth-context.js';
-import { createRequireAuthentication } from './shared/middleware/require-authentication.js';
 import { createEnrichAuthContext } from './shared/middleware/enrich-auth-context.js';
-import { createWebhookRouter } from './account/api/webhook-router.js';
-import { createAuthRouter } from './account/api/auth-router.js';
+import type { AuthExtractor } from './shared/middleware/require-authentication.js';
+import { createRequireAuthentication } from './shared/middleware/require-authentication.js';
 
 export interface AppDependencies {
   readonly authPort: AuthPort;

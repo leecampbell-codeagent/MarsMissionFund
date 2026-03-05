@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import type { AccountAppService } from '../../account/application/account-app-service.js';
 
 export interface AuthClaimsExtractor {

@@ -1,8 +1,8 @@
 /* Design system tokens — must be first */
-@import './styles/tokens.css';
+@import "./styles/tokens.css";
 
 /* Global styles (reset, fonts, base) */
-@import './styles/global.css';
+@import "./styles/global.css";
 
 /* Tailwind CSS v4 */
-@import 'tailwindcss';
+@import "tailwindcss";

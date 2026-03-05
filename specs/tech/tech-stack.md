@@ -159,8 +159,7 @@ No external search provider is required.
 
 | Technology | Purpose |
 | ---------- | ------- |
-| ESLint (flat config) | TypeScript linting |
-| Prettier | Code formatting |
+| Biome | TypeScript linting and code formatting |
 | markdownlint-cli2 | Markdown linting (per L3-007) |
 
 ---

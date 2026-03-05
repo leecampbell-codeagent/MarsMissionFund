@@ -1,6 +1,5 @@
-import { type ReactElement } from 'react';
-import { useAuth } from '@clerk/clerk-react';
-import { UserButton } from '@clerk/clerk-react';
+import { UserButton, useAuth } from '@clerk/clerk-react';
+import type { ReactElement } from 'react';
 import { userButtonAppearance } from '../../lib/clerk-theme';
 
 /**

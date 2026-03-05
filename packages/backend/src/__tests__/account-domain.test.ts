@@ -1,9 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Account, InvalidAccountDataError } from '../account/domain/account.js';
 import {
-  AuthenticationError,
-  AccountSuspendedError,
   AccountDeletedError,
+  AccountSuspendedError,
+  AuthenticationError,
   DomainError,
 } from '../shared/domain/errors.js';
 

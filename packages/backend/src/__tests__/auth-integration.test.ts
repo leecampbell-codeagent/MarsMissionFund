@@ -1,20 +1,20 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import request from 'supertest';
-import express from 'express';
-import pinoHttp from 'pino-http';
-import pino from 'pino';
-import {
-  createRequireAuthentication,
-  type AuthExtractor,
-} from '../shared/middleware/require-authentication.js';
-import {
-  createEnrichAuthContext,
-  type AuthClaimsExtractor,
-} from '../shared/middleware/enrich-auth-context.js';
-import { AccountAppService } from '../account/application/account-app-service.js';
-import { InMemoryAccountRepository } from '../account/adapters/mock/in-memory-account-repository.js';
-import { Account } from '../account/domain/account.js';
 import type { Request } from 'express';
+import express from 'express';
+import pino from 'pino';
+import pinoHttp from 'pino-http';
+import request from 'supertest';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { InMemoryAccountRepository } from '../account/adapters/mock/in-memory-account-repository.js';
+import { AccountAppService } from '../account/application/account-app-service.js';
+import { Account } from '../account/domain/account.js';
+import {
+  type AuthClaimsExtractor,
+  createEnrichAuthContext,
+} from '../shared/middleware/enrich-auth-context.js';
+import {
+  type AuthExtractor,
+  createRequireAuthentication,
+} from '../shared/middleware/require-authentication.js';
 
 const testLogger = pino({ level: 'silent' });
 

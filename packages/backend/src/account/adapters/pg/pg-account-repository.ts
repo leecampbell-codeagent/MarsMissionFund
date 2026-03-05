@@ -59,15 +59,15 @@ export class PgAccountRepository implements AccountRepository {
 
   private toDomain(row: Record<string, unknown>): Account {
     return Account.reconstitute({
-      id: row['id'] as string,
-      clerkUserId: row['clerk_user_id'] as string,
-      email: row['email'] as string,
-      displayName: (row['display_name'] as string | null) ?? null,
-      status: row['status'] as AccountStatus,
-      roles: row['roles'] as string[],
-      onboardingCompleted: row['onboarding_completed'] as boolean,
-      createdAt: new Date(row['created_at'] as string),
-      updatedAt: new Date(row['updated_at'] as string),
+      id: row.id as string,
+      clerkUserId: row.clerk_user_id as string,
+      email: row.email as string,
+      displayName: (row.display_name as string | null) ?? null,
+      status: row.status as AccountStatus,
+      roles: row.roles as string[],
+      onboardingCompleted: row.onboarding_completed as boolean,
+      createdAt: new Date(row.created_at as string),
+      updatedAt: new Date(row.updated_at as string),
     });
   }
 }

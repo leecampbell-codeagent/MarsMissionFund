@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
 import { useAuth } from '@clerk/clerk-react';
+import { useMemo } from 'react';
 import { createApiClient } from '../lib/api-client';
 
 /**

@@ -1,16 +1,16 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import request from 'supertest';
-import express from 'express';
+import type express from 'express';
+import type { Request as ExpressRequest } from 'express';
 import pino from 'pino';
-import { createApp, type AppDependencies } from '../app.js';
+import request from 'supertest';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { InMemoryAccountRepository } from '../account/adapters/mock/in-memory-account-repository.js';
 import { MockAuthAdapter } from '../account/adapters/mock/mock-auth-adapter.js';
 import { MockWebhookVerificationAdapter } from '../account/adapters/mock/mock-webhook-verification-adapter.js';
-import { InMemoryAccountRepository } from '../account/adapters/mock/in-memory-account-repository.js';
 import { AccountAppService } from '../account/application/account-app-service.js';
 import { Account } from '../account/domain/account.js';
-import type { AuthExtractor } from '../shared/middleware/require-authentication.js';
+import { type AppDependencies, createApp } from '../app.js';
 import type { AuthClaimsExtractor } from '../shared/middleware/enrich-auth-context.js';
-import type { Request as ExpressRequest } from 'express';
+import type { AuthExtractor } from '../shared/middleware/require-authentication.js';
 
 const testLogger = pino({ level: 'silent' });
 
@@ -24,7 +24,7 @@ interface MockAuth {
 }
 
 function getAuthFromReq(req: ExpressRequest): MockAuth | undefined {
-  return (req as unknown as Record<string, unknown>)['auth'] as MockAuth | undefined;
+  return (req as unknown as Record<string, unknown>).auth as MockAuth | undefined;
 }
 
 function createMockExtractor(): AuthExtractor & AuthClaimsExtractor {

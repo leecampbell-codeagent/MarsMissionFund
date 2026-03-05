@@ -365,7 +365,7 @@ Formatting is never a review discussion — it is automated.
 
 | Language | Linter | Formatter | Configuration |
 | --- | --- | --- | --- |
-| TypeScript | ESLint (flat config) | Prettier | `eslint.config.js`, `.prettierrc` |
+| TypeScript | Biome | Biome | `biome.json` |
 | Markdown | markdownlint-cli2 | — | `.markdownlint.jsonc` (per L3-007) |
 
 ### 10.2 Enforcement

@@ -1,6 +1,6 @@
 import type {
-  WebhookVerificationPort,
   WebhookEvent,
+  WebhookVerificationPort,
 } from '../../ports/webhook-verification-port.js';
 
 export class MockWebhookVerificationAdapter implements WebhookVerificationPort {

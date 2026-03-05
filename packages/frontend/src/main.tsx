@@ -1,11 +1,11 @@
+import { ClerkProvider } from '@clerk/clerk-react';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ClerkProvider } from '@clerk/clerk-react';
 import { BrowserRouter } from 'react-router-dom';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from './lib/query-client';
-import { clerkAppearance } from './lib/clerk-theme';
 import { App } from './App';
+import { clerkAppearance } from './lib/clerk-theme';
+import { queryClient } from './lib/query-client';
 
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string;
 

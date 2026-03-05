@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createApiClient, UnauthenticatedError, ApiError } from './api-client';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ApiError, createApiClient, UnauthenticatedError } from './api-client';
 
 describe('createApiClient', () => {
   const mockGetToken = vi.fn<() => Promise<string | null>>();

@@ -1,14 +1,14 @@
-import { type ReactElement } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import type { ReactElement } from 'react';
+import { Route, Routes } from 'react-router-dom';
 import './App.css';
-import { PageShell } from './components/layout/page-shell';
-import { LandingPlaceholder } from './components/layout/landing-placeholder';
 import { ProtectedRoute } from './components/auth/protected-route';
 import { PublicOnlyRoute } from './components/auth/public-only-route';
-import SignInPage from './pages/sign-in';
-import SignUpPage from './pages/sign-up';
+import { LandingPlaceholder } from './components/layout/landing-placeholder';
+import { PageShell } from './components/layout/page-shell';
 import DashboardPlaceholder from './pages/dashboard';
 import OnboardingPlaceholder from './pages/onboarding';
+import SignInPage from './pages/sign-in';
+import SignUpPage from './pages/sign-up';
 
 export function App(): ReactElement {
   return (

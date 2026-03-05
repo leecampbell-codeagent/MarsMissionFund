@@ -1,4 +1,4 @@
-import { Account, AccountStatus } from '../domain/account.js';
+import type { Account, AccountStatus } from '../domain/account.js';
 
 export interface WebhookAccountInput {
   readonly clerkUserId: string;

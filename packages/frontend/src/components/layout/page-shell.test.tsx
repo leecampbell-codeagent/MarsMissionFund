@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { PageShell } from './page-shell';
 
 // Mock @clerk/clerk-react — PageShell now includes HeaderAuthSection which uses useAuth

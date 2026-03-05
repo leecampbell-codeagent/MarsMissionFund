@@ -1,7 +1,7 @@
-import { useEffect, type ReactElement } from 'react';
 import { useUser } from '@clerk/clerk-react';
-import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { type ReactElement, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApiClient } from '../hooks/use-api-client';
 
 interface AuthMeResponse {

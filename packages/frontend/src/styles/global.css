@@ -11,8 +11,8 @@
 /* Bebas Neue — Display font (headings, hero, stat values)
    font-display: optional — fallback acceptable for display headings on slow connections */
 @font-face {
-  font-family: 'Bebas Neue';
-  src: url('/fonts/bebas-neue-v14-latin-regular.woff2') format('woff2');
+  font-family: "Bebas Neue";
+  src: url("/fonts/bebas-neue-v14-latin-regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: optional;
@@ -21,32 +21,32 @@
 /* DM Sans — Body font (body text, buttons, card titles)
    font-display: swap — prevent invisible text */
 @font-face {
-  font-family: 'DM Sans';
-  src: url('/fonts/dm-sans-v15-latin-regular.woff2') format('woff2');
+  font-family: "DM Sans";
+  src: url("/fonts/dm-sans-v15-latin-regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'DM Sans';
-  src: url('/fonts/dm-sans-v15-latin-500.woff2') format('woff2');
+  font-family: "DM Sans";
+  src: url("/fonts/dm-sans-v15-latin-500.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'DM Sans';
-  src: url('/fonts/dm-sans-v15-latin-600.woff2') format('woff2');
+  font-family: "DM Sans";
+  src: url("/fonts/dm-sans-v15-latin-600.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'DM Sans';
-  src: url('/fonts/dm-sans-v15-latin-700.woff2') format('woff2');
+  font-family: "DM Sans";
+  src: url("/fonts/dm-sans-v15-latin-700.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -55,16 +55,16 @@
 /* Space Mono — Data font (labels, data values, mission codes)
    font-display: swap */
 @font-face {
-  font-family: 'Space Mono';
-  src: url('/fonts/space-mono-v13-latin-regular.woff2') format('woff2');
+  font-family: "Space Mono";
+  src: url("/fonts/space-mono-v13-latin-regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Space Mono';
-  src: url('/fonts/space-mono-v13-latin-700.woff2') format('woff2');
+  font-family: "Space Mono";
+  src: url("/fonts/space-mono-v13-latin-700.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;

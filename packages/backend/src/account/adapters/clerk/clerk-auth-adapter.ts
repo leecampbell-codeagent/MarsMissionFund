@@ -1,6 +1,6 @@
 import { clerkMiddleware, getAuth } from '@clerk/express';
-import type { RequestHandler, Request } from 'express';
-import type { AuthPort, AuthPayload } from '../../ports/auth-port.js';
+import type { Request, RequestHandler } from 'express';
+import type { AuthPayload, AuthPort } from '../../ports/auth-port.js';
 
 export class ClerkAuthAdapter implements AuthPort {
   verifyToken(token: string): Promise<AuthPayload | null> {
@@ -41,8 +41,8 @@ export function getClerkSessionClaims(req: Request): {
     return {};
   }
   return {
-    email: typeof claims['email'] === 'string' ? claims['email'] : undefined,
-    firstName: typeof claims['firstName'] === 'string' ? claims['firstName'] : undefined,
-    lastName: typeof claims['lastName'] === 'string' ? claims['lastName'] : undefined,
+    email: typeof claims.email === 'string' ? claims.email : undefined,
+    firstName: typeof claims.firstName === 'string' ? claims.firstName : undefined,
+    lastName: typeof claims.lastName === 'string' ? claims.lastName : undefined,
   };
 }

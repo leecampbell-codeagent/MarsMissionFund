@@ -1,8 +1,7 @@
-import { Router } from 'express';
-import express from 'express';
+import express, { Router } from 'express';
+import type { Logger } from 'pino';
 import type { AccountAppService } from '../application/account-app-service.js';
 import type { WebhookVerificationPort } from '../ports/webhook-verification-port.js';
-import type { Logger } from 'pino';
 
 export function createWebhookRouter(
   accountAppService: AccountAppService,

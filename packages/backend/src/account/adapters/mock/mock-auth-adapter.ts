@@ -1,5 +1,5 @@
-import type { RequestHandler, Request, Response, NextFunction } from 'express';
-import type { AuthPort, AuthPayload } from '../../ports/auth-port.js';
+import type { NextFunction, Request, RequestHandler, Response } from 'express';
+import type { AuthPayload, AuthPort } from '../../ports/auth-port.js';
 
 const MOCK_USER_ID = 'user_mock_001';
 const MOCK_SESSION_ID = 'sess_mock_001';
@@ -15,7 +15,7 @@ export class MockAuthAdapter implements AuthPort {
   getMiddleware(): RequestHandler {
     return (req: Request, _res: Response, next: NextFunction): void => {
       // Attach a mock auth object that mimics Clerk's auth structure
-      (req as unknown as Record<string, unknown>)['auth'] = {
+      (req as unknown as Record<string, unknown>).auth = {
         userId: MOCK_USER_ID,
         sessionId: MOCK_SESSION_ID,
         sessionClaims: {

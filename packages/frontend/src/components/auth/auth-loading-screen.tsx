@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 /**
  * Full-page loading screen displayed while Clerk's auth state initialises.
@@ -6,6 +6,7 @@ import { type ReactElement } from 'react';
  */
 export function AuthLoadingScreen(): ReactElement {
   return (
+    // biome-ignore lint/a11y/useSemanticElements: loading indicator uses role="status" intentionally
     <div className="auth-loading-screen" role="status" aria-label="Checking authentication">
       <div className="auth-loading-screen__spinner" />
       <p className="auth-loading-screen__text">Preparing your mission...</p>
