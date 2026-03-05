@@ -36,6 +36,9 @@ rm -rf /workspace/{*,.[!.]*}
 echo "Cloning ${REPO_URL} (branch: ${BASE_BRANCH:-main})..."
 gh repo clone "${REPO_URL}" . -- --branch "${BASE_BRANCH:-main}"
 
+# Configure git to use gh for HTTPS authentication (enables git push)
+gh auth setup-git
+
 # ---------------------------------------------------------------------------
 # Step 1b: Configure remotes
 # ---------------------------------------------------------------------------
@@ -43,7 +46,11 @@ STEP="remotes"
 UPSTREAM_REPO="${UPSTREAM_REPO:-}"
 if [ -n "${UPSTREAM_REPO}" ]; then
     echo "Adding upstream remote: ${UPSTREAM_REPO}..."
-    git remote add upstream "https://github.com/${UPSTREAM_REPO}.git"
+    if git remote get-url upstream &>/dev/null; then
+        git remote set-url upstream "https://github.com/${UPSTREAM_REPO}.git"
+    else
+        git remote add upstream "https://github.com/${UPSTREAM_REPO}.git"
+    fi
     git fetch upstream main
 fi
 
