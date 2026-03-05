@@ -2,9 +2,9 @@ import { type ReactElement, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   type AccountRole,
+  DEFAULT_NOTIFICATION_PREFERENCES,
   type NotificationPreferences,
   type OnboardingStep,
-  DEFAULT_NOTIFICATION_PREFERENCES,
 } from '../api/account-api';
 import { AuthLoadingScreen } from '../components/auth/auth-loading-screen';
 import {
@@ -267,10 +267,9 @@ export default function OnboardingPage(): ReactElement {
             <StepProgressIndicator currentStep={currentStepIndex - 1} steps={STEPS.slice(1, -1)} />
           )}
 
-          <div
+          <section
             className="onboarding-wizard__step"
             aria-live="polite"
-            role="region"
             aria-label="Onboarding step content"
           >
             {localStep === 'welcome' && (
@@ -322,7 +321,7 @@ export default function OnboardingPage(): ReactElement {
                 onGoToDashboard={handleGoToDashboard}
               />
             )}
-          </div>
+          </section>
         </div>
       </div>
       <style>{`

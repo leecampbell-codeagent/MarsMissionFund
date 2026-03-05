@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 type Role = 'backer' | 'creator' | 'both';
 
@@ -76,38 +76,38 @@ export function RoleSelectionStep({
         <h1 className="role-step__heading">CHOOSE YOUR ROLE</h1>
         <p className="role-step__subheading">How do you want to participate in the Mars mission?</p>
 
-        <div
-          className="role-step__cards"
-          role="radiogroup"
-          aria-label="Select your role"
-        >
+        <div className="role-step__cards" role="radiogroup" aria-label="Select your role">
           {ROLES.map((role) => {
             const isSelected = selectedRole === role.id;
             return (
-              <div
+              <label
                 key={role.id}
-                role="radio"
-                aria-checked={isSelected}
-                tabIndex={isSelected ? 0 : -1}
                 className={`role-card${isSelected ? ' role-card--selected' : ''}`}
-                onClick={() => onRoleChange(role.id)}
-                onKeyDown={(e) => handleKeyDown(e, role.id)}
               >
+                <input
+                  type="radio"
+                  name="role"
+                  value={role.id}
+                  checked={isSelected}
+                  onChange={() => onRoleChange(role.id)}
+                  onKeyDown={(e) => handleKeyDown(e, role.id)}
+                  className="role-card__input"
+                />
                 <span className="role-card__icon" aria-hidden="true">
                   {role.icon}
                 </span>
                 <h2 className="role-card__title">{role.title}</h2>
                 <p className="role-card__description">{role.description}</p>
-              </div>
+              </label>
             );
           })}
         </div>
 
         {showKycCallout && (
-          <div className="role-step__kyc-callout" role="status">
+          <output className="role-step__kyc-callout">
             Creator accounts require identity verification (KYC) to submit campaigns. You can
             complete this later.
-          </div>
+          </output>
         )}
 
         {error && (
@@ -186,6 +186,13 @@ export function RoleSelectionStep({
           }
         }
 
+        .role-card__input {
+          position: absolute;
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
         .role-card {
           background: var(--color-bg-surface);
           border: 1px solid var(--color-border-subtle);
@@ -198,6 +205,10 @@ export function RoleSelectionStep({
             background var(--motion-hover-duration) var(--motion-hover-easing),
             border-color var(--motion-hover-duration) var(--motion-hover-easing);
           outline: none;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: relative;
         }
 
         @media (min-width: 640px) {
@@ -216,7 +227,7 @@ export function RoleSelectionStep({
           box-shadow: 0 0 0 3px rgba(255, 92, 26, 0.15);
         }
 
-        .role-card:focus-visible {
+        .role-card:focus-within {
           border-color: var(--color-action-primary);
           box-shadow: 0 0 0 3px rgba(255, 92, 26, 0.15);
         }

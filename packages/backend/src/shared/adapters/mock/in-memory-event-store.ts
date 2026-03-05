@@ -1,4 +1,8 @@
-import type { AppendEventInput, EventStorePort, TransactionClient } from '../../ports/event-store-port.js';
+import type {
+  AppendEventInput,
+  EventStorePort,
+  TransactionClient,
+} from '../../ports/event-store-port.js';
 
 export class InMemoryEventStore implements EventStorePort {
   private readonly eventsByAggregate = new Map<string, AppendEventInput[]>();

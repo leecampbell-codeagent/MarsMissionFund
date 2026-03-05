@@ -1,15 +1,19 @@
 import type { Logger } from 'pino';
-import { ACCOUNT_EVENT_TYPES } from '../domain/account-events.js';
+import { AccountNotFoundError } from '../../shared/domain/errors.js';
+import type {
+  EventStorePort,
+  TransactionClient,
+  TransactionPort,
+} from '../../shared/ports/event-store-port.js';
 import {
   Account,
   type AccountRole,
   type NotificationPreferences,
   type OnboardingStep,
 } from '../domain/account.js';
+import { ACCOUNT_EVENT_TYPES } from '../domain/account-events.js';
 import type { AccountRepository } from '../ports/account-repository.js';
 import type { WebhookEvent } from '../ports/webhook-verification-port.js';
-import { AccountNotFoundError } from '../../shared/domain/errors.js';
-import type { EventStorePort, TransactionClient, TransactionPort } from '../../shared/ports/event-store-port.js';
 
 export interface UpdateProfileInput {
   readonly displayName?: string | null;
@@ -77,15 +81,18 @@ export class AccountAppService {
     const doWork = async (txClient?: TransactionClient) => {
       await this.accountRepository.update(updatedAccount, txClient);
       const seqNum = await this.eventStore.getNextSequenceNumber(accountId, txClient);
-      await this.eventStore.append({
-        eventType: ACCOUNT_EVENT_TYPES.PROFILE_UPDATED,
-        aggregateId: accountId,
-        aggregateType: 'account',
-        sequenceNumber: seqNum,
-        correlationId,
-        sourceService: 'account-service',
-        payload: { fields_changed: changedFields },
-      }, txClient);
+      await this.eventStore.append(
+        {
+          eventType: ACCOUNT_EVENT_TYPES.PROFILE_UPDATED,
+          aggregateId: accountId,
+          aggregateType: 'account',
+          sequenceNumber: seqNum,
+          correlationId,
+          sourceService: 'account-service',
+          payload: { fields_changed: changedFields },
+        },
+        txClient,
+      );
     };
 
     if (this.transactionPort) {
@@ -120,15 +127,18 @@ export class AccountAppService {
     const doWork = async (txClient?: TransactionClient) => {
       await this.accountRepository.update(updatedAccount, txClient);
       const seqNum = await this.eventStore.getNextSequenceNumber(accountId, txClient);
-      await this.eventStore.append({
-        eventType: ACCOUNT_EVENT_TYPES.ROLES_UPDATED,
-        aggregateId: accountId,
-        aggregateType: 'account',
-        sequenceNumber: seqNum,
-        correlationId,
-        sourceService: 'account-service',
-        payload: { roles: [...mergedRoles] },
-      }, txClient);
+      await this.eventStore.append(
+        {
+          eventType: ACCOUNT_EVENT_TYPES.ROLES_UPDATED,
+          aggregateId: accountId,
+          aggregateType: 'account',
+          sequenceNumber: seqNum,
+          correlationId,
+          sourceService: 'account-service',
+          payload: { roles: [...mergedRoles] },
+        },
+        txClient,
+      );
     };
 
     if (this.transactionPort) {
@@ -137,7 +147,10 @@ export class AccountAppService {
       await doWork();
     }
 
-    this.logger.info({ accountId, action: 'roles_updated', roles: mergedRoles }, 'Account roles updated');
+    this.logger.info(
+      { accountId, action: 'roles_updated', roles: mergedRoles },
+      'Account roles updated',
+    );
 
     return updatedAccount;
   }
@@ -156,27 +169,33 @@ export class AccountAppService {
       await this.accountRepository.update(updatedAccount, txClient);
 
       const stepSeqNum = await this.eventStore.getNextSequenceNumber(accountId, txClient);
-      await this.eventStore.append({
-        eventType: ACCOUNT_EVENT_TYPES.ONBOARDING_STEP_COMPLETED,
-        aggregateId: accountId,
-        aggregateType: 'account',
-        sequenceNumber: stepSeqNum,
-        correlationId: stepCorrelationId,
-        sourceService: 'account-service',
-        payload: { step },
-      }, txClient);
+      await this.eventStore.append(
+        {
+          eventType: ACCOUNT_EVENT_TYPES.ONBOARDING_STEP_COMPLETED,
+          aggregateId: accountId,
+          aggregateType: 'account',
+          sequenceNumber: stepSeqNum,
+          correlationId: stepCorrelationId,
+          sourceService: 'account-service',
+          payload: { step },
+        },
+        txClient,
+      );
 
       if (step === 'completed') {
         const completedSeqNum = await this.eventStore.getNextSequenceNumber(accountId, txClient);
-        await this.eventStore.append({
-          eventType: ACCOUNT_EVENT_TYPES.ONBOARDING_COMPLETED,
-          aggregateId: accountId,
-          aggregateType: 'account',
-          sequenceNumber: completedSeqNum,
-          correlationId: completedCorrelationId,
-          sourceService: 'account-service',
-          payload: {},
-        }, txClient);
+        await this.eventStore.append(
+          {
+            eventType: ACCOUNT_EVENT_TYPES.ONBOARDING_COMPLETED,
+            aggregateId: accountId,
+            aggregateType: 'account',
+            sequenceNumber: completedSeqNum,
+            correlationId: completedCorrelationId,
+            sourceService: 'account-service',
+            payload: {},
+          },
+          txClient,
+        );
       }
     };
 
@@ -214,15 +233,18 @@ export class AccountAppService {
     const doWork = async (txClient?: TransactionClient) => {
       await this.accountRepository.update(updatedAccount, txClient);
       const seqNum = await this.eventStore.getNextSequenceNumber(accountId, txClient);
-      await this.eventStore.append({
-        eventType: ACCOUNT_EVENT_TYPES.PREFERENCES_UPDATED,
-        aggregateId: accountId,
-        aggregateType: 'account',
-        sequenceNumber: seqNum,
-        correlationId,
-        sourceService: 'account-service',
-        payload: { categories_changed: categoriesChanged },
-      }, txClient);
+      await this.eventStore.append(
+        {
+          eventType: ACCOUNT_EVENT_TYPES.PREFERENCES_UPDATED,
+          aggregateId: accountId,
+          aggregateType: 'account',
+          sequenceNumber: seqNum,
+          correlationId,
+          sourceService: 'account-service',
+          payload: { categories_changed: categoriesChanged },
+        },
+        txClient,
+      );
     };
 
     if (this.transactionPort) {
@@ -231,7 +253,10 @@ export class AccountAppService {
       await doWork();
     }
 
-    this.logger.info({ accountId, action: 'preferences_updated' }, 'Notification preferences updated');
+    this.logger.info(
+      { accountId, action: 'preferences_updated' },
+      'Notification preferences updated',
+    );
 
     return updatedAccount;
   }

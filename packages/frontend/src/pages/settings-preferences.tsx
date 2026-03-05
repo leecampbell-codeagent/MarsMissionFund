@@ -1,5 +1,5 @@
 import { type ReactElement, useEffect, useRef, useState } from 'react';
-import { type NotificationPreferences } from '../api/account-api';
+import type { NotificationPreferences } from '../api/account-api';
 import { ToggleSwitch } from '../components/ui/toggle-switch';
 import { useAccount } from '../hooks/account/use-account';
 import { useUpdatePreferences } from '../hooks/account/use-update-preferences';
@@ -134,9 +134,9 @@ export default function PreferencesSettingsPage(): ReactElement {
           <h1 className="settings-page__heading">NOTIFICATIONS</h1>
 
           {successMessage && (
-            <div className="settings-page__success" role="status" aria-live="polite">
+            <output className="settings-page__success" aria-live="polite">
               {successMessage}
-            </div>
+            </output>
           )}
 
           {saveError && (
@@ -152,10 +152,7 @@ export default function PreferencesSettingsPage(): ReactElement {
               const labelId = `settings-pref-label-${row.key}`;
 
               return (
-                <div
-                  key={row.key}
-                  className={`pref-row${!isLast ? ' pref-row--bordered' : ''}`}
-                >
+                <div key={row.key} className={`pref-row${!isLast ? ' pref-row--bordered' : ''}`}>
                   <div className="pref-row__content">
                     <div>
                       <p id={labelId} className="pref-row__label">
@@ -180,9 +177,7 @@ export default function PreferencesSettingsPage(): ReactElement {
                           </span>
                         )}
                       </p>
-                      <p
-                        className={`pref-row__desc${row.locked ? ' pref-row__desc--locked' : ''}`}
-                      >
+                      <p className={`pref-row__desc${row.locked ? ' pref-row__desc--locked' : ''}`}>
                         {row.description}
                       </p>
                     </div>

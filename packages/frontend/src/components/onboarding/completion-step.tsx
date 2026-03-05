@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface CompletionStepProps {
   readonly displayName: string | null;
@@ -9,7 +9,9 @@ export function CompletionStep({
   displayName,
   onGoToDashboard,
 }: CompletionStepProps): ReactElement {
-  const greeting = displayName ? `Welcome aboard, ${displayName}` : 'Welcome aboard, Mission Operative';
+  const greeting = displayName
+    ? `Welcome aboard, ${displayName}`
+    : 'Welcome aboard, Mission Operative';
 
   return (
     <>
@@ -23,14 +25,7 @@ export function CompletionStep({
             xmlns="http://www.w3.org/2000/svg"
             aria-hidden="true"
           >
-            <circle
-              cx="32"
-              cy="32"
-              r="30"
-              stroke="currentColor"
-              strokeWidth="3"
-              fill="none"
-            />
+            <circle cx="32" cy="32" r="30" stroke="currentColor" strokeWidth="3" fill="none" />
             <path
               d="M20 32L28 40L44 24"
               stroke="currentColor"
@@ -42,11 +37,7 @@ export function CompletionStep({
         </div>
         <h1 className="completion-step__heading">YOU&apos;RE READY FOR MARS</h1>
         <p className="completion-step__greeting">{greeting}</p>
-        <button
-          type="button"
-          className="completion-step__cta"
-          onClick={onGoToDashboard}
-        >
+        <button type="button" className="completion-step__cta" onClick={onGoToDashboard}>
           Go to Dashboard
         </button>
       </div>

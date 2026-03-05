@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { type Account } from '../../api/account-api';
+import type { Account } from '../../api/account-api';
 import { useApiClient } from '../use-api-client';
 
 export function useAccount() {

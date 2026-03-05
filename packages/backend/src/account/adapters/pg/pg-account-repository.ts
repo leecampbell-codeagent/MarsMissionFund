@@ -1,4 +1,5 @@
 import type { Pool, PoolClient } from 'pg';
+import type { TransactionClient } from '../../../shared/ports/event-store-port.js';
 import {
   Account,
   type AccountRole,
@@ -7,7 +8,6 @@ import {
   type OnboardingStep,
 } from '../../domain/account.js';
 import type { AccountRepository, WebhookAccountInput } from '../../ports/account-repository.js';
-import type { TransactionClient } from '../../../shared/ports/event-store-port.js';
 
 interface PgTransactionClient extends TransactionClient {
   readonly __brand: 'TransactionClient';
@@ -147,7 +147,7 @@ export class PgAccountRepository implements AccountRepository {
       bio: (row.bio as string | null) ?? null,
       avatarUrl: (row.avatar_url as string | null) ?? null,
       status: row.status as AccountStatus,
-      roles: (row.roles as string[]) as AccountRole[],
+      roles: row.roles as string[] as AccountRole[],
       onboardingCompleted: row.onboarding_completed as boolean,
       onboardingStep: (row.onboarding_step as OnboardingStep) ?? 'welcome',
       notificationPreferences,

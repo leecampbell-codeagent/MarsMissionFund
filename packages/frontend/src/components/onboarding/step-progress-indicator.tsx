@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 interface StepInfo {
   readonly label: string;
@@ -17,10 +17,7 @@ export function StepProgressIndicator({
 
   return (
     <>
-      <nav
-        aria-label="Onboarding progress"
-        className="step-progress"
-      >
+      <nav aria-label="Onboarding progress" className="step-progress">
         <ol className="step-progress__list" aria-hidden="false">
           {steps.map((step, index) => {
             const isCompleted = index < currentStep;
@@ -33,11 +30,14 @@ export function StepProgressIndicator({
             if (isCurrent) statusText = 'current';
 
             return (
-              <li key={step.label} className="step-progress__item">
+              <li
+                key={step.label}
+                className="step-progress__item"
+                aria-label={`Step ${index + 1}: ${step.label}, ${statusText}`}
+                aria-current={isCurrent ? 'step' : undefined}
+              >
                 <div
                   className={`step-progress__dot${isCompleted ? ' step-progress__dot--completed' : ''}${isCurrent ? ' step-progress__dot--current' : ''}${isFuture ? ' step-progress__dot--future' : ''}`}
-                  aria-label={`Step ${index + 1}: ${step.label}, ${statusText}`}
-                  aria-current={isCurrent ? 'step' : undefined}
                 >
                   <span className="step-progress__dot-number" aria-hidden="true">
                     {index + 1}

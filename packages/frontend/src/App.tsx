@@ -7,8 +7,8 @@ import { LandingPlaceholder } from './components/layout/landing-placeholder';
 import { PageShell } from './components/layout/page-shell';
 import DashboardPlaceholder from './pages/dashboard';
 import OnboardingPage from './pages/onboarding';
-import ProfileSettingsPage from './pages/settings-profile';
 import PreferencesSettingsPage from './pages/settings-preferences';
+import ProfileSettingsPage from './pages/settings-profile';
 import SignInPage from './pages/sign-in';
 import SignUpPage from './pages/sign-up';
 

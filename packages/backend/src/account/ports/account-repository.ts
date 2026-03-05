@@ -1,5 +1,5 @@
-import type { Account, AccountStatus } from '../domain/account.js';
 import type { TransactionClient } from '../../shared/ports/event-store-port.js';
+import type { Account, AccountStatus } from '../domain/account.js';
 
 export interface WebhookAccountInput {
   readonly clerkUserId: string;

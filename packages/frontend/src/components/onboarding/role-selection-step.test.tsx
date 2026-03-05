@@ -25,14 +25,8 @@ describe('RoleSelectionStep', () => {
 
   it('marks the selected role as checked', () => {
     render(<RoleSelectionStep {...defaultProps} selectedRole="creator" />);
-    expect(screen.getByRole('radio', { name: /creator/i })).toHaveAttribute(
-      'aria-checked',
-      'true',
-    );
-    expect(screen.getByRole('radio', { name: /backer/i })).toHaveAttribute(
-      'aria-checked',
-      'false',
-    );
+    expect(screen.getByRole('radio', { name: /creator/i })).toBeChecked();
+    expect(screen.getByRole('radio', { name: /backer/i })).not.toBeChecked();
   });
 
   it('calls onRoleChange when a role card is clicked', async () => {

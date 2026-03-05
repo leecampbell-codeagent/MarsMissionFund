@@ -15,9 +15,7 @@ describe('PreferencesStep', () => {
 
   it('renders the heading', () => {
     render(<PreferencesStep {...defaultProps} />);
-    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      'NOTIFICATION PREFERENCES',
-    );
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('NOTIFICATION PREFERENCES');
   });
 
   it('renders all preference rows', () => {
