@@ -5,6 +5,7 @@ import { ProtectedRoute } from './components/auth/protected-route';
 import { PublicOnlyRoute } from './components/auth/public-only-route';
 import { LandingPlaceholder } from './components/layout/landing-placeholder';
 import { PageShell } from './components/layout/page-shell';
+import ReviewQueuePage from './pages/admin-review-queue';
 import EditCampaignPage from './pages/campaigns-edit';
 import MyCampaignsPage from './pages/campaigns-mine';
 import NewCampaignPage from './pages/campaigns-new';
@@ -98,6 +99,14 @@ export function App(): ReactElement {
           element={
             <ProtectedRoute>
               <EditCampaignPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/review-queue"
+          element={
+            <ProtectedRoute>
+              <ReviewQueuePage />
             </ProtectedRoute>
           }
         />

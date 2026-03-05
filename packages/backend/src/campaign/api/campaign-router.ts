@@ -4,9 +4,11 @@ import type { AccountRole } from '../../account/domain/account.js';
 import {
   CampaignAlreadySubmittedError,
   CampaignNotFoundError,
+  CampaignNotReviewableError,
   InvalidCampaignError,
   InsufficientRoleError,
   KycRequiredError,
+  ReviewerCommentRequiredError,
 } from '../domain/errors.js';
 import type { CampaignAppService } from '../application/campaign-app-service.js';
 
@@ -81,6 +83,12 @@ const updateCampaignSchema = z
   })
   .strict();
 
+const reviewCommentSchema = z
+  .object({
+    comment: z.string().trim().min(1, 'Comment is required.').max(5000),
+  })
+  .strict();
+
 function zodErrorMessage(error: z.ZodError): string {
   const issues =
     (error as unknown as { issues?: { message: string }[] }).issues ??
@@ -116,6 +124,9 @@ function formatCampaignResult(
     team_info: result.teamInfo,
     risk_disclosures: result.riskDisclosures,
     hero_image_url: result.heroImageUrl,
+    reviewer_id: result.reviewerId,
+    reviewer_comment: result.reviewerComment,
+    reviewed_at: result.reviewedAt?.toISOString() ?? null,
     milestones: result.milestones.map((m) => ({
       id: m.id,
       campaign_id: m.campaignId,
@@ -134,6 +145,7 @@ function formatCampaignResult(
 }
 
 const CREATOR_ROLES: readonly AccountRole[] = ['creator'];
+const REVIEWER_ROLES: readonly AccountRole[] = ['reviewer', 'administrator'];
 
 export function createCampaignRouter(campaignAppService: CampaignAppService): Router {
   const router = Router();
@@ -208,6 +220,40 @@ export function createCampaignRouter(campaignAppService: CampaignAppService): Ro
       } catch (err) {
         if (err instanceof InvalidCampaignError) {
           res.status(400).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        throw err;
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  /**
+   * GET /api/v1/campaigns/review-queue — List submitted/under_review campaigns for reviewer
+   * NOTE: Must be registered BEFORE /:id to avoid param collision
+   * Requires: reviewer or administrator role
+   */
+  router.get('/api/v1/campaigns/review-queue', async (req, res, next) => {
+    try {
+      const userId = req.authContext?.userId;
+      if (!userId) {
+        res.status(401).json({
+          error: { code: 'UNAUTHENTICATED', message: 'Authentication required.', correlation_id: req.id },
+        });
+        return;
+      }
+
+      const roles = req.authContext?.roles ?? [];
+
+      try {
+        const results = await campaignAppService.listSubmittedCampaigns(userId, roles);
+        res.status(200).json({ data: results.map(formatCampaignResult) });
+      } catch (err) {
+        if (err instanceof InsufficientRoleError) {
+          res.status(403).json({
             error: { code: err.code, message: err.message, correlation_id: req.id },
           });
           return;
@@ -429,6 +475,355 @@ export function createCampaignRouter(campaignAppService: CampaignAppService): Ro
         }
         if (err instanceof InsufficientRoleError) {
           res.status(403).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        throw err;
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  /**
+   * POST /api/v1/campaigns/:id/claim — Claim a submitted campaign for review
+   * Requires: reviewer or administrator role
+   */
+  router.post('/api/v1/campaigns/:id/claim', async (req, res, next) => {
+    try {
+      const userId = req.authContext?.userId;
+      if (!userId) {
+        res.status(401).json({
+          error: { code: 'UNAUTHENTICATED', message: 'Authentication required.', correlation_id: req.id },
+        });
+        return;
+      }
+
+      const { id } = req.params;
+      if (!id) {
+        res.status(400).json({
+          error: { code: 'VALIDATION_ERROR', message: 'Campaign ID is required.', correlation_id: req.id },
+        });
+        return;
+      }
+
+      const roles = req.authContext?.roles ?? [];
+      const hasReviewerRole = roles.some((r) => REVIEWER_ROLES.includes(r as AccountRole));
+      if (!hasReviewerRole) {
+        res.status(403).json({
+          error: {
+            code: 'INSUFFICIENT_ROLE',
+            message: 'Only reviewers or administrators can claim campaigns.',
+            correlation_id: req.id,
+          },
+        });
+        return;
+      }
+
+      try {
+        const result = await campaignAppService.startReview(userId, id, roles);
+        res.status(200).json({ data: formatCampaignResult(result) });
+      } catch (err) {
+        if (err instanceof CampaignNotFoundError) {
+          res.status(404).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        if (err instanceof CampaignNotReviewableError) {
+          res.status(409).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        if (err instanceof InsufficientRoleError) {
+          res.status(403).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        throw err;
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  /**
+   * POST /api/v1/campaigns/:id/approve — Approve a campaign under review
+   * Requires: reviewer or administrator role; must be the assigned reviewer
+   */
+  router.post('/api/v1/campaigns/:id/approve', async (req, res, next) => {
+    try {
+      const userId = req.authContext?.userId;
+      if (!userId) {
+        res.status(401).json({
+          error: { code: 'UNAUTHENTICATED', message: 'Authentication required.', correlation_id: req.id },
+        });
+        return;
+      }
+
+      const { id } = req.params;
+      if (!id) {
+        res.status(400).json({
+          error: { code: 'VALIDATION_ERROR', message: 'Campaign ID is required.', correlation_id: req.id },
+        });
+        return;
+      }
+
+      const roles = req.authContext?.roles ?? [];
+      const hasReviewerRole = roles.some((r) => REVIEWER_ROLES.includes(r as AccountRole));
+      if (!hasReviewerRole) {
+        res.status(403).json({
+          error: {
+            code: 'INSUFFICIENT_ROLE',
+            message: 'Only reviewers or administrators can approve campaigns.',
+            correlation_id: req.id,
+          },
+        });
+        return;
+      }
+
+      const parseResult = reviewCommentSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: zodErrorMessage(parseResult.error),
+            details: zodErrorDetails(parseResult.error),
+            correlation_id: req.id,
+          },
+        });
+        return;
+      }
+
+      try {
+        const result = await campaignAppService.approveCampaign(
+          userId,
+          id,
+          parseResult.data.comment,
+          roles,
+        );
+        res.status(200).json({ data: formatCampaignResult(result) });
+      } catch (err) {
+        if (err instanceof CampaignNotFoundError) {
+          res.status(404).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        if (err instanceof CampaignNotReviewableError) {
+          res.status(409).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        if (err instanceof ReviewerCommentRequiredError) {
+          res.status(400).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        if (err instanceof InsufficientRoleError) {
+          res.status(403).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        throw err;
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  /**
+   * POST /api/v1/campaigns/:id/reject — Reject a campaign under review
+   * Requires: reviewer or administrator role; must be the assigned reviewer
+   */
+  router.post('/api/v1/campaigns/:id/reject', async (req, res, next) => {
+    try {
+      const userId = req.authContext?.userId;
+      if (!userId) {
+        res.status(401).json({
+          error: { code: 'UNAUTHENTICATED', message: 'Authentication required.', correlation_id: req.id },
+        });
+        return;
+      }
+
+      const { id } = req.params;
+      if (!id) {
+        res.status(400).json({
+          error: { code: 'VALIDATION_ERROR', message: 'Campaign ID is required.', correlation_id: req.id },
+        });
+        return;
+      }
+
+      const roles = req.authContext?.roles ?? [];
+      const hasReviewerRole = roles.some((r) => REVIEWER_ROLES.includes(r as AccountRole));
+      if (!hasReviewerRole) {
+        res.status(403).json({
+          error: {
+            code: 'INSUFFICIENT_ROLE',
+            message: 'Only reviewers or administrators can reject campaigns.',
+            correlation_id: req.id,
+          },
+        });
+        return;
+      }
+
+      const parseResult = reviewCommentSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: zodErrorMessage(parseResult.error),
+            details: zodErrorDetails(parseResult.error),
+            correlation_id: req.id,
+          },
+        });
+        return;
+      }
+
+      try {
+        const result = await campaignAppService.rejectCampaign(
+          userId,
+          id,
+          parseResult.data.comment,
+          roles,
+        );
+        res.status(200).json({ data: formatCampaignResult(result) });
+      } catch (err) {
+        if (err instanceof CampaignNotFoundError) {
+          res.status(404).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        if (err instanceof CampaignNotReviewableError) {
+          res.status(409).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        if (err instanceof ReviewerCommentRequiredError) {
+          res.status(400).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        if (err instanceof InsufficientRoleError) {
+          res.status(403).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        throw err;
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  /**
+   * POST /api/v1/campaigns/:id/recuse — Reviewer recuses from a campaign
+   * Requires: reviewer or administrator role; must be the assigned reviewer
+   */
+  router.post('/api/v1/campaigns/:id/recuse', async (req, res, next) => {
+    try {
+      const userId = req.authContext?.userId;
+      if (!userId) {
+        res.status(401).json({
+          error: { code: 'UNAUTHENTICATED', message: 'Authentication required.', correlation_id: req.id },
+        });
+        return;
+      }
+
+      const { id } = req.params;
+      if (!id) {
+        res.status(400).json({
+          error: { code: 'VALIDATION_ERROR', message: 'Campaign ID is required.', correlation_id: req.id },
+        });
+        return;
+      }
+
+      const roles = req.authContext?.roles ?? [];
+      const hasReviewerRole = roles.some((r) => REVIEWER_ROLES.includes(r as AccountRole));
+      if (!hasReviewerRole) {
+        res.status(403).json({
+          error: {
+            code: 'INSUFFICIENT_ROLE',
+            message: 'Only reviewers or administrators can recuse from campaigns.',
+            correlation_id: req.id,
+          },
+        });
+        return;
+      }
+
+      try {
+        const result = await campaignAppService.recuseCampaign(userId, id, roles);
+        res.status(200).json({ data: formatCampaignResult(result) });
+      } catch (err) {
+        if (err instanceof CampaignNotFoundError) {
+          res.status(404).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        if (err instanceof CampaignNotReviewableError) {
+          res.status(409).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        if (err instanceof InsufficientRoleError) {
+          res.status(403).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        throw err;
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  /**
+   * POST /api/v1/campaigns/:id/return-to-draft — Creator revises a rejected campaign
+   * Requires: authenticated user who owns the campaign
+   */
+  router.post('/api/v1/campaigns/:id/return-to-draft', async (req, res, next) => {
+    try {
+      const userId = req.authContext?.userId;
+      if (!userId) {
+        res.status(401).json({
+          error: { code: 'UNAUTHENTICATED', message: 'Authentication required.', correlation_id: req.id },
+        });
+        return;
+      }
+
+      const { id } = req.params;
+      if (!id) {
+        res.status(400).json({
+          error: { code: 'VALIDATION_ERROR', message: 'Campaign ID is required.', correlation_id: req.id },
+        });
+        return;
+      }
+
+      try {
+        const result = await campaignAppService.returnCampaignToDraft(userId, id);
+        res.status(200).json({ data: formatCampaignResult(result) });
+      } catch (err) {
+        if (err instanceof CampaignNotFoundError) {
+          res.status(404).json({
+            error: { code: err.code, message: err.message, correlation_id: req.id },
+          });
+          return;
+        }
+        if (err instanceof CampaignNotReviewableError) {
+          res.status(409).json({
             error: { code: err.code, message: err.message, correlation_id: req.id },
           });
           return;

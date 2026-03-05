@@ -60,9 +60,16 @@ export interface CampaignResponse {
   readonly team_info: string | null;
   readonly risk_disclosures: string | null;
   readonly hero_image_url: string | null;
+  readonly reviewer_id: string | null;
+  readonly reviewer_comment: string | null;
+  readonly reviewed_at: string | null;
   readonly milestones: readonly MilestoneResponse[];
   readonly created_at: string;
   readonly updated_at: string;
+}
+
+export interface ReviewCommentInput {
+  readonly comment: string;
 }
 
 export interface MilestoneInput {

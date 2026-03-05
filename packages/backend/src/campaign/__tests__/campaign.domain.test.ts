@@ -6,7 +6,9 @@ import {
 } from '../domain/campaign.js';
 import {
   CampaignAlreadySubmittedError,
+  CampaignNotReviewableError,
   InvalidCampaignError,
+  ReviewerCommentRequiredError,
 } from '../domain/errors.js';
 import { Milestone } from '../domain/milestone.js';
 
@@ -371,6 +373,234 @@ describe('Campaign.submit()', () => {
     });
     const milestones = makeValidMilestones(campaign.id);
     expect(() => sevenDays.submit({ milestones })).not.toThrow();
+  });
+});
+
+// ─── Review Pipeline Domain Tests ─────────────────────────────────────────────
+
+function makeSubmittedCampaign(): Campaign {
+  return Campaign.reconstitute({
+    id: 'c-submitted',
+    creatorId: 'creator-001',
+    title: 'Test Campaign',
+    summary: 'summary',
+    description: 'desc',
+    marsAlignmentStatement: 'alignment',
+    category: 'propulsion',
+    status: 'submitted',
+    minFundingTargetCents: 150_000_000,
+    maxFundingCapCents: 500_000_000,
+    deadline: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+    budgetBreakdown: null,
+    teamInfo: JSON.stringify([{ name: 'Jane' }]),
+    riskDisclosures: JSON.stringify([{ risk: 'some risk' }]),
+    heroImageUrl: null,
+    reviewerId: null,
+    reviewerComment: null,
+    reviewedAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+}
+
+function makeUnderReviewCampaign(reviewerId = 'reviewer-001'): Campaign {
+  return Campaign.reconstitute({
+    id: 'c-under-review',
+    creatorId: 'creator-001',
+    title: 'Test Campaign',
+    summary: 'summary',
+    description: 'desc',
+    marsAlignmentStatement: 'alignment',
+    category: 'propulsion',
+    status: 'under_review',
+    minFundingTargetCents: 150_000_000,
+    maxFundingCapCents: 500_000_000,
+    deadline: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+    budgetBreakdown: null,
+    teamInfo: JSON.stringify([{ name: 'Jane' }]),
+    riskDisclosures: JSON.stringify([{ risk: 'some risk' }]),
+    heroImageUrl: null,
+    reviewerId,
+    reviewerComment: null,
+    reviewedAt: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+}
+
+describe('Campaign.startReview()', () => {
+  it('transitions submitted → under_review', () => {
+    const campaign = makeSubmittedCampaign();
+    const reviewed = campaign.startReview('reviewer-001');
+    expect(reviewed.status).toBe('under_review');
+    expect(reviewed.reviewerId).toBe('reviewer-001');
+    expect(reviewed.reviewedAt).toBeInstanceOf(Date);
+  });
+
+  it('throws CampaignNotReviewableError if not submitted', () => {
+    const campaign = makeUnderReviewCampaign();
+    expect(() => campaign.startReview('reviewer-002')).toThrow(CampaignNotReviewableError);
+  });
+
+  it('throws CampaignNotReviewableError if draft', () => {
+    const campaign = makeValidDraft();
+    expect(() => campaign.startReview('reviewer-001')).toThrow(CampaignNotReviewableError);
+  });
+
+  it('accepts a custom reviewedAt timestamp', () => {
+    const campaign = makeSubmittedCampaign();
+    const ts = new Date('2026-03-05T10:00:00Z');
+    const reviewed = campaign.startReview('reviewer-001', ts);
+    expect(reviewed.reviewedAt?.toISOString()).toBe(ts.toISOString());
+  });
+});
+
+describe('Campaign.approve()', () => {
+  it('transitions under_review → approved with comment', () => {
+    const campaign = makeUnderReviewCampaign('reviewer-001');
+    const approved = campaign.approve('reviewer-001', 'Excellent Mars alignment and feasible plan.');
+    expect(approved.status).toBe('approved');
+    expect(approved.reviewerComment).toBe('Excellent Mars alignment and feasible plan.');
+    expect(approved.reviewedAt).toBeInstanceOf(Date);
+  });
+
+  it('throws CampaignNotReviewableError if not under_review', () => {
+    const campaign = makeSubmittedCampaign();
+    expect(() => campaign.approve('reviewer-001', 'Great!')).toThrow(CampaignNotReviewableError);
+  });
+
+  it('throws CampaignNotReviewableError if wrong reviewer', () => {
+    const campaign = makeUnderReviewCampaign('reviewer-001');
+    expect(() => campaign.approve('reviewer-002', 'Great!')).toThrow(CampaignNotReviewableError);
+  });
+
+  it('throws ReviewerCommentRequiredError for empty comment', () => {
+    const campaign = makeUnderReviewCampaign('reviewer-001');
+    expect(() => campaign.approve('reviewer-001', '')).toThrow(ReviewerCommentRequiredError);
+    expect(() => campaign.approve('reviewer-001', '   ')).toThrow(ReviewerCommentRequiredError);
+  });
+
+  it('trims the comment', () => {
+    const campaign = makeUnderReviewCampaign('reviewer-001');
+    const approved = campaign.approve('reviewer-001', '  Good campaign.  ');
+    expect(approved.reviewerComment).toBe('Good campaign.');
+  });
+});
+
+describe('Campaign.reject()', () => {
+  it('transitions under_review → rejected with comment', () => {
+    const campaign = makeUnderReviewCampaign('reviewer-001');
+    const rejected = campaign.reject('reviewer-001', 'Missing team credentials and feasibility plan.');
+    expect(rejected.status).toBe('rejected');
+    expect(rejected.reviewerComment).toBe('Missing team credentials and feasibility plan.');
+  });
+
+  it('throws CampaignNotReviewableError if not under_review', () => {
+    const campaign = makeSubmittedCampaign();
+    expect(() => campaign.reject('reviewer-001', 'Not good.')).toThrow(CampaignNotReviewableError);
+  });
+
+  it('throws CampaignNotReviewableError if wrong reviewer', () => {
+    const campaign = makeUnderReviewCampaign('reviewer-001');
+    expect(() => campaign.reject('reviewer-002', 'Not good.')).toThrow(CampaignNotReviewableError);
+  });
+
+  it('throws ReviewerCommentRequiredError for empty comment', () => {
+    const campaign = makeUnderReviewCampaign('reviewer-001');
+    expect(() => campaign.reject('reviewer-001', '')).toThrow(ReviewerCommentRequiredError);
+  });
+});
+
+describe('Campaign.recuse()', () => {
+  it('transitions under_review → submitted and clears reviewer fields', () => {
+    const campaign = makeUnderReviewCampaign('reviewer-001');
+    const recused = campaign.recuse('reviewer-001');
+    expect(recused.status).toBe('submitted');
+    expect(recused.reviewerId).toBeNull();
+    expect(recused.reviewerComment).toBeNull();
+    expect(recused.reviewedAt).toBeNull();
+  });
+
+  it('throws CampaignNotReviewableError if not under_review', () => {
+    const campaign = makeSubmittedCampaign();
+    expect(() => campaign.recuse('reviewer-001')).toThrow(CampaignNotReviewableError);
+  });
+
+  it('throws CampaignNotReviewableError if wrong reviewer', () => {
+    const campaign = makeUnderReviewCampaign('reviewer-001');
+    expect(() => campaign.recuse('reviewer-002')).toThrow(CampaignNotReviewableError);
+  });
+});
+
+describe('Campaign.returnToDraft()', () => {
+  it('transitions rejected → draft and preserves data', () => {
+    const rejectedCampaign = Campaign.reconstitute({
+      id: 'c-rejected',
+      creatorId: 'creator-001',
+      title: 'My Campaign',
+      summary: 'summary',
+      description: 'desc',
+      marsAlignmentStatement: 'alignment',
+      category: 'propulsion',
+      status: 'rejected',
+      minFundingTargetCents: 150_000_000,
+      maxFundingCapCents: 500_000_000,
+      deadline: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+      budgetBreakdown: null,
+      teamInfo: JSON.stringify([{ name: 'Jane' }]),
+      riskDisclosures: JSON.stringify([{ risk: 'some risk' }]),
+      heroImageUrl: null,
+      reviewerId: 'reviewer-001',
+      reviewerComment: 'Needs work.',
+      reviewedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    const draft = rejectedCampaign.returnToDraft();
+    expect(draft.status).toBe('draft');
+    expect(draft.title).toBe('My Campaign'); // data preserved
+    expect(draft.summary).toBe('summary');   // data preserved
+    // Reviewer info preserved for audit history
+    expect(draft.reviewerId).toBe('reviewer-001');
+    expect(draft.reviewerComment).toBe('Needs work.');
+  });
+
+  it('throws CampaignNotReviewableError if not rejected', () => {
+    const campaign = makeSubmittedCampaign();
+    expect(() => campaign.returnToDraft()).toThrow(CampaignNotReviewableError);
+  });
+
+  it('throws CampaignNotReviewableError if under_review', () => {
+    const campaign = makeUnderReviewCampaign();
+    expect(() => campaign.returnToDraft()).toThrow(CampaignNotReviewableError);
+  });
+});
+
+describe('Campaign.reconstitute() with reviewer fields', () => {
+  it('defaults new reviewer fields to null when not provided', () => {
+    const campaign = Campaign.reconstitute({
+      id: 'c-001',
+      creatorId: 'u-001',
+      title: 'Test',
+      summary: null,
+      description: null,
+      marsAlignmentStatement: null,
+      category: 'propulsion',
+      status: 'draft',
+      minFundingTargetCents: 150_000_000,
+      maxFundingCapCents: 500_000_000,
+      deadline: null,
+      budgetBreakdown: null,
+      teamInfo: null,
+      riskDisclosures: null,
+      heroImageUrl: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    expect(campaign.reviewerId).toBeNull();
+    expect(campaign.reviewerComment).toBeNull();
+    expect(campaign.reviewedAt).toBeNull();
   });
 });
 

@@ -34,3 +34,17 @@ export class InsufficientRoleError extends DomainError {
     this.name = 'InsufficientRoleError';
   }
 }
+
+export class CampaignNotReviewableError extends DomainError {
+  constructor(message = 'Campaign is not in a reviewable state for this action.') {
+    super('CAMPAIGN_NOT_REVIEWABLE', message);
+    this.name = 'CampaignNotReviewableError';
+  }
+}
+
+export class ReviewerCommentRequiredError extends DomainError {
+  constructor(message = 'A written comment is required for this review action.') {
+    super('REVIEWER_COMMENT_REQUIRED', message);
+    this.name = 'ReviewerCommentRequiredError';
+  }
+}

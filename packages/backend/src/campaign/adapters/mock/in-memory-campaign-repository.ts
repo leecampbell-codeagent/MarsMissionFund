@@ -24,6 +24,18 @@ export class InMemoryCampaignRepository implements CampaignRepository {
     return results;
   }
 
+  async findSubmitted(): Promise<{ campaign: Campaign; milestones: Milestone[] }[]> {
+    const results: { campaign: Campaign; milestones: Milestone[] }[] = [];
+    for (const campaign of this.campaigns.values()) {
+      if (campaign.status === 'submitted' || campaign.status === 'under_review') {
+        results.push({ campaign, milestones: this.milestones.get(campaign.id) ?? [] });
+      }
+    }
+    // FIFO: order by createdAt ascending
+    results.sort((a, b) => a.campaign.createdAt.getTime() - b.campaign.createdAt.getTime());
+    return results;
+  }
+
   async save(campaign: Campaign, milestones: readonly Milestone[]): Promise<void> {
     this.campaigns.set(campaign.id, campaign);
     this.milestones.set(campaign.id, [...milestones]);

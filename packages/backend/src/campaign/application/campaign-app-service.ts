@@ -2,7 +2,11 @@ import type { Logger } from 'pino';
 import type { EventStorePort } from '../../shared/ports/event-store-port.js';
 import { Campaign } from '../domain/campaign.js';
 import type { CreateCampaignInput, UpdateCampaignInput } from '../domain/campaign.js';
-import { CampaignNotFoundError, KycRequiredError } from '../domain/errors.js';
+import {
+  CampaignNotFoundError,
+  InsufficientRoleError,
+  KycRequiredError,
+} from '../domain/errors.js';
 import { Milestone } from '../domain/milestone.js';
 import type { CreateMilestoneInput } from '../domain/milestone.js';
 import type { CampaignRepository } from '../ports/campaign-repository.js';
@@ -12,6 +16,11 @@ const CAMPAIGN_EVENT_TYPES = {
   DRAFT_CREATED: 'campaign.draft_created',
   DRAFT_UPDATED: 'campaign.draft_updated',
   SUBMITTED: 'campaign.submitted',
+  REVIEW_STARTED: 'campaign.review_started',
+  APPROVED: 'campaign.approved',
+  REJECTED: 'campaign.rejected',
+  REVIEW_RECUSED: 'campaign.review_recused',
+  RETURNED_TO_DRAFT: 'campaign.returned_to_draft',
 } as const;
 
 export interface MilestoneInput {
@@ -83,6 +92,9 @@ export interface CampaignResult {
   readonly teamInfo: string | null;
   readonly riskDisclosures: string | null;
   readonly heroImageUrl: string | null;
+  readonly reviewerId: string | null;
+  readonly reviewerComment: string | null;
+  readonly reviewedAt: Date | null;
   readonly milestones: readonly MilestoneResult[];
   readonly createdAt: Date;
   readonly updatedAt: Date;
@@ -246,6 +258,231 @@ export class CampaignAppService {
     return records.map((r) => this.toResult(r.campaign, r.milestones));
   }
 
+  // ─── Review Pipeline ─────────────────────────────────────────────────────────
+
+  /** Asserts the caller has reviewer or administrator role. */
+  private assertReviewerRole(roles: readonly string[]): void {
+    if (!roles.includes('reviewer') && !roles.includes('administrator')) {
+      throw new InsufficientRoleError();
+    }
+  }
+
+  /**
+   * Returns campaigns in submitted or under_review status (FIFO ordered).
+   * Requires reviewer or administrator role.
+   */
+  async listSubmittedCampaigns(
+    _reviewerUserId: string,
+    roles: readonly string[],
+  ): Promise<CampaignResult[]> {
+    this.assertReviewerRole(roles);
+    const records = await this.campaignRepository.findSubmitted();
+    return records.map((r) => this.toResult(r.campaign, r.milestones));
+  }
+
+  /**
+   * Claims a submitted campaign for review (submitted → under_review).
+   * Requires reviewer or administrator role.
+   */
+  async startReview(
+    reviewerUserId: string,
+    campaignId: string,
+    roles: readonly string[],
+  ): Promise<CampaignResult> {
+    this.assertReviewerRole(roles);
+
+    const record = await this.campaignRepository.findById(campaignId);
+    if (!record) {
+      throw new CampaignNotFoundError();
+    }
+
+    const updatedCampaign = record.campaign.startReview(reviewerUserId);
+    await this.campaignRepository.update(updatedCampaign);
+
+    const seqNum = await this.eventStore.getNextSequenceNumber(campaignId);
+    await this.eventStore.append({
+      eventType: CAMPAIGN_EVENT_TYPES.REVIEW_STARTED,
+      aggregateId: campaignId,
+      aggregateType: 'campaign',
+      sequenceNumber: seqNum,
+      correlationId: crypto.randomUUID(),
+      sourceService: 'campaign-service',
+      payload: {
+        campaignId,
+        reviewerId: reviewerUserId,
+        previousStatus: record.campaign.status,
+        newStatus: updatedCampaign.status,
+      },
+    });
+
+    this.logger.info({ campaignId, reviewerId: reviewerUserId }, 'Campaign review started');
+
+    return this.toResult(updatedCampaign, record.milestones);
+  }
+
+  /**
+   * Approves a campaign under review (under_review → approved).
+   * Requires reviewer or administrator role. Only the assigned reviewer can approve.
+   */
+  async approveCampaign(
+    reviewerUserId: string,
+    campaignId: string,
+    comment: string,
+    roles: readonly string[],
+  ): Promise<CampaignResult> {
+    this.assertReviewerRole(roles);
+
+    const record = await this.campaignRepository.findById(campaignId);
+    if (!record) {
+      throw new CampaignNotFoundError();
+    }
+
+    const updatedCampaign = record.campaign.approve(reviewerUserId, comment);
+    await this.campaignRepository.update(updatedCampaign);
+
+    const seqNum = await this.eventStore.getNextSequenceNumber(campaignId);
+    await this.eventStore.append({
+      eventType: CAMPAIGN_EVENT_TYPES.APPROVED,
+      aggregateId: campaignId,
+      aggregateType: 'campaign',
+      sequenceNumber: seqNum,
+      correlationId: crypto.randomUUID(),
+      sourceService: 'campaign-service',
+      payload: {
+        campaignId,
+        reviewerId: reviewerUserId,
+        previousStatus: record.campaign.status,
+        newStatus: updatedCampaign.status,
+        comment: comment.substring(0, 500),
+      },
+    });
+
+    this.logger.info({ campaignId, reviewerId: reviewerUserId }, 'Campaign approved');
+
+    return this.toResult(updatedCampaign, record.milestones);
+  }
+
+  /**
+   * Rejects a campaign under review (under_review → rejected).
+   * Requires reviewer or administrator role. Only the assigned reviewer can reject.
+   */
+  async rejectCampaign(
+    reviewerUserId: string,
+    campaignId: string,
+    comment: string,
+    roles: readonly string[],
+  ): Promise<CampaignResult> {
+    this.assertReviewerRole(roles);
+
+    const record = await this.campaignRepository.findById(campaignId);
+    if (!record) {
+      throw new CampaignNotFoundError();
+    }
+
+    const updatedCampaign = record.campaign.reject(reviewerUserId, comment);
+    await this.campaignRepository.update(updatedCampaign);
+
+    const seqNum = await this.eventStore.getNextSequenceNumber(campaignId);
+    await this.eventStore.append({
+      eventType: CAMPAIGN_EVENT_TYPES.REJECTED,
+      aggregateId: campaignId,
+      aggregateType: 'campaign',
+      sequenceNumber: seqNum,
+      correlationId: crypto.randomUUID(),
+      sourceService: 'campaign-service',
+      payload: {
+        campaignId,
+        reviewerId: reviewerUserId,
+        previousStatus: record.campaign.status,
+        newStatus: updatedCampaign.status,
+        comment: comment.substring(0, 500),
+      },
+    });
+
+    this.logger.info({ campaignId, reviewerId: reviewerUserId }, 'Campaign rejected');
+
+    return this.toResult(updatedCampaign, record.milestones);
+  }
+
+  /**
+   * Reviewer recuses themselves from a campaign (under_review → submitted).
+   * Requires reviewer or administrator role. Only the assigned reviewer can recuse.
+   */
+  async recuseCampaign(
+    reviewerUserId: string,
+    campaignId: string,
+    roles: readonly string[],
+  ): Promise<CampaignResult> {
+    this.assertReviewerRole(roles);
+
+    const record = await this.campaignRepository.findById(campaignId);
+    if (!record) {
+      throw new CampaignNotFoundError();
+    }
+
+    const updatedCampaign = record.campaign.recuse(reviewerUserId);
+    await this.campaignRepository.update(updatedCampaign);
+
+    const seqNum = await this.eventStore.getNextSequenceNumber(campaignId);
+    await this.eventStore.append({
+      eventType: CAMPAIGN_EVENT_TYPES.REVIEW_RECUSED,
+      aggregateId: campaignId,
+      aggregateType: 'campaign',
+      sequenceNumber: seqNum,
+      correlationId: crypto.randomUUID(),
+      sourceService: 'campaign-service',
+      payload: {
+        campaignId,
+        reviewerId: reviewerUserId,
+        previousStatus: record.campaign.status,
+        newStatus: updatedCampaign.status,
+      },
+    });
+
+    this.logger.info({ campaignId, reviewerId: reviewerUserId }, 'Campaign review recused');
+
+    return this.toResult(updatedCampaign, record.milestones);
+  }
+
+  /**
+   * Creator returns a rejected campaign to draft for revision (rejected → draft).
+   * Only the campaign creator may call this.
+   */
+  async returnCampaignToDraft(
+    creatorUserId: string,
+    campaignId: string,
+  ): Promise<CampaignResult> {
+    const record = await this.campaignRepository.findById(campaignId);
+    if (!record || record.campaign.creatorId !== creatorUserId) {
+      throw new CampaignNotFoundError();
+    }
+
+    const updatedCampaign = record.campaign.returnToDraft();
+    await this.campaignRepository.update(updatedCampaign);
+
+    const seqNum = await this.eventStore.getNextSequenceNumber(campaignId);
+    await this.eventStore.append({
+      eventType: CAMPAIGN_EVENT_TYPES.RETURNED_TO_DRAFT,
+      aggregateId: campaignId,
+      aggregateType: 'campaign',
+      sequenceNumber: seqNum,
+      correlationId: crypto.randomUUID(),
+      sourceService: 'campaign-service',
+      payload: {
+        campaignId,
+        creatorId: creatorUserId,
+        previousStatus: record.campaign.status,
+        newStatus: updatedCampaign.status,
+      },
+    });
+
+    this.logger.info({ campaignId, creatorId: creatorUserId }, 'Campaign returned to draft');
+
+    return this.toResult(updatedCampaign, record.milestones);
+  }
+
+  // ─── Private helpers ─────────────────────────────────────────────────────────
+
   private buildMilestones(
     campaignId: string,
     milestoneInputs: readonly MilestoneInput[],
@@ -283,6 +520,9 @@ export class CampaignAppService {
       teamInfo: campaign.teamInfo,
       riskDisclosures: campaign.riskDisclosures,
       heroImageUrl: campaign.heroImageUrl,
+      reviewerId: campaign.reviewerId,
+      reviewerComment: campaign.reviewerComment,
+      reviewedAt: campaign.reviewedAt,
       milestones: milestones.map((m) => ({
         id: m.id,
         campaignId: m.campaignId,

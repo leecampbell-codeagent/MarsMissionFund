@@ -1,4 +1,9 @@
-import { CampaignAlreadySubmittedError, InvalidCampaignError } from './errors.js';
+import {
+  CampaignAlreadySubmittedError,
+  CampaignNotReviewableError,
+  InvalidCampaignError,
+  ReviewerCommentRequiredError,
+} from './errors.js';
 import type { Milestone } from './milestone.js';
 
 export type CampaignStatus =
@@ -68,6 +73,9 @@ interface CampaignProps {
   readonly teamInfo: string | null;
   readonly riskDisclosures: string | null;
   readonly heroImageUrl: string | null;
+  readonly reviewerId: string | null;
+  readonly reviewerComment: string | null;
+  readonly reviewedAt: Date | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -157,14 +165,26 @@ export class Campaign {
       teamInfo: input.teamInfo ?? null,
       riskDisclosures: input.riskDisclosures ?? null,
       heroImageUrl: input.heroImageUrl ?? null,
+      reviewerId: null,
+      reviewerComment: null,
+      reviewedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
   }
 
   /** Reconstitutes from persistence — no validation. */
-  static reconstitute(props: CampaignProps): Campaign {
-    return new Campaign(props);
+  static reconstitute(props: Omit<CampaignProps, 'reviewerId' | 'reviewerComment' | 'reviewedAt'> & {
+    reviewerId?: string | null;
+    reviewerComment?: string | null;
+    reviewedAt?: Date | null;
+  }): Campaign {
+    return new Campaign({
+      ...props,
+      reviewerId: props.reviewerId ?? null,
+      reviewerComment: props.reviewerComment ?? null,
+      reviewedAt: props.reviewedAt ?? null,
+    });
   }
 
   get id(): string { return this.props.id; }
@@ -182,6 +202,9 @@ export class Campaign {
   get teamInfo(): string | null { return this.props.teamInfo; }
   get riskDisclosures(): string | null { return this.props.riskDisclosures; }
   get heroImageUrl(): string | null { return this.props.heroImageUrl; }
+  get reviewerId(): string | null { return this.props.reviewerId; }
+  get reviewerComment(): string | null { return this.props.reviewerComment; }
+  get reviewedAt(): Date | null { return this.props.reviewedAt; }
   get createdAt(): Date { return this.props.createdAt; }
   get updatedAt(): Date { return this.props.updatedAt; }
 
@@ -378,6 +401,124 @@ export class Campaign {
       ...this.props,
       status: 'submitted',
       updatedAt: submittedAt,
+    });
+  }
+
+  /**
+   * Transitions submitted → under_review.
+   * Only allowed if status is 'submitted'.
+   */
+  startReview(reviewerId: string, reviewedAt?: Date): Campaign {
+    if (this.props.status !== 'submitted') {
+      throw new CampaignNotReviewableError(
+        'Campaign must be in submitted status to start review.',
+      );
+    }
+    const now = reviewedAt ?? new Date();
+    return new Campaign({
+      ...this.props,
+      status: 'under_review',
+      reviewerId,
+      reviewedAt: now,
+      updatedAt: now,
+    });
+  }
+
+  /**
+   * Transitions under_review → approved.
+   * Only the assigned reviewer may approve. A written comment is required.
+   */
+  approve(reviewerId: string, comment: string, reviewedAt?: Date): Campaign {
+    if (this.props.status !== 'under_review') {
+      throw new CampaignNotReviewableError(
+        'Campaign must be under review to approve.',
+      );
+    }
+    if (this.props.reviewerId !== reviewerId) {
+      throw new CampaignNotReviewableError(
+        'Only the assigned reviewer may approve this campaign.',
+      );
+    }
+    if (!comment || comment.trim().length === 0) {
+      throw new ReviewerCommentRequiredError();
+    }
+    const now = reviewedAt ?? new Date();
+    return new Campaign({
+      ...this.props,
+      status: 'approved',
+      reviewerComment: comment.trim(),
+      reviewedAt: now,
+      updatedAt: now,
+    });
+  }
+
+  /**
+   * Transitions under_review → rejected.
+   * Only the assigned reviewer may reject. A written comment is required.
+   */
+  reject(reviewerId: string, comment: string, reviewedAt?: Date): Campaign {
+    if (this.props.status !== 'under_review') {
+      throw new CampaignNotReviewableError(
+        'Campaign must be under review to reject.',
+      );
+    }
+    if (this.props.reviewerId !== reviewerId) {
+      throw new CampaignNotReviewableError(
+        'Only the assigned reviewer may reject this campaign.',
+      );
+    }
+    if (!comment || comment.trim().length === 0) {
+      throw new ReviewerCommentRequiredError();
+    }
+    const now = reviewedAt ?? new Date();
+    return new Campaign({
+      ...this.props,
+      status: 'rejected',
+      reviewerComment: comment.trim(),
+      reviewedAt: now,
+      updatedAt: now,
+    });
+  }
+
+  /**
+   * Transitions under_review → submitted (reviewer recuses).
+   * Only the assigned reviewer may recuse. Clears reviewer fields.
+   */
+  recuse(reviewerId: string): Campaign {
+    if (this.props.status !== 'under_review') {
+      throw new CampaignNotReviewableError(
+        'Campaign must be under review to recuse.',
+      );
+    }
+    if (this.props.reviewerId !== reviewerId) {
+      throw new CampaignNotReviewableError(
+        'Only the assigned reviewer may recuse from this campaign.',
+      );
+    }
+    return new Campaign({
+      ...this.props,
+      status: 'submitted',
+      reviewerId: null,
+      reviewerComment: null,
+      reviewedAt: null,
+      updatedAt: new Date(),
+    });
+  }
+
+  /**
+   * Transitions rejected → draft (creator chooses to revise).
+   * Previous data is preserved; reviewer info preserved for audit history.
+   */
+  returnToDraft(): Campaign {
+    if (this.props.status !== 'rejected') {
+      throw new CampaignNotReviewableError(
+        'Campaign must be in rejected status to return to draft.',
+      );
+    }
+    return new Campaign({
+      ...this.props,
+      status: 'draft',
+      updatedAt: new Date(),
     });
   }
 }

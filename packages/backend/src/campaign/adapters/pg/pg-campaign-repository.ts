@@ -28,6 +28,29 @@ export class PgCampaignRepository implements CampaignRepository {
     return { campaign, milestones };
   }
 
+  async findSubmitted(): Promise<{ campaign: Campaign; milestones: Milestone[] }[]> {
+    const campaignResult = await this.pool.query(
+      `SELECT * FROM campaigns WHERE status IN ('submitted', 'under_review') ORDER BY created_at ASC`,
+    );
+
+    if (campaignResult.rows.length === 0) return [];
+
+    const results: { campaign: Campaign; milestones: Milestone[] }[] = [];
+    for (const row of campaignResult.rows) {
+      const campaign = this.toCampaignDomain(row);
+      const milestonesResult = await this.pool.query(
+        'SELECT * FROM milestones WHERE campaign_id = $1 ORDER BY target_date ASC, created_at ASC',
+        [campaign.id],
+      );
+      results.push({
+        campaign,
+        milestones: milestonesResult.rows.map((r) => this.toMilestoneDomain(r)),
+      });
+    }
+
+    return results;
+  }
+
   async findByCreatorId(
     creatorId: string,
   ): Promise<{ campaign: Campaign; milestones: Milestone[] }[]> {
@@ -60,8 +83,9 @@ export class PgCampaignRepository implements CampaignRepository {
         id, creator_id, title, summary, description, mars_alignment_statement,
         category, status, min_funding_target_cents, max_funding_cap_cents,
         deadline, budget_breakdown, team_info, risk_disclosures, hero_image_url,
+        reviewer_id, reviewer_comment, reviewed_at,
         created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`,
       [
         campaign.id,
         campaign.creatorId,
@@ -78,6 +102,9 @@ export class PgCampaignRepository implements CampaignRepository {
         campaign.teamInfo,
         campaign.riskDisclosures,
         campaign.heroImageUrl,
+        campaign.reviewerId,
+        campaign.reviewerComment,
+        campaign.reviewedAt,
         campaign.createdAt,
         campaign.updatedAt,
       ],
@@ -104,7 +131,10 @@ export class PgCampaignRepository implements CampaignRepository {
         team_info = $12,
         risk_disclosures = $13,
         hero_image_url = $14,
-        updated_at = $15
+        reviewer_id = $15,
+        reviewer_comment = $16,
+        reviewed_at = $17,
+        updated_at = $18
       WHERE id = $1`,
       [
         campaign.id,
@@ -121,6 +151,9 @@ export class PgCampaignRepository implements CampaignRepository {
         campaign.teamInfo,
         campaign.riskDisclosures,
         campaign.heroImageUrl,
+        campaign.reviewerId,
+        campaign.reviewerComment,
+        campaign.reviewedAt,
         campaign.updatedAt,
       ],
     );
@@ -173,6 +206,9 @@ export class PgCampaignRepository implements CampaignRepository {
       teamInfo: (row.team_info as string | null) ?? null,
       riskDisclosures: (row.risk_disclosures as string | null) ?? null,
       heroImageUrl: (row.hero_image_url as string | null) ?? null,
+      reviewerId: (row.reviewer_id as string | null) ?? null,
+      reviewerComment: (row.reviewer_comment as string | null) ?? null,
+      reviewedAt: row.reviewed_at ? new Date(row.reviewed_at as string) : null,
       createdAt: new Date(row.created_at as string),
       updatedAt: new Date(row.updated_at as string),
     });
