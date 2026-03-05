@@ -176,7 +176,7 @@ describe('CampaignForm integration', () => {
       ...baseCampaign,
       shortDescription: 'A great campaign for Mars',
       description: 'Full description of the campaign',
-      category: 'propulsion_systems',
+      category: 'propulsion',
       heroImageUrl: 'https://example.com/hero.jpg',
       fundingGoalCents: '100000000',
       deadline: '2027-01-15T00:00:00.000Z',
@@ -185,7 +185,7 @@ describe('CampaignForm integration', () => {
         { title: 'M1', description: 'First', fundingBasisPoints: 5000, targetDate: null },
         { title: 'M2', description: 'Second', fundingBasisPoints: 5000, targetDate: null },
       ],
-      riskDisclosures: [{ title: 'Risk 1', description: 'A risk', severity: 'medium' }],
+      riskDisclosures: [{ id: crypto.randomUUID(), risk: 'Risk 1', mitigation: 'A mitigation plan' }],
     };
 
     render(

@@ -177,6 +177,12 @@ export function createCampaignRouter(
       const clerkUserId = requireAuthOrUnauthorized(req, res);
       if (!clerkUserId) return;
 
+      const parseResult = emptyBodySchema.safeParse(req.body ?? {});
+      if (!parseResult.success) {
+        res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Request body must be empty.', correlation_id: req.correlationId ?? null } });
+        return;
+      }
+
       const campaign = await campaignAppService.claimCampaign(clerkUserId, req.params.id);
       res.status(200).json({ data: serializeCampaign(campaign) });
     } catch (err) {
@@ -266,6 +272,12 @@ export function createCampaignRouter(
       const clerkUserId = requireAuthOrUnauthorized(req, res);
       if (!clerkUserId) return;
 
+      const parseResult = emptyBodySchema.safeParse(req.body ?? {});
+      if (!parseResult.success) {
+        res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Request body must be empty.', correlation_id: req.correlationId ?? null } });
+        return;
+      }
+
       const campaign = await campaignAppService.launchCampaign(clerkUserId, req.params.id);
       res.status(200).json({ data: serializeCampaign(campaign) });
     } catch (err) {
@@ -281,6 +293,12 @@ export function createCampaignRouter(
     try {
       const clerkUserId = requireAuthOrUnauthorized(req, res);
       if (!clerkUserId) return;
+
+      const parseResult = emptyBodySchema.safeParse(req.body ?? {});
+      if (!parseResult.success) {
+        res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Request body must be empty.', correlation_id: req.correlationId ?? null } });
+        return;
+      }
 
       const campaign = await campaignAppService.archiveCampaign(clerkUserId, req.params.id);
       res.status(200).json({ data: serializeCampaign(campaign) });

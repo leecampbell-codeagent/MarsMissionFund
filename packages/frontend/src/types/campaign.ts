@@ -17,31 +17,31 @@ export const CampaignStatus = {
 export type CampaignStatus = (typeof CampaignStatus)[keyof typeof CampaignStatus];
 
 export const CampaignCategory = {
-  PropulsionSystems: 'propulsion_systems',
-  LifeSupport: 'life_support',
-  HabitatConstruction: 'habitat_construction',
-  ResourceExtraction: 'resource_extraction',
-  CommunicationSystems: 'communication_systems',
-  PowerGeneration: 'power_generation',
-  FoodProduction: 'food_production',
-  MedicalSystems: 'medical_systems',
-  NavigationGuidance: 'navigation_guidance',
-  WasteManagement: 'waste_management',
+  Propulsion:               'propulsion',
+  EntryDescentLanding:      'entry_descent_landing',
+  PowerEnergy:              'power_energy',
+  HabitatsConstruction:     'habitats_construction',
+  LifeSupportCrewHealth:    'life_support_crew_health',
+  FoodWaterProduction:      'food_water_production',
+  InSituResourceUtilisation:'in_situ_resource_utilisation',
+  RadiationProtection:      'radiation_protection',
+  RoboticsAutomation:       'robotics_automation',
+  CommunicationsNavigation: 'communications_navigation',
 } as const;
 
 export type CampaignCategory = (typeof CampaignCategory)[keyof typeof CampaignCategory];
 
 export const CAMPAIGN_CATEGORY_LABELS: Record<CampaignCategory, string> = {
-  propulsion_systems: 'Propulsion Systems',
-  life_support: 'Life Support',
-  habitat_construction: 'Habitat Construction',
-  resource_extraction: 'Resource Extraction',
-  communication_systems: 'Communication Systems',
-  power_generation: 'Power Generation',
-  food_production: 'Food Production',
-  medical_systems: 'Medical Systems',
-  navigation_guidance: 'Navigation & Guidance',
-  waste_management: 'Waste Management',
+  propulsion:                 'Propulsion',
+  entry_descent_landing:      'Entry, Descent & Landing',
+  power_energy:               'Power & Energy',
+  habitats_construction:      'Habitats & Construction',
+  life_support_crew_health:   'Life Support & Crew Health',
+  food_water_production:      'Food & Water Production',
+  in_situ_resource_utilisation: 'In-Situ Resource Utilisation',
+  radiation_protection:       'Radiation Protection',
+  robotics_automation:        'Robotics & Automation',
+  communications_navigation:  'Communications & Navigation',
 };
 
 export interface Milestone {
@@ -59,15 +59,17 @@ export interface TeamMember {
 }
 
 export interface RiskDisclosure {
-  readonly title: string;
-  readonly description: string;
-  readonly severity: 'low' | 'medium' | 'high';
+  readonly id: string;
+  readonly risk: string;        // max 500 chars
+  readonly mitigation: string;  // max 500 chars
 }
 
 export interface BudgetItem {
-  readonly category: string;
-  readonly description: string;
-  readonly amountCents: string; // string — never parse to Number (G-024)
+  readonly id: string;
+  readonly category: string;        // max 100 chars
+  readonly description: string;     // max 500 chars
+  readonly estimatedCents: string;  // integer cents as string — never parse to Number (G-024)
+  readonly notes?: string;          // max 200 chars
 }
 
 export interface Campaign {

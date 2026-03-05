@@ -13,7 +13,7 @@ import { createAccountRouter } from './account/api/account-router.js';
 import { createWebhookRouter } from './account/api/webhook-router.js';
 import type { AccountAppService } from './account/application/account-app-service.js';
 import { createCampaignRouter } from './campaign/api/campaign-router.js';
-import { serializeCampaign } from './campaign/api/campaign-serializer.js';
+import { serializeCampaignSummary } from './campaign/api/campaign-serializer.js';
 import type { CampaignAppService } from './campaign/application/campaign-app-service.js';
 import { createKycRouter } from './kyc/api/kyc-router.js';
 import type { KycAppService } from './kyc/application/kyc-app-service.js';
@@ -90,7 +90,7 @@ export function createApp(services: AppServices): Application {
         return;
       }
       const campaigns = await services.campaignAppService.listMyCampaigns(auth.userId);
-      res.status(200).json({ data: campaigns.map(serializeCampaign) });
+      res.status(200).json({ data: campaigns.map(serializeCampaignSummary) });
     } catch (err) {
       next(err);
     }

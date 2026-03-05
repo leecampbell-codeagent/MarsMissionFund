@@ -49,9 +49,10 @@ export function BudgetSection({ campaign, onChange }: BudgetSectionProps): React
 
   const addItem = () => {
     const newItem: BudgetItem = {
+      id: crypto.randomUUID(),
       category: '',
       description: '',
-      amountCents: '0',
+      estimatedCents: '0',
     };
     onChange('budgetBreakdown', [...items, newItem]);
   };
@@ -70,7 +71,7 @@ export function BudgetSection({ campaign, onChange }: BudgetSectionProps): React
   const handleAmountChange = (index: number, dollars: string) => {
     const num = parseFloat(dollars);
     const cents = isNaN(num) ? '0' : String(Math.round(num * 100));
-    updateItem(index, 'amountCents', cents);
+    updateItem(index, 'estimatedCents', cents);
   };
 
   return (
@@ -156,7 +157,7 @@ export function BudgetSection({ campaign, onChange }: BudgetSectionProps): React
                 type="number"
                 min="0"
                 step="1000"
-                defaultValue={Number(item.amountCents) / 100}
+                defaultValue={Number(item.estimatedCents) / 100}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => handleAmountChange(index, e.target.value)}
                 placeholder="0"
                 required

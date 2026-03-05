@@ -50,9 +50,9 @@ export function RiskSection({ campaign, onChange }: RiskSectionProps): ReactElem
 
   const addRisk = () => {
     const newRisk: RiskDisclosure = {
-      title: '',
-      description: '',
-      severity: 'medium',
+      id: crypto.randomUUID(),
+      risk: '',
+      mitigation: '',
     };
     onChange('riskDisclosures', [...risks, newRisk]);
   };
@@ -103,25 +103,13 @@ export function RiskSection({ campaign, onChange }: RiskSectionProps): ReactElem
           </div>
 
           <div>
-            <label htmlFor={`risk-title-${index}`} style={labelStyle}>Risk Title *</label>
-            <input
-              id={`risk-title-${index}`}
-              type="text"
-              value={risk.title}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => updateRisk(index, 'title', e.target.value)}
-              placeholder="e.g. Technical Delays"
-              required
-              style={inputStyle}
-            />
-          </div>
-
-          <div>
-            <label htmlFor={`risk-description-${index}`} style={labelStyle}>Description *</label>
+            <label htmlFor={`risk-risk-${index}`} style={labelStyle}>Risk *</label>
             <textarea
-              id={`risk-description-${index}`}
-              value={risk.description}
-              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => updateRisk(index, 'description', e.target.value)}
-              placeholder="Describe this risk and mitigation strategy"
+              id={`risk-risk-${index}`}
+              value={risk.risk}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => updateRisk(index, 'risk', e.target.value)}
+              placeholder="Describe the risk (max 500 chars)"
+              maxLength={500}
               rows={2}
               required
               style={{ ...inputStyle, resize: 'vertical' }}
@@ -129,17 +117,17 @@ export function RiskSection({ campaign, onChange }: RiskSectionProps): ReactElem
           </div>
 
           <div>
-            <label htmlFor={`risk-severity-${index}`} style={labelStyle}>Severity *</label>
-            <select
-              id={`risk-severity-${index}`}
-              value={risk.severity}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => updateRisk(index, 'severity', e.target.value)}
-              style={{ ...inputStyle, appearance: 'auto' }}
-            >
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
+            <label htmlFor={`risk-mitigation-${index}`} style={labelStyle}>Mitigation *</label>
+            <textarea
+              id={`risk-mitigation-${index}`}
+              value={risk.mitigation}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => updateRisk(index, 'mitigation', e.target.value)}
+              placeholder="How will you mitigate this risk? (max 500 chars)"
+              maxLength={500}
+              rows={2}
+              required
+              style={{ ...inputStyle, resize: 'vertical' }}
+            />
           </div>
         </div>
       ))}

@@ -246,21 +246,14 @@ export default function CampaignDetailPage(): ReactElement {
                     <div key={i} style={{ background: 'var(--color-bg-elevated)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-card)', padding: '16px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                         <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                          {risk.title}
-                        </span>
-                        <span
-                          style={{
-                            fontFamily: 'var(--font-data)',
-                            fontSize: '11px',
-                            color: risk.severity === 'high' ? 'var(--color-status-error)' : risk.severity === 'medium' ? 'var(--color-status-warning)' : 'var(--color-text-tertiary)',
-                            textTransform: 'uppercase',
-                          }}
-                        >
-                          {risk.severity}
+                          Risk
                         </span>
                       </div>
                       <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                        {risk.description}
+                        {risk.risk}
+                      </p>
+                      <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-tertiary)', margin: '4px 0 0', lineHeight: 1.5 }}>
+                        <strong>Mitigation:</strong> {risk.mitigation}
                       </p>
                     </div>
                   ))}
@@ -282,7 +275,7 @@ export default function CampaignDetailPage(): ReactElement {
                         <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: 'var(--color-text-secondary)', marginLeft: '8px' }}>{item.description}</span>
                       </div>
                       <span style={{ fontFamily: 'var(--font-data)', fontSize: '13px', color: 'var(--color-text-primary)', fontWeight: 600 }}>
-                        {formatCents(item.amountCents)}
+                        {formatCents(item.estimatedCents)}
                       </span>
                     </div>
                   ))}
