@@ -4,7 +4,7 @@ import { useApiClient } from '../use-api-client';
 
 export interface ApproveCampaignInput {
   readonly campaignId: string;
-  readonly comment: string;
+  readonly comment?: string;
 }
 
 export function useApproveCampaign() {

@@ -25,7 +25,7 @@ export default function ReviewQueuePage(): ReactElement {
   const handleApprove = (campaignId: string) => {
     approveCampaign.mutate({
       campaignId,
-      comment: 'Campaign approved. Meets all curation criteria for Mars Mission Fund.',
+      
     });
   };
 
