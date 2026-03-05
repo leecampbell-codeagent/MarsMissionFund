@@ -9,6 +9,7 @@ import DashboardPlaceholder from './pages/dashboard';
 import OnboardingPage from './pages/onboarding';
 import PreferencesSettingsPage from './pages/settings-preferences';
 import ProfileSettingsPage from './pages/settings-profile';
+import VerificationSettingsPage from './pages/settings-verification';
 import SignInPage from './pages/sign-in';
 import SignUpPage from './pages/sign-up';
 
@@ -62,6 +63,14 @@ export function App(): ReactElement {
           element={
             <ProtectedRoute>
               <PreferencesSettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings/verification"
+          element={
+            <ProtectedRoute>
+              <VerificationSettingsPage />
             </ProtectedRoute>
           }
         />

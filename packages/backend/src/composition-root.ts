@@ -4,6 +4,9 @@ import { MockAuthAdapter } from './account/adapters/mock/mock-auth-adapter.js';
 import { MockWebhookVerificationAdapter } from './account/adapters/mock/mock-webhook-verification-adapter.js';
 import { AccountAppService } from './account/application/account-app-service.js';
 import type { AppDependencies } from './app.js';
+import { InMemoryKycRepository } from './kyc/adapters/mock/in-memory-kyc-repository.js';
+import { MockKycAdapter } from './kyc/adapters/mock/mock-kyc-adapter.js';
+import { KycAppService } from './kyc/application/kyc-app-service.js';
 import { logger } from './logger.js';
 import { InMemoryEventStore } from './shared/adapters/mock/in-memory-event-store.js';
 import type { AuthClaimsExtractor } from './shared/middleware/enrich-auth-context.js';
@@ -87,12 +90,24 @@ export async function createDependencies(): Promise<AppDependencies> {
     const accountRepository = new InMemoryAccountRepository();
     const eventStore = new InMemoryEventStore();
     const accountAppService = new AccountAppService(accountRepository, eventStore, logger);
+    const kycRepository = new InMemoryKycRepository();
+    const kycAdapter = new MockKycAdapter();
+    const isMockKyc = process.env.MOCK_KYC !== 'false';
+    const kycAppService = new KycAppService(
+      kycRepository,
+      accountRepository,
+      kycAdapter,
+      eventStore,
+      logger,
+      isMockKyc,
+    );
     const extractor = createMockAuthExtractor();
 
     return {
       authPort,
       webhookVerifier,
       accountAppService,
+      kycAppService,
       authExtractor: extractor,
       claimsExtractor: extractor,
     };
@@ -125,6 +140,8 @@ export async function createDependencies(): Promise<AppDependencies> {
     connectionString: process.env.DATABASE_URL,
   });
 
+  const { PgKycRepository } = await import('./kyc/adapters/pg/pg-kyc-repository.js');
+
   const authPort = new ClerkAuthAdapter();
   const webhookVerifier = new ClerkWebhookVerificationAdapter(webhookSigningSecret);
   const accountRepository = new PgAccountRepository(pool);
@@ -136,12 +153,26 @@ export async function createDependencies(): Promise<AppDependencies> {
     logger,
     transactionPort,
   );
+
+  const kycRepository = new PgKycRepository(pool);
+  const isMockKyc = process.env.MOCK_KYC !== 'false';
+  const kycPort = new MockKycAdapter();
+  const kycAppService = new KycAppService(
+    kycRepository,
+    accountRepository,
+    kycPort,
+    eventStore,
+    logger,
+    isMockKyc,
+  );
+
   const extractor = await createClerkAuthExtractor();
 
   return {
     authPort,
     webhookVerifier,
     accountAppService,
+    kycAppService,
     authExtractor: extractor,
     claimsExtractor: extractor,
   };
