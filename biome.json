@@ -16,7 +16,6 @@
       "!db",
       "!.github",
       "!e2e",
-      "!autonomous",
       "!specs/**/*.html"
     ]
   },
@@ -50,16 +49,6 @@
   "overrides": [
     {
       "includes": ["**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
-      "linter": {
-        "rules": {
-          "suspicious": {
-            "noConsole": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": ["**/*.config.js", "**/*.config.ts"],
       "linter": {
         "rules": {
           "suspicious": {
