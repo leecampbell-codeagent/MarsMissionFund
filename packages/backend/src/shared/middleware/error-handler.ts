@@ -9,6 +9,14 @@ import {
   SecurityAlertsCannotBeDisabledError,
   UserNotFoundError,
 } from '../../account/domain/errors/account-errors.js';
+import {
+  KycAccountNotActiveError,
+  KycAccountSuspendedError,
+  KycAlreadyPendingError,
+  KycAlreadyVerifiedError,
+  KycResubmissionNotAllowedError,
+  KycTransitionConflictError,
+} from '../../kyc/domain/errors/kyc-errors.js';
 import { DomainError } from '../domain/errors.js';
 
 /**
@@ -67,6 +75,35 @@ export function createErrorHandler(logger: Logger) {
         error: {
           code: 'UNAUTHENTICATED',
           message: 'Authentication required. Sign in to continue.',
+          correlation_id: correlationId,
+        },
+      });
+      return;
+    }
+
+    // KYC 409 Conflict errors
+    if (
+      err instanceof KycAlreadyPendingError ||
+      err instanceof KycAlreadyVerifiedError ||
+      err instanceof KycResubmissionNotAllowedError ||
+      err instanceof KycTransitionConflictError
+    ) {
+      res.status(409).json({
+        error: {
+          code: err.code,
+          message: err.message,
+          correlation_id: correlationId,
+        },
+      });
+      return;
+    }
+
+    // KYC 403 Forbidden errors
+    if (err instanceof KycAccountNotActiveError || err instanceof KycAccountSuspendedError) {
+      res.status(403).json({
+        error: {
+          code: err.code,
+          message: err.message,
           correlation_id: correlationId,
         },
       });

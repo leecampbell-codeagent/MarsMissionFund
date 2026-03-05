@@ -1,6 +1,8 @@
+import { KycTransitionConflictError } from '../../kyc/domain/errors/kyc-errors.js';
 import { UserNotFoundError } from '../domain/errors/account-errors.js';
 import { type UpdateProfileInput, User } from '../domain/models/user.js';
 import type { AccountStatus } from '../domain/value-objects/account-status.js';
+import type { KycStatus } from '../domain/value-objects/kyc-status.js';
 import type { NotificationPreferences } from '../domain/value-objects/notification-preferences.js';
 import type { Role } from '../domain/value-objects/role.js';
 import type { UserRepository } from '../ports/user-repository.port.js';
@@ -124,6 +126,41 @@ export class InMemoryUserRepository implements UserRepository {
       roles,
       notificationPrefs: existing.notificationPrefs,
       kycStatus: existing.kycStatus,
+      lastSeenAt: existing.lastSeenAt,
+      createdAt: existing.createdAt,
+      updatedAt: new Date(),
+    });
+    this.users.set(clerkUserId, updated);
+    return updated;
+  }
+
+  async updateKycStatus(
+    clerkUserId: string,
+    fromStatus: KycStatus,
+    toStatus: KycStatus,
+  ): Promise<User> {
+    const existing = this.users.get(clerkUserId);
+    if (!existing) {
+      throw new KycTransitionConflictError();
+    }
+
+    if (existing.kycStatus !== fromStatus) {
+      throw new KycTransitionConflictError();
+    }
+
+    const updated = User.reconstitute({
+      id: existing.id,
+      clerkUserId: existing.clerkUserId,
+      email: existing.email,
+      displayName: existing.displayName,
+      bio: existing.bio,
+      avatarUrl: existing.avatarUrl,
+      accountStatus: existing.accountStatus,
+      onboardingCompleted: existing.onboardingCompleted,
+      onboardingStep: existing.onboardingStep,
+      roles: existing.roles,
+      notificationPrefs: existing.notificationPrefs,
+      kycStatus: toStatus,
       lastSeenAt: existing.lastSeenAt,
       createdAt: existing.createdAt,
       updatedAt: new Date(),

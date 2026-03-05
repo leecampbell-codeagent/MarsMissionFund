@@ -23,7 +23,7 @@ export interface UserProfile {
   readonly avatarUrl: string | null;
   readonly accountStatus: 'pending_verification' | 'active' | 'suspended' | 'deactivated';
   readonly roles: ReadonlyArray<'backer' | 'creator' | 'reviewer' | 'administrator' | 'super_administrator'>;
-  readonly kycStatus: 'not_started' | 'pending' | 'in_review' | 'verified' | 'failed' | 'expired';
+  readonly kycStatus: 'not_started' | 'pending' | 'in_review' | 'verified' | 'rejected' | 'expired';
   readonly onboardingCompleted: boolean;
   readonly onboardingStep: string | null;
   readonly notificationPrefs: NotificationPrefs;

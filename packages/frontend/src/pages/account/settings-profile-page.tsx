@@ -3,9 +3,11 @@ import { useLocation } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateProfile } from '../../api/account-api';
 import { useCurrentUser, CURRENT_USER_QUERY_KEY } from '../../hooks/account/use-current-user';
+import { useKycStatus } from '../../hooks/account/use-kyc-status';
 import { SettingsNav } from '../../components/account/settings-nav';
 import { ProfileCard } from '../../components/account/profile-card';
 import { ProfileEditForm } from '../../components/account/profile-edit-form';
+import { KycVerificationPanel } from '../../components/account/kyc-verification-panel';
 
 /**
  * SettingsProfilePage — /settings/profile
@@ -15,6 +17,7 @@ export default function SettingsProfilePage(): ReactElement {
   const location = useLocation();
   const queryClient = useQueryClient();
   const { user, isLoading, isError } = useCurrentUser();
+  const { kycStatus, isLoading: isKycLoading, isError: isKycError, error: kycError } = useKycStatus();
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -118,6 +121,34 @@ export default function SettingsProfilePage(): ReactElement {
               error={saveError}
             />
           )}
+
+          {/* Identity verification section */}
+          <div style={{ marginTop: '24px' }}>
+            <p
+              style={{
+                fontFamily: 'var(--font-data)',
+                fontSize: '11px',
+                fontWeight: 400,
+                letterSpacing: '0.3em',
+                textTransform: 'uppercase',
+                color: 'var(--color-text-accent)',
+                marginBottom: '16px',
+                marginTop: 0,
+              }}
+            >
+              04 — IDENTITY VERIFICATION
+            </p>
+            <section aria-labelledby="kyc-section-label">
+              <span id="kyc-section-label" style={{ display: 'none' }}>
+                Identity Verification
+              </span>
+              <KycVerificationPanel
+                kycStatus={kycStatus?.kycStatus}
+                isLoading={isKycLoading}
+                error={isKycError ? kycError : null}
+              />
+            </section>
+          </div>
         </div>
       </div>
     </div>

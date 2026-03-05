@@ -4,7 +4,7 @@ export const KycStatus = {
   Pending: 'pending',
   InReview: 'in_review',
   Verified: 'verified',
-  Failed: 'failed',
+  Rejected: 'rejected', // was 'Failed: failed' — renamed per G-018
   Expired: 'expired',
 } as const;
 

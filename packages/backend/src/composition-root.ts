@@ -5,6 +5,10 @@ import { MockClerkAuthAdapter } from './account/adapters/mock-clerk-auth.adapter
 import { PgUserRepository } from './account/adapters/pg-user-repository.adapter.js';
 import { PinoAuditLoggerAdapter } from './account/adapters/pino-audit-logger.adapter.js';
 import { AccountAppService } from './account/application/account-app-service.js';
+import { PgKycAuditRepository } from './kyc/adapters/pg-kyc-audit-repository.adapter.js';
+import { StubKycVerificationAdapter } from './kyc/adapters/stub-kyc-provider.adapter.js';
+import { KycAppService } from './kyc/application/kyc-app-service.js';
+import type { KycVerificationPort } from './kyc/ports/kyc-provider.port.js';
 
 /**
  * Wires all dependencies manually (no DI containers).
@@ -13,7 +17,7 @@ import { AccountAppService } from './account/application/account-app-service.js'
 export function createServices(
   pool: Pool,
   logger: Logger,
-): { accountAppService: AccountAppService } {
+): { accountAppService: AccountAppService; kycAppService: KycAppService } {
   const userRepository = new PgUserRepository(pool);
 
   // Use mock Clerk adapter when MOCK_CLERK=true (local dev / CI without Clerk credentials)
@@ -24,7 +28,21 @@ export function createServices(
 
   const accountAppService = new AccountAppService(userRepository, clerkAuth, auditLogger, logger);
 
-  return { accountAppService };
+  // KYC provider — default to stub (MOCK_KYC=true unless explicitly set to false)
+  const mockKyc = process.env.MOCK_KYC !== 'false';
+  const kycProvider: KycVerificationPort = mockKyc
+    ? new StubKycVerificationAdapter(true)
+    : (() => {
+        throw new Error('Real KYC provider not implemented');
+      })();
+
+  // KYC audit repository
+  const kycAuditRepository = new PgKycAuditRepository(pool);
+
+  // KYC app service — shares userRepository with AccountAppService
+  const kycAppService = new KycAppService(userRepository, kycProvider, kycAuditRepository, logger);
+
+  return { accountAppService, kycAppService };
 }
 
 

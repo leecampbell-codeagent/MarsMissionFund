@@ -178,6 +178,96 @@ Either:
 
 ---
 
+## KYC Domain Gotchas
+
+### G-018: KYC Status Column Value Naming Mismatch
+
+**Problem:** The `users.kyc_status` CHECK constraint (created in feat-001) uses `'failed'` as the
+value for rejected verification. L4-005 calls this state "Rejected". The `KycStatus` value object
+also uses `Failed: 'failed'`. This inconsistency makes the code misleading and will cause confusion
+when implementing the full state machine.
+
+**Fix:** The feat-002 migration must rename `'failed'` to `'rejected'` in the CHECK constraint.
+Add an `ALTER TABLE` in the migration to drop and recreate the constraint with the new value.
+Update the `KycStatus` value object to use `Rejected: 'rejected'`. Update all references in
+`pg-user-repository.adapter.ts` and frontend `UserProfile` type.
+
+**Detected in:** feat-002 research
+
+---
+
+### G-019: Audit Event Ordering — DB Update Before Audit Log
+
+**Problem:** If the audit event is emitted BEFORE the DB update, and the DB update subsequently
+fails (timeout, constraint violation), the audit log shows a state transition that never completed.
+The audit trail becomes inaccurate.
+
+**Fix:** Always perform the DB state update first, then emit the audit event. If the audit event
+emission fails (e.g., insert to `kyc_audit_events` fails), log the error to pino but do not
+roll back the state update — the audit is best-effort for the local demo. For production, the
+audit insert should be in the same DB transaction as the status update.
+
+**Detected in:** feat-002 research
+
+---
+
+### G-020: Concurrent KYC Submit Requests Need Conditional WHERE
+
+**Problem:** Two simultaneous `POST /kyc/submit` requests (e.g., double-click, React strict mode
+double-invocation) could both read `kyc_status = 'not_started'`, both pass the validation check,
+and both trigger the state machine — resulting in two audit events and potentially two competing
+DB updates.
+
+**Fix:** The `updateKycStatus()` repository method for the `not_started → pending` transition
+must use a conditional WHERE clause:
+
+```sql
+UPDATE users
+SET kyc_status = 'pending', updated_at = NOW()
+WHERE clerk_user_id = $1 AND kyc_status = 'not_started'
+RETURNING *
+```
+
+If the UPDATE affects 0 rows (because another concurrent request already changed the status),
+the application service must treat this as a conflict and return `409 KYC_ALREADY_PENDING`.
+This makes the transition atomic without requiring an explicit lock.
+
+**Detected in:** feat-002 research
+
+---
+
+### G-021: `AuditLoggerPort.resourceType` Typed as `'user'` Only
+
+**Problem:** The `AuditEntry` interface in `packages/backend/src/account/ports/audit-logger.port.ts`
+has `resourceType: 'user'` as a literal type. KYC audit events should use `resourceType: 'kyc'`
+per L3-006 Section 4.1. TypeScript will reject `resourceType: 'kyc'` until the union is expanded.
+
+**Fix:** Change the `resourceType` field type to `'user' | 'kyc'` (and future resource types as
+needed). Update the `AuditEntry` interface:
+
+```typescript
+readonly resourceType: 'user' | 'kyc';
+```
+
+**Detected in:** feat-002 research
+
+---
+
+### G-022: `in_review` DB Value Reserved but Not Used by Stub
+
+**Problem:** The `users.kyc_status` CHECK constraint includes `'in_review'` as a valid value.
+The stub never transitions to `in_review` (it auto-approves). Code that assumes all valid
+CHECK constraint values are reachable via the stub will be confused.
+
+**Fix:** The `in_review` value is reserved for the real Veriff integration. The stub state
+machine only uses `not_started`, `pending`, and `verified` (and `rejected` for failure testing).
+Document this clearly in the KYC application service and test coverage — do not write tests for
+`in_review` in feat-002; they belong in the real Veriff adapter feature.
+
+**Detected in:** feat-002 research
+
+---
+
 ## Testing Gotchas
 
 ### G-012: Never Use Real Clerk Tokens in Unit or Integration Tests

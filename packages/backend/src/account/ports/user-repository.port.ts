@@ -1,5 +1,6 @@
 import type { UpdateProfileInput, User } from '../domain/models/user.js';
 import type { AccountStatus } from '../domain/value-objects/account-status.js';
+import type { KycStatus } from '../domain/value-objects/kyc-status.js';
 import type { NotificationPreferences } from '../domain/value-objects/notification-preferences.js';
 import type { Role } from '../domain/value-objects/role.js';
 
@@ -15,6 +16,11 @@ export interface UserRepository {
     status: AccountStatus,
     roles: Role[],
     email?: string,
+  ): Promise<User>;
+  updateKycStatus(
+    clerkUserId: string,
+    fromStatus: KycStatus,
+    toStatus: KycStatus,
   ): Promise<User>;
   touchLastSeen(clerkUserId: string): Promise<void>;
   completeOnboarding(clerkUserId: string): Promise<User>;

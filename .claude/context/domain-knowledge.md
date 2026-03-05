@@ -139,6 +139,80 @@ Security alerts: always forced `true`, cannot be set to `false` at the API layer
 
 ---
 
+## KYC Domain
+
+### KYC Status State Machine (Stub Scope)
+
+The full L4-005 lifecycle has 9 states. The stub (feat-002) implements only:
+
+```
+not_started → pending   (user calls POST /kyc/submit)
+pending     → verified  (stub auto-approves synchronously)
+failed      → pending   (user resubmits after failure — allowed)
+```
+
+In production (real Veriff), transitions via `in_review` and `pending_resubmission` apply.
+Those states exist in the domain design but are out of scope for the local demo.
+
+### KYC vs. Role Gate (Critical Distinction)
+
+Do NOT conflate the Creator role with KYC verification status. They are independent:
+- The Creator role may be assigned BEFORE KYC is complete.
+- Creator-gated features require BOTH `roles CONTAINS 'creator'` AND `kyc_status = 'verified'`.
+- API endpoints that gate on KYC must check both — role alone is insufficient.
+- Error code when KYC is required but not verified: `KYC_NOT_VERIFIED`, HTTP 403.
+
+### KYC DB Column Naming Mismatch
+
+The current `users.kyc_status` CHECK constraint uses `'failed'` as the rejection value.
+L4-005 calls this state "Rejected". This naming inconsistency should be resolved in the
+feat-002 migration by renaming `'failed'` to `'rejected'` in the CHECK constraint and the
+`KycStatus` value object.
+
+### KYC Adapter Interface (Port Design)
+
+The `KycVerificationPort` interface in `packages/backend/src/kyc/ports/kyc-provider.port.ts`
+must define the contract for both the stub and the eventual real Veriff adapter:
+
+```typescript
+interface KycSessionResult {
+  sessionId: string;
+  sessionUrl?: string;  // not used by stub
+  outcome: 'approved' | 'declined' | 'pending';
+}
+
+interface KycVerificationPort {
+  initiateSession(userId: string): Promise<KycSessionResult>;
+}
+```
+
+The stub always returns `{ sessionId: 'stub-session', outcome: 'approved' }` synchronously.
+The real Veriff adapter would return a session URL and wait for a webhook.
+
+### Audit Events for KYC
+
+KYC status transitions emit two distinct audit events per stub submission:
+1. `kyc.status.change` — `not_started → pending`
+2. `kyc.status.change` — `pending → verified`
+
+Each event must include `previous_status`, `new_status`, `trigger_reason`, and actor identity.
+Document content and PII are NEVER included in audit events (per L3-006).
+
+The `kyc_audit_events` table stores KYC-specific events. It is NOT the general `audit_events`
+table — KYC audit is its own table for retention and data classification reasons.
+
+### Veriff (Production KYC Provider)
+
+Veriff uses a session-based flow:
+- Create session → receive session URL and ID.
+- User completes verification in Veriff's hosted flow.
+- Veriff sends `decision` webhook (HMAC-SHA256 signed) with outcome.
+
+For MMF, the Veriff adapter is behind the `KycVerificationPort` interface.
+The `MOCK_KYC=true` environment variable selects the stub adapter at composition root level.
+
+---
+
 ## Database
 
 ### Migration Convention

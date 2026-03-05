@@ -1,4 +1,5 @@
 import type { Pool } from 'pg';
+import { KycTransitionConflictError } from '../../kyc/domain/errors/kyc-errors.js';
 import { UserNotFoundError } from '../domain/errors/account-errors.js';
 import { type UpdateProfileInput, User, type UserData } from '../domain/models/user.js';
 import type { AccountStatus } from '../domain/value-objects/account-status.js';
@@ -230,6 +231,32 @@ export class PgUserRepository implements UserRepository {
     const row = result.rows[0];
     if (!row) {
       throw new UserNotFoundError(clerkUserId);
+    }
+    return rowToDomain(row);
+  }
+
+  async updateKycStatus(
+    clerkUserId: string,
+    fromStatus: KycStatus,
+    toStatus: KycStatus,
+  ): Promise<User> {
+    const result = await this.pool.query<UserRow>(
+      `UPDATE users
+       SET    kyc_status = $2,
+              updated_at = NOW()
+       WHERE  clerk_user_id = $1
+         AND  kyc_status   = $3
+       RETURNING *`,
+      [clerkUserId, toStatus, fromStatus],
+    );
+
+    if (result.rowCount === 0) {
+      throw new KycTransitionConflictError();
+    }
+
+    const row = result.rows[0];
+    if (!row) {
+      throw new KycTransitionConflictError();
     }
     return rowToDomain(row);
   }

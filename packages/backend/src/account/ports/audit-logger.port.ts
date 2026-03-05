@@ -7,6 +7,8 @@ export const AuditActions = {
   AccountActivated: 'account.activated',
   AccountSuspended: 'account.suspended',
   UserSynced: 'user.synced',
+  // KYC actions
+  KycStatusChange: 'kyc.status.change',
 } as const;
 
 export type AuditAction = (typeof AuditActions)[keyof typeof AuditActions];
@@ -15,8 +17,8 @@ export interface AuditEntry {
   readonly timestamp: Date;
   readonly actorClerkUserId: string;
   readonly action: AuditAction;
-  readonly resourceType: 'user';
-  readonly resourceId: string; // MMF users.id (UUID)
+  readonly resourceType: 'user' | 'kyc'; // expanded from 'user' only per G-021
+  readonly resourceId: string; // MMF users.id (UUID) for 'user'; MMF users.id for 'kyc'
   readonly metadata?: Record<string, unknown>;
 }
 

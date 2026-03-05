@@ -12,6 +12,8 @@ const httpLogger =
 import { createAccountRouter } from './account/api/account-router.js';
 import { createWebhookRouter } from './account/api/webhook-router.js';
 import type { AccountAppService } from './account/application/account-app-service.js';
+import { createKycRouter } from './kyc/api/kyc-router.js';
+import type { KycAppService } from './kyc/application/kyc-app-service.js';
 import {
   clerkMiddleware,
   correlationIdMiddleware,
@@ -21,6 +23,7 @@ import { createErrorHandler } from './shared/middleware/error-handler.js';
 
 export interface AppServices {
   accountAppService: AccountAppService;
+  kycAppService: KycAppService;
   logger: Logger;
 }
 
@@ -59,6 +62,7 @@ export function createApp(services: AppServices): Application {
   // Protected routes — all /api/v1/* except /webhooks (already registered above)
   const requireAuth = createRequireAuth();
   app.use('/api/v1', requireAuth, createAccountRouter(services.accountAppService));
+  app.use('/api/v1/kyc', requireAuth, createKycRouter(services.kycAppService, logger));
 
   // Global error handler (must be last)
   app.use(createErrorHandler(logger));

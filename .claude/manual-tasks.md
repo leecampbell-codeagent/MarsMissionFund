@@ -2,7 +2,7 @@
 
 > Steps that cannot be automated — require human action in third-party dashboards.
 > Maintained by the Infrastructure Engineer agent.
-> Updated: 2026-03-05
+> Updated: 2026-03-05 (Task #3 added for feat-002)
 
 ---
 
@@ -182,6 +182,97 @@ docker compose exec postgres psql -U mmf -d mmf_dev -c "SELECT COUNT(*) FROM use
 ### Currently Mocked By
 
 PostgreSQL is the real database — it is never mocked. The `in-memory-user-repository.adapter.ts` is used in unit tests only (not a database mock).
+
+---
+
+## Task #3 — Veriff KYC Integration
+
+**Service:** Veriff (https://veriff.com)
+**Blocked feature:** feat-002 real KYC (the stub adapter is already working for local demo)
+**Status:** ⬜ TODO
+**Priority:** Low (stub works for demo)
+
+### What This Enables
+
+Real identity verification for Mars Mission Fund creators — Veriff performs document and selfie checks and returns a verified/rejected outcome via webhook, replacing the auto-approving stub adapter.
+
+### Steps
+
+1. Go to https://station.veriff.com and sign in (or create a Veriff account — contact sales@veriff.com for a sandbox account if you do not have one).
+
+2. **Create an integration:**
+   - In the left sidebar, go to **Integrations**.
+   - Click **"New integration"**.
+   - Name: `Mars Mission Fund`
+   - Environment: select **Sandbox** for testing; **Production** when going live.
+   - Click **"Create"**.
+
+3. **Copy your API credentials** — shown on the integration detail page:
+   - `API Key` → copy and set as `VERIFF_API_KEY` in your `.env` file.
+   - The API key is used by the backend to create verification sessions.
+
+4. **Configure the webhook endpoint:**
+   - On the integration detail page, find **"Webhooks"** or **"Notifications"**.
+   - Click **"Add endpoint"**.
+   - URL: `https://your-domain.com/api/v1/webhooks/veriff`
+     (For local testing, use a tunnelling tool such as ngrok — see Verification section below.)
+   - Enable the following event types:
+     - `verification.decision` — fired when Veriff reaches a final approved/declined decision
+   - Click **"Save"**.
+   - On the webhook detail page, copy the **"HMAC Secret"** (or "Signing Secret") — set it as `VERIFF_WEBHOOK_SECRET` in your `.env`.
+
+5. **Set `MOCK_KYC=false`** in your `.env` to disable the stub and activate the real Veriff adapter.
+
+6. **Implement the real Veriff adapter** (backend engineer task):
+   - Create `packages/backend/src/kyc/adapters/veriff-kyc-provider.adapter.ts` implementing `KycVerificationPort`.
+   - Use the Veriff Node.js SDK (`@veriff/incontext-sdk` or the REST API directly).
+   - The `initiateSession()` method should create a Veriff session via `POST https://stationapi.veriff.com/v1/sessions` and return `{ sessionId, outcome: 'pending' }`.
+   - The final decision arrives via webhook — implement `POST /api/v1/webhooks/veriff` to receive the `verification.decision` event, validate the HMAC signature using `VERIFF_WEBHOOK_SECRET`, and call `kycAppService.handleVeriffDecision()`.
+
+7. **Wire the real adapter in the composition root:**
+   - In `packages/backend/src/composition-root.ts`, replace the stub instantiation when `MOCK_KYC=false`:
+     ```typescript
+     const kycProvider: KycVerificationPort = mockKyc
+       ? new StubKycVerificationAdapter(true)
+       : new VeriffKycProviderAdapter(process.env.VERIFF_API_KEY!);
+     ```
+
+### Config Required
+
+```bash
+VERIFF_API_KEY=your_veriff_api_key_here          # → add to .env
+VERIFF_WEBHOOK_SECRET=your_veriff_hmac_secret    # → add to .env
+MOCK_KYC=false                                   # → change from true to false in .env
+```
+
+### Verification
+
+**Test API key works (sandbox):**
+```bash
+curl -X POST https://stationapi.veriff.com/v1/sessions \
+  -H "Content-Type: application/json" \
+  -H "X-AUTH-CLIENT: $VERIFF_API_KEY" \
+  -d '{"verification": {"callback": "https://your-domain.com", "person": {"firstName": "Test", "lastName": "User"}, "document": {"type": "PASSPORT", "country": "US"}, "lang": "en"}}'
+# Expect: 201 response with a sessionId and a verification URL
+```
+
+**Test webhook delivery locally** (using ngrok or similar):
+```bash
+npx ngrok http 3001
+# Copy the HTTPS tunnel URL and update your Veriff webhook endpoint URL
+# Complete a sandbox verification in the Veriff demo flow — check backend logs for webhook receipt
+```
+
+**Confirm stub is disabled:**
+```bash
+# With MOCK_KYC=false, calling POST /api/v1/kyc/submit should create a real Veriff session
+# and return kycStatus: 'pending' (not 'verified') until the webhook arrives
+```
+
+### Currently Mocked By
+
+- `packages/backend/src/kyc/adapters/stub-kyc-provider.adapter.ts`
+- Will be replaced by: `packages/backend/src/kyc/adapters/veriff-kyc-provider.adapter.ts`
 
 
 

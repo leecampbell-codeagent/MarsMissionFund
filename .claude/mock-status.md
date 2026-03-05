@@ -2,7 +2,7 @@
 
 > Tracks which external service integrations are mocked vs real.
 > Maintained by the Infrastructure Engineer agent.
-> Updated: 2026-03-05 (feat-001)
+> Updated: 2026-03-05 (feat-002)
 
 ---
 
@@ -11,7 +11,7 @@
 | Service | Status | Mock Adapter | Real Adapter | Manual Task | Feature |
 |---------|--------|-------------|--------------|-------------|---------|
 | Clerk Auth | Real | — (module-level mock in tests only) | `clerk-auth.adapter.ts` | Task #1 | feat-001 |
-| KYC (Veriff) | Mocked | `mock-kyc-adapter.ts` | `veriff-kyc-adapter.ts` (not yet built) | TBD | feat-002 |
+| KYC (Veriff) | Mocked | `stub-kyc-provider.adapter.ts` | `veriff-kyc-adapter.ts` (not yet built) | Task #3 | feat-002 |
 | Payments (Stripe) | Mocked | `mock-payment-adapter.ts` | `stripe-payment-adapter.ts` (not yet built) | TBD | feat-005 |
 | Email (AWS SES) | Mocked | `mock-email-adapter.ts` | `ses-email-adapter.ts` (not yet built) | TBD | feat-TBD |
 | PostgreSQL | Real | `in-memory-user-repository.adapter.ts` (unit tests only) | `pg-user-repository.adapter.ts` | Task #2 | feat-001 |
