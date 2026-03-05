@@ -379,6 +379,51 @@ describe('AccountAppService.handleClerkWebhook()', () => {
   });
 });
 
+describe('AccountAppService.completeOnboarding()', () => {
+  it('sets onboardingCompleted to true and onboardingStep to complete', async () => {
+    const { service, userRepository } = makeService();
+    seedUser(userRepository, 'user_complete_onboarding', {
+      onboardingCompleted: false,
+      onboardingStep: null,
+    });
+
+    const updated = await service.completeOnboarding('user_complete_onboarding');
+
+    expect(updated.onboardingCompleted).toBe(true);
+    expect(updated.onboardingStep).toBe('complete');
+  });
+
+  it('is idempotent — can be called on an already-completed user', async () => {
+    const { service, userRepository } = makeService();
+    seedUser(userRepository, 'user_already_complete', {
+      onboardingCompleted: true,
+      onboardingStep: 'complete',
+    });
+
+    const updated = await service.completeOnboarding('user_already_complete');
+
+    expect(updated.onboardingCompleted).toBe(true);
+    expect(updated.onboardingStep).toBe('complete');
+  });
+
+  it('throws UserNotFoundError for unknown clerkUserId', async () => {
+    const { service } = makeService();
+    await expect(service.completeOnboarding('user_unknown')).rejects.toThrow(UserNotFoundError);
+  });
+
+  it('calls auditLogger.log with action profile.updated', async () => {
+    const { service, userRepository, auditLogger } = makeService();
+    seedUser(userRepository, 'user_complete_audit');
+
+    await service.completeOnboarding('user_complete_audit');
+
+    const entry = auditLogger.entries.find((e) => e.action === AuditActions.ProfileUpdated);
+    expect(entry).toBeDefined();
+    expect(entry!.actorClerkUserId).toBe('user_complete_audit');
+    expect(entry!.metadata).toMatchObject({ fields: ['onboardingCompleted', 'onboardingStep'] });
+  });
+});
+
 describe('MockClerkAuthAdapter', () => {
   it('returns correct fixture for user_test_backer', async () => {
     const adapter = new MockClerkAuthAdapter();

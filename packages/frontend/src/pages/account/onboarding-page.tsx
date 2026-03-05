@@ -1,7 +1,7 @@
 import { type ReactElement, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateProfile, updateNotificationPrefs, type NotificationPrefs } from '../../api/account-api';
+import { updateProfile, updateNotificationPrefs, completeOnboarding, type NotificationPrefs } from '../../api/account-api';
 import { useCurrentUser, CURRENT_USER_QUERY_KEY } from '../../hooks/account/use-current-user';
 import { OnboardingStepIndicator } from '../../components/account/onboarding-step-indicator';
 import { OnboardingWelcomeStep } from '../../components/account/onboarding-welcome-step';
@@ -55,11 +55,7 @@ export default function OnboardingPage(): ReactElement {
   });
 
   const completeMutation = useMutation({
-    mutationFn: () =>
-      updateProfile({
-        onboardingCompleted: true,
-        onboardingStep: 'complete',
-      }),
+    mutationFn: () => completeOnboarding(),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: CURRENT_USER_QUERY_KEY });
     },
@@ -88,14 +84,10 @@ export default function OnboardingPage(): ReactElement {
     profileMutation.mutate({
       displayName: data.displayName || null,
       bio: data.bio || null,
-      onboardingStep: 'profiling',
     });
   };
 
   const handleProfileSkip = () => {
-    void profileMutation.mutateAsync({ onboardingStep: 'profiling' }).catch(() => {
-      // Skip anyway
-    });
     setCurrentStep((s) => s + 1);
   };
 

@@ -139,6 +139,33 @@ export class InMemoryUserRepository implements UserRepository {
     const updated = existing.touchLastSeen();
     this.users.set(clerkUserId, updated);
   }
+
+  async completeOnboarding(clerkUserId: string): Promise<User> {
+    const existing = this.users.get(clerkUserId);
+    if (!existing) {
+      throw new UserNotFoundError(clerkUserId);
+    }
+
+    const updated = User.reconstitute({
+      id: existing.id,
+      clerkUserId: existing.clerkUserId,
+      email: existing.email,
+      displayName: existing.displayName,
+      bio: existing.bio,
+      avatarUrl: existing.avatarUrl,
+      accountStatus: existing.accountStatus,
+      onboardingCompleted: true,
+      onboardingStep: 'complete',
+      roles: existing.roles,
+      notificationPrefs: existing.notificationPrefs,
+      kycStatus: existing.kycStatus,
+      lastSeenAt: existing.lastSeenAt,
+      createdAt: existing.createdAt,
+      updatedAt: new Date(),
+    });
+    this.users.set(clerkUserId, updated);
+    return updated;
+  }
 }
 
 

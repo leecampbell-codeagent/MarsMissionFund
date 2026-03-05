@@ -17,6 +17,7 @@ export interface UserRepository {
     email?: string,
   ): Promise<User>;
   touchLastSeen(clerkUserId: string): Promise<void>;
+  completeOnboarding(clerkUserId: string): Promise<User>;
 }
 
 

@@ -44,8 +44,6 @@ interface UpdateProfileInput {
   readonly displayName?: string | null;
   readonly bio?: string | null;
   readonly avatarUrl?: string | null;
-  readonly onboardingCompleted?: boolean;
-  readonly onboardingStep?: 'role_selection' | 'profiling' | 'notifications' | 'complete';
 }
 
 interface UpdateProfileResponse {
@@ -129,6 +127,23 @@ export async function updateNotificationPrefs(
     method: 'PATCH',
     path: '/me/notifications',
     body: input,
+  });
+  return response.data;
+}
+
+interface CompleteOnboardingResponse {
+  readonly data: UserProfile;
+}
+
+/**
+ * POST /api/v1/me/onboarding/complete
+ * Marks the current user's onboarding as complete.
+ * This is the only way to set onboardingCompleted — it cannot be set via PATCH /me/profile (HIGH-003).
+ */
+export async function completeOnboarding(): Promise<UserProfile> {
+  const response = await apiClient<CompleteOnboardingResponse>({
+    method: 'POST',
+    path: '/me/onboarding/complete',
   });
   return response.data;
 }
