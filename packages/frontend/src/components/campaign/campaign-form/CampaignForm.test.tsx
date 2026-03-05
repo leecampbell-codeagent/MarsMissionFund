@@ -180,7 +180,7 @@ describe('CampaignForm integration', () => {
       heroImageUrl: 'https://example.com/hero.jpg',
       fundingGoalCents: '100000000',
       deadline: '2027-01-15T00:00:00.000Z',
-      teamMembers: [{ name: 'John', role: 'Engineer', bio: null, linkedInUrl: null }],
+      teamMembers: [{ id: '550e8400-e29b-41d4-a716-446655440010', name: 'John', role: 'Engineer', bio: null, linkedInUrl: null }],
       milestones: [
         { title: 'M1', description: 'First', fundingBasisPoints: 5000, targetDate: null },
         { title: 'M2', description: 'Second', fundingBasisPoints: 5000, targetDate: null },

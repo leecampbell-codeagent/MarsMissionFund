@@ -48,5 +48,7 @@ export function serializeCampaignSummary(campaign: Campaign): Record<string, unk
     submittedAt: campaign.submittedAt?.toISOString() ?? null,
     creatorUserId: campaign.creatorUserId,
     status: campaign.status,
+    createdAt: campaign.createdAt.toISOString(),
+    updatedAt: campaign.updatedAt.toISOString(),
   };
 }

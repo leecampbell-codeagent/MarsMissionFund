@@ -50,6 +50,7 @@ export function TeamSection({ campaign, onChange }: TeamSectionProps): ReactElem
 
   const addMember = () => {
     const newMember: TeamMember = {
+      id: crypto.randomUUID(),
       name: '',
       role: '',
       bio: null,

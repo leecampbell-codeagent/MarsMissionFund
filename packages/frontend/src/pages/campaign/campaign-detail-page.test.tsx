@@ -36,7 +36,7 @@ const mockCampaign: Campaign = {
     { title: 'Design Phase', description: 'Complete engineering design', fundingBasisPoints: 3000, targetDate: null },
     { title: 'Prototype', description: 'Build working prototype', fundingBasisPoints: 7000, targetDate: null },
   ],
-  teamMembers: [{ name: 'Alice', role: 'Chief Engineer', bio: null, linkedInUrl: null }],
+  teamMembers: [{ id: '550e8400-e29b-41d4-a716-446655440003', name: 'Alice', role: 'Chief Engineer', bio: null, linkedInUrl: null }],
   riskDisclosures: [{ id: '550e8400-e29b-41d4-a716-446655440099', risk: 'Tech Risk', mitigation: 'Mitigation plan in place' }],
   budgetBreakdown: [],
   alignmentStatement: 'Advances Mars propulsion capability.',
