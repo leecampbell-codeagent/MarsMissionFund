@@ -1,5 +1,6 @@
 import { Account, type AccountStatus } from '../../domain/account.js';
 import type { AccountRepository, WebhookAccountInput } from '../../ports/account-repository.js';
+import type { TransactionClient } from '../../../shared/ports/event-store-port.js';
 
 export class InMemoryAccountRepository implements AccountRepository {
   private readonly accounts = new Map<string, Account>();
@@ -43,7 +44,7 @@ export class InMemoryAccountRepository implements AccountRepository {
     }
   }
 
-  async update(account: Account): Promise<void> {
+  async update(account: Account, _txClient?: TransactionClient): Promise<void> {
     this.accounts.set(account.id, account);
   }
 

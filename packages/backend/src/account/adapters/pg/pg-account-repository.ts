@@ -1,4 +1,4 @@
-import type { Pool } from 'pg';
+import type { Pool, PoolClient } from 'pg';
 import {
   Account,
   type AccountRole,
@@ -7,6 +7,16 @@ import {
   type OnboardingStep,
 } from '../../domain/account.js';
 import type { AccountRepository, WebhookAccountInput } from '../../ports/account-repository.js';
+import type { TransactionClient } from '../../../shared/ports/event-store-port.js';
+
+interface PgTransactionClient extends TransactionClient {
+  readonly __brand: 'TransactionClient';
+  readonly pgClient: PoolClient;
+}
+
+function isPgTransactionClient(client: TransactionClient): client is PgTransactionClient {
+  return 'pgClient' in client;
+}
 
 export class PgAccountRepository implements AccountRepository {
   constructor(private readonly pool: Pool) {}
@@ -64,8 +74,9 @@ export class PgAccountRepository implements AccountRepository {
     );
   }
 
-  async update(account: Account): Promise<void> {
-    await this.pool.query(
+  async update(account: Account, txClient?: TransactionClient): Promise<void> {
+    const executor = txClient && isPgTransactionClient(txClient) ? txClient.pgClient : this.pool;
+    await executor.query(
       `UPDATE accounts SET
          display_name = $2,
          bio = $3,

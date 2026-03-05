@@ -1,14 +1,14 @@
-import type { AppendEventInput, EventStorePort } from '../../ports/event-store-port.js';
+import type { AppendEventInput, EventStorePort, TransactionClient } from '../../ports/event-store-port.js';
 
 export class InMemoryEventStore implements EventStorePort {
   private readonly eventsByAggregate = new Map<string, AppendEventInput[]>();
 
-  async append(event: AppendEventInput): Promise<void> {
+  async append(event: AppendEventInput, _txClient?: TransactionClient): Promise<void> {
     const existing = this.eventsByAggregate.get(event.aggregateId) ?? [];
     this.eventsByAggregate.set(event.aggregateId, [...existing, event]);
   }
 
-  async getNextSequenceNumber(aggregateId: string): Promise<number> {
+  async getNextSequenceNumber(aggregateId: string, _txClient?: TransactionClient): Promise<number> {
     const events = this.eventsByAggregate.get(aggregateId) ?? [];
     return events.length + 1;
   }
