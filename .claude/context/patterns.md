@@ -552,3 +552,41 @@ z.enum(CAMPAIGN_CATEGORIES as [string, ...string[]])
 
 
 
+
+## feat-005 Patterns (Payments Bounded Context)
+
+### Atomic payment capture transaction
+When capturing a contribution, all side-effects must be wrapped in a single `PoolClient` transaction:
+1. UPDATE contribution status → captured
+2. INSERT escrow_ledger credit entry
+3. UPDATE campaigns SET total_raised_cents = total_raised_cents + $amount, contributor_count = contributor_count + 1
+4. If total_raised_cents >= funding_goal_cents: UPDATE campaigns SET status = 'funded'
+5. COMMIT
+
+Never split these across separate queries — partial state is unrecoverable.
+
+### HTTP 201 for payment failure
+When the payment gateway returns a failure, respond with HTTP 201 (not 422/400).
+The contribution record exists with `status: 'failed'` and must be returned for client audit trail.
+
+### Payment token handling
+- Payment tokens must NEVER be logged at any layer (Pino, console, error messages)
+- Tokens are stored in the contributions table for reconciliation but never returned in API responses
+- Serialiser explicitly omits `paymentToken` from all response shapes
+
+### Port interface satisfaction pattern
+```typescript
+// Define the port interface
+export interface PaymentGatewayPort {
+  capture(token: string, amountCents: number, contributionId: string): Promise<PaymentResult>;
+}
+// Stub adapter — satisfies interface without changes to application code
+export class StubPaymentGatewayAdapter implements PaymentGatewayPort { ... }
+```
+
+### Route ordering (contribution vs campaign detail)
+```tsx
+// CORRECT — specific route before parameterised route
+<Route path="/campaigns/:id/contribute" element={<ProtectedRoute><ContributeToMissionPage /></ProtectedRoute>} />
+<Route path="/campaigns/:id" element={<PublicCampaignDetailPage />} />
+```

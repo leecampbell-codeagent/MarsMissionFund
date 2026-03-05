@@ -773,3 +773,20 @@ The `emptyBodySchema = z.object({}).strict()` pattern (for body-less endpoints) 
 
 **Detected in:** feat-003 quality gate
 
+
+## feat-005 Gotchas (Payments)
+
+### MOCK_PAYMENTS vs MOCK_PAYMENT
+The `.env.example` already has `MOCK_PAYMENTS=true` (with S). The composition root reads `MOCK_PAYMENTS`. Do not introduce a second env var `MOCK_PAYMENT` (without S) — it creates confusion.
+
+### contributions table FK is `users(id)`, not `accounts(id)`
+The auth table is named `users`, not `accounts`. All FK references from payments tables must use `REFERENCES users(id)`.
+
+### Duplicate detection excludes `failed` contributions
+The 60-second window SQL must include `WHERE status != 'failed'` — a previous failed attempt for the same donor/campaign/amount should not block a retry.
+
+### Escrow ledger is append-only — no `updated_at`
+`escrow_ledger` and `contribution_audit_events` are append-only tables. Do NOT add `updated_at` column or `update_updated_at_column()` trigger to them.
+
+### `tok_fail` is the sentinel for failure, not `tok_decline`
+The sentinel token for triggering the payment failure path is `tok_fail`. Frontend helper text must show this exact value.
