@@ -117,7 +117,7 @@ fi
 # ---------------------------------------------------------------------------
 STEP="dev_stack"
 DEV_PID=""
-if [ -f package.json ]; then
+if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts?.dev ? 0 : 1)" 2>/dev/null; then
     echo "Starting dev stack in background..."
     npm run dev &
     DEV_PID=$!
@@ -132,7 +132,7 @@ if [ -f package.json ]; then
         echo "Warning: dev stack not responding after 60s, continuing anyway."
     fi
 else
-    echo "No package.json found, skipping dev stack."
+    echo "No dev script found, skipping dev stack."
 fi
 
 # ---------------------------------------------------------------------------
