@@ -261,16 +261,9 @@ All quality checks passed. Create a PR for review.
    ```
 
 2. **Push and create PR** (using `PR_TARGET` resolved in step 1b):
-
-   **Resolve repo identifiers from git remotes** (do NOT hardcode repo or owner names):
    ```bash
    UPSTREAM_REPO=$(git remote get-url upstream | sed 's|.*github.com[:/]||;s|\.git$||')
    ORIGIN_OWNER=$(git remote get-url origin | sed 's|.*github.com[:/]||;s|/.*||')
-   ```
-   - `UPSTREAM_REPO` = the `owner/repo` that PRs target (e.g. `LeeCampbell/MarsMissionFund`)
-   - `ORIGIN_OWNER` = the fork owner for the `--head` flag (e.g. `leecampbell-codeagent`)
-
-   ```bash
    git push origin ralph/feat-XXX-[name]
    gh pr create \
      --repo "${UPSTREAM_REPO}" \

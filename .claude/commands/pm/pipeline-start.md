@@ -215,16 +215,9 @@ Screenshots are uploaded to GitHub's CDN (not committed to the repo) to avoid bl
     - [ ] Build succeeds (`npm run build`)
 
 12. **If ALL pass — create a PR to upstream:**
-
-    **Resolve repo identifiers from git remotes** (do NOT hardcode repo or owner names):
     ```bash
     UPSTREAM_REPO=$(git remote get-url upstream | sed 's|.*github.com[:/]||;s|\.git$||')
     ORIGIN_OWNER=$(git remote get-url origin | sed 's|.*github.com[:/]||;s|/.*||')
-    ```
-    - `UPSTREAM_REPO` = the `owner/repo` that PRs target (e.g. `LeeCampbell/MarsMissionFund`)
-    - `ORIGIN_OWNER` = the fork owner for the `--head` flag (e.g. `leecampbell-codeagent`)
-
-    ```bash
     git push origin ralph/feat-XXX-[name]
     gh pr create \
       --repo "${UPSTREAM_REPO}" \
