@@ -1,0 +1,14 @@
+{
+  "name": "mars-mission-fund",
+  "private": true,
+  "description": "Sample crowdfunding app for Autonomous Agentic Coding workshops",
+  "scripts": {
+    "lint": "biome check .",
+    "format": "biome check --formatter-enabled=true --linter-enabled=false .",
+    "typecheck": "echo 'No workspaces to typecheck yet'",
+    "test": "echo 'No workspaces to test yet'"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.5"
+  }
+}
