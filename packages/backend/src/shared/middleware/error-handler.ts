@@ -41,6 +41,13 @@ import {
   KycResubmissionNotAllowedError,
   KycTransitionConflictError,
 } from '../../kyc/domain/errors/kyc-errors.js';
+import {
+  CampaignNotAcceptingContributionsError,
+  ContributionAmountBelowMinimumError,
+  ContributionNotFoundError,
+  DuplicateContributionError,
+  InvalidContributionAmountError,
+} from '../../payments/domain/errors/payment-errors.js';
 import { DomainError } from '../domain/errors.js';
 
 /**
@@ -229,6 +236,57 @@ export function createErrorHandler(logger: Logger) {
       res.status(403).json({
         error: {
           code: err.code,
+          message: err.message,
+          correlation_id: correlationId,
+        },
+      });
+      return;
+    }
+
+    // Payment domain errors — 400 validation
+    if (
+      err instanceof ContributionAmountBelowMinimumError ||
+      err instanceof InvalidContributionAmountError
+    ) {
+      res.status(400).json({
+        error: {
+          code: err.code,
+          message: err.message,
+          correlation_id: correlationId,
+        },
+      });
+      return;
+    }
+
+    // Payment domain errors — 409 Duplicate
+    if (err instanceof DuplicateContributionError) {
+      res.status(409).json({
+        error: {
+          code: err.code,
+          message: err.message,
+          correlation_id: correlationId,
+        },
+      });
+      return;
+    }
+
+    // Payment domain errors — 422 Campaign not accepting contributions
+    if (err instanceof CampaignNotAcceptingContributionsError) {
+      res.status(422).json({
+        error: {
+          code: err.code,
+          message: err.message,
+          correlation_id: correlationId,
+        },
+      });
+      return;
+    }
+
+    // Payment domain errors — 404 Contribution not found
+    if (err instanceof ContributionNotFoundError) {
+      res.status(404).json({
+        error: {
+          code: 'NOT_FOUND',
           message: err.message,
           correlation_id: correlationId,
         },

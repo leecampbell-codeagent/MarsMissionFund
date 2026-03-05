@@ -542,6 +542,243 @@ in feat-005. For feat-004, always return `'0'`.
 Use `= ANY($1::TEXT[])` pattern (see G-039). Pass `NULL` for "no filter" (returns all).
 Validate each category value against `CAMPAIGN_CATEGORIES` at the Zod layer.
 
+---
+
+## Payment Domain (feat-005)
+
+### Contribution State Machine
+
+Three states in scope for feat-005 (immediate-capture stub):
+
+| State | Description | Trigger |
+|-------|-------------|---------|
+| `pending_capture` | Record created, gateway call in flight | POST /contributions passes validation |
+| `captured` | Funds captured; escrow ledger entry written | Stub returns success |
+| `failed` | Gateway declined; no funds held | `tok_fail` sentinel token |
+
+`refunded` and `partially_refunded` are future states (feat-006+).
+
+The `pending_capture` state is essential even for the stub — it creates an immutable record of intent before the gateway call, enabling idempotent recovery if the server crashes mid-flight.
+
+### Payment Gateway Port Interface
+
+```typescript
+// packages/backend/src/payment/ports/payment-gateway.port.ts
+export interface CaptureInput {
+  readonly token: string;
+  readonly amountCents: number;
+  readonly currency: 'USD';
+  readonly idempotencyKey: string;
+  readonly metadata: {
+    readonly campaignId: string;
+    readonly contributionId: string;
+    readonly donorId: string;
+  };
+}
+
+export interface CaptureResult {
+  readonly success: boolean;
+  readonly transactionRef: string;
+  readonly failureReason?: string;
+}
+
+export interface PaymentGatewayPort {
+  capture(input: CaptureInput): Promise<CaptureResult>;
+}
+```
+
+Selected via `MOCK_PAYMENT=true` env var (default `true`).
+The stub adapter is `StubPaymentGatewayAdapter` in `packages/backend/src/payment/adapters/`.
+
+### Stub Sentinel Tokens
+
+| Token | Behaviour |
+|-------|-----------|
+| `tok_fail` | Returns `{ success: false, failureReason: 'Card declined' }` |
+| Any other value | Returns `{ success: true, transactionRef: 'stub_txn_...' }` |
+
+The `tok_fail` sentinel is checked case-sensitively. Any other token string (including `tok_success`) produces success. This makes demo usage frictionless while providing a testable failure path.
+
+Payment tokens must NEVER be logged at any layer (L2-002 Section 1.7, PCI DSS).
+
+### Escrow Ledger Design
+
+Double-entry, append-only ledger in `escrow_ledger` table.
+Each row is immutable — corrections create new rows.
+
+Key columns:
+- `campaign_id UUID` — which campaign's escrow account
+- `contribution_id UUID` — which contribution (may be NULL for interest/disbursement entries)
+- `entry_type TEXT` — `'credit'` (money in), `'debit'` (money out), `'interest_credit'`
+- `amount_cents BIGINT` — always positive
+- `running_balance_cents BIGINT` — cumulative balance for this campaign at this entry
+- `created_at TIMESTAMPTZ` — timestamp (no updated_at — immutable)
+
+Running balance computed at insert using a subquery on the last ledger entry for the campaign.
+Total raised = `SUM(amount_cents) FILTER (WHERE entry_type = 'credit') - SUM(amount_cents) FILTER (WHERE entry_type = 'debit')`.
+
+### Denormalised Campaign Funding Progress
+
+Two columns added to `campaigns` table in feat-005 migration:
+- `total_raised_cents BIGINT NOT NULL DEFAULT 0`
+- `contributor_count INTEGER NOT NULL DEFAULT 0`
+
+Updated atomically in the same DB transaction as the contribution capture.
+The atomic SQL pattern:
+
+```sql
+UPDATE campaigns
+SET total_raised_cents = total_raised_cents + $1,
+    contributor_count = contributor_count + 1,
+    status = CASE
+      WHEN total_raised_cents + $1 >= funding_goal_cents AND status = 'live' THEN 'funded'
+      ELSE status
+    END,
+    updated_at = NOW()
+WHERE id = $2
+  AND status IN ('live', 'funded')
+  AND (funding_cap_cents IS NULL OR total_raised_cents + $1 <= funding_cap_cents)
+RETURNING *
+```
+
+If 0 rows affected: campaign not in live/funded state OR funding cap reached.
+
+This pattern also handles the live → funded transition atomically.
+
+### Duplicate Contribution Prevention (60-second Window)
+
+The 60-second idempotency window check:
+
+```sql
+SELECT id FROM contributions
+WHERE donor_user_id = $1
+  AND campaign_id = $2
+  AND amount_cents = $3
+  AND status IN ('pending_capture', 'captured')
+  AND created_at > NOW() - INTERVAL '60 seconds'
+LIMIT 1
+```
+
+If a row is found: throw `DuplicateContributionError` → HTTP 409, `DUPLICATE_CONTRIBUTION`.
+`failed` contributions do NOT count toward the window — a retry after failure with the same amount is allowed.
+
+### KYC Gate for Contributions
+
+Donors (Backer role) do NOT need KYC verification to make contributions.
+KYC is only required for:
+- Creator role assignment (to create and manage campaigns)
+- Disbursement processing (before funds are released to creator)
+
+The contribution flow checks only:
+1. User is authenticated (Clerk JWT)
+2. MMF user record exists
+3. Account status is `active`
+
+No KYC check on the contribution endpoint.
+
+### Contribution Bounded Context Directory
+
+```
+packages/backend/src/payment/
+├── domain/
+│   ├── models/contribution.ts
+│   └── errors/payment-errors.ts
+├── ports/
+│   ├── payment-gateway.port.ts
+│   ├── contribution-repository.port.ts
+│   ├── escrow-ledger-repository.port.ts
+│   └── contribution-audit-repository.port.ts
+├── adapters/
+│   ├── stub-payment-gateway.adapter.ts
+│   ├── pg-contribution-repository.adapter.ts
+│   ├── pg-escrow-ledger-repository.adapter.ts
+│   ├── in-memory-contribution-repository.adapter.ts
+│   └── pg-contribution-audit-repository.adapter.ts
+├── application/
+│   └── contribution-app-service.ts
+└── api/
+    ├── contribution-router.ts
+    └── schemas/
+        └── create-contribution.schema.ts
+```
+
+### Contribution API Endpoint
+
+```
+POST /api/v1/contributions
+```
+Requires authentication (requireAuth middleware).
+`donor_user_id` resolved from Clerk user ID in auth context — NEVER from request body.
+
+Request body:
+```json
+{
+  "campaignId": "uuid",
+  "amountCents": "50000",
+  "paymentToken": "tok_success"
+}
+```
+
+Response (201 Created on success or failure):
+```json
+{
+  "data": {
+    "contributionId": "uuid",
+    "campaignId": "uuid",
+    "amountCents": "50000",
+    "status": "captured",
+    "transactionRef": "stub_txn_abc123"
+  }
+}
+```
+
+### Contribution Audit Events
+
+New table `contribution_audit_events`.
+Actions:
+- `contribution.initiated` — `(new) → pending_capture`
+- `contribution.captured` — `pending_capture → captured`
+- `contribution.failed` — `pending_capture → failed`
+
+Audit events store `transaction_ref` but NEVER `payment_token`.
+
+### AuditLoggerPort resourceType Extension
+
+The `resourceType` field in `AuditEntry` must include `'contribution'`:
+
+```typescript
+readonly resourceType: 'user' | 'kyc' | 'campaign' | 'contribution';
+```
+
+### Funding Progress Stub Removal (feat-004 → feat-005)
+
+`PublicCampaignListItem.totalRaisedCents` and `contributorCount` are stubbed as `'0'`/`0` in feat-004.
+Once `campaigns.total_raised_cents` and `campaigns.contributor_count` columns exist (feat-005 migration),
+update the SQL in `pg-campaign-repository.adapter.ts` queries to read these columns directly.
+No TypeScript type changes needed — the types already accept these values.
+
+### Frontend Contribution Route
+
+The "Back This Mission" CTA in `public-campaign-detail-page.tsx` (line 311) already links to:
+```
+/campaigns/${campaign.id}/contribute
+```
+
+This route does NOT exist in `routes.tsx` yet.
+It must be added as a ProtectedRoute (requires authentication).
+If unauthenticated, ProtectedRoute redirects to `/sign-in`.
+After sign-in, the user should be redirected back to the contribute page (requires React Router state or sessionStorage).
+
+### New Tables Required (feat-005)
+
+| Table | Purpose |
+|-------|---------|
+| `contributions` | Core contribution record with state machine |
+| `escrow_ledger` | Append-only double-entry ledger |
+| `contribution_audit_events` | Audit trail for contribution state transitions |
+
+Plus migrations to ALTER `campaigns` table to add `total_raised_cents` and `contributor_count`.
+
 
 
 

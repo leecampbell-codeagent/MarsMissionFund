@@ -24,6 +24,9 @@ const PublicCampaignDetailPage = lazy(
   () => import('./pages/campaign/public-campaign-detail/public-campaign-detail-page'),
 );
 
+// Contribution page — protected (feat-005)
+const ContributeToMissionPage = lazy(() => import('./pages/campaign/contribute-to-mission-page'));
+
 function FullPageSpinner(): ReactElement {
   return (
     <div
@@ -150,6 +153,17 @@ export function AppRoutes(): ReactElement {
         {/* Public campaign routes — no authentication required (feat-004) */}
         {/* /campaigns — discovery/browse page */}
         <Route path="/campaigns" element={<CampaignDiscoveryPage />} />
+
+        {/* /campaigns/:id/contribute — contribution flow (feat-005) — MUST be before /campaigns/:id */}
+        <Route
+          path="/campaigns/:id/contribute"
+          element={
+            <ProtectedRoute>
+              <ContributeToMissionPage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* /campaigns/:id — public detail page (live/funded campaigns) */}
         <Route path="/campaigns/:id" element={<PublicCampaignDetailPage />} />
 

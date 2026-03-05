@@ -12,6 +12,12 @@ import { PgKycAuditRepository } from './kyc/adapters/pg-kyc-audit-repository.ada
 import { StubKycVerificationAdapter } from './kyc/adapters/stub-kyc-provider.adapter.js';
 import { KycAppService } from './kyc/application/kyc-app-service.js';
 import type { KycVerificationPort } from './kyc/ports/kyc-provider.port.js';
+import { PgContributionAuditRepository } from './payments/adapters/pg-contribution-audit-repository.adapter.js';
+import { PgContributionRepository } from './payments/adapters/pg-contribution-repository.adapter.js';
+import { PgEscrowLedgerRepository } from './payments/adapters/pg-escrow-ledger-repository.adapter.js';
+import { StubPaymentGatewayAdapter } from './payments/adapters/stub-payment-gateway.adapter.js';
+import { ContributionAppService } from './payments/application/contribution-app-service.js';
+import type { PaymentGatewayPort } from './payments/ports/payment-gateway.port.js';
 
 /**
  * Wires all dependencies manually (no DI containers).
@@ -24,6 +30,7 @@ export function createServices(
   accountAppService: AccountAppService;
   kycAppService: KycAppService;
   campaignAppService: CampaignAppService;
+  contributionAppService: ContributionAppService;
 } {
   const userRepository = new PgUserRepository(pool);
 
@@ -61,5 +68,30 @@ export function createServices(
     logger,
   );
 
-  return { accountAppService, kycAppService, campaignAppService };
+  // Payment gateway — stub unless MOCK_PAYMENT=false (reserved for real Stripe)
+  const mockPayment = process.env.MOCK_PAYMENT !== 'false';
+  const paymentGateway: PaymentGatewayPort = mockPayment
+    ? new StubPaymentGatewayAdapter()
+    : (() => {
+        throw new Error('Real payment gateway not implemented');
+      })();
+
+  // Payment repositories
+  const contributionRepository = new PgContributionRepository(pool);
+  const escrowLedgerRepository = new PgEscrowLedgerRepository(pool);
+  const contributionAuditRepository = new PgContributionAuditRepository(pool);
+
+  // Contribution app service — shares repositories from other contexts (P-023)
+  const contributionAppService = new ContributionAppService(
+    pool, // Raw pool for transaction management
+    contributionRepository,
+    escrowLedgerRepository,
+    contributionAuditRepository,
+    campaignRepository, // Shared — same instance as campaignAppService (P-023)
+    userRepository, // Shared — same instance as accountAppService (P-023)
+    paymentGateway,
+    logger,
+  );
+
+  return { accountAppService, kycAppService, campaignAppService, contributionAppService };
 }

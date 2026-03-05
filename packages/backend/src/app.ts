@@ -1,4 +1,4 @@
-import type { Application, RequestHandler } from 'express';
+import type { Application, NextFunction, Request, RequestHandler, Response } from 'express';
 import express from 'express';
 import type { Logger } from 'pino';
 // pino-http CJS interop: use require-style import for correct types
@@ -18,6 +18,9 @@ import { createPublicCampaignRouter } from './campaign/api/public-campaign-route
 import type { CampaignAppService } from './campaign/application/campaign-app-service.js';
 import { createKycRouter } from './kyc/api/kyc-router.js';
 import type { KycAppService } from './kyc/application/kyc-app-service.js';
+import { createContributionRouter } from './payments/api/contribution-router.js';
+import { serializeContribution } from './payments/api/contribution-serializer.js';
+import type { ContributionAppService } from './payments/application/contribution-app-service.js';
 import {
   clerkMiddleware,
   correlationIdMiddleware,
@@ -30,6 +33,7 @@ export interface AppServices {
   accountAppService: AccountAppService;
   kycAppService: KycAppService;
   campaignAppService: CampaignAppService;
+  contributionAppService: ContributionAppService;
   logger: Logger;
 }
 
@@ -75,6 +79,13 @@ export function createApp(services: AppServices): Application {
     createCampaignRouter(services.campaignAppService, logger),
   );
 
+  // Contributions router — requires auth
+  app.use(
+    '/api/v1/contributions',
+    requireAuth,
+    createContributionRouter(services.contributionAppService, logger),
+  );
+
   // NEW: Public campaign routes — no requireAuth (G-036)
   // clerkMiddleware() is already global and populates req.auth for all requests
   app.use(
@@ -103,6 +114,42 @@ export function createApp(services: AppServices): Application {
       next(err);
     }
   });
+
+  // Cross-context: donor's contributions for a campaign — registered in app.ts (P-022)
+  // Per spec feat-005-spec-api.md §6: this avoids contaminating the campaign router
+  app.get(
+    '/api/v1/campaigns/:id/contributions',
+    requireAuth,
+    async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+      try {
+        const auth = getClerkAuth(req);
+        if (!auth) {
+          res.status(401).json({
+            error: {
+              code: 'UNAUTHENTICATED',
+              message: 'Authentication required. Sign in to continue.',
+              correlation_id: req.correlationId ?? null,
+            },
+          });
+          return;
+        }
+        const limitStr = typeof req.query.limit === 'string' ? req.query.limit : '20';
+        const offsetStr = typeof req.query.offset === 'string' ? req.query.offset : '0';
+        const limit = Math.min(Math.max(parseInt(limitStr, 10), 1), 100);
+        const offset = Math.max(parseInt(offsetStr, 10), 0);
+        const contributions =
+          await services.contributionAppService.listContributionsForDonorCampaign(
+            auth.userId,
+            req.params.id,
+            limit,
+            offset,
+          );
+        res.status(200).json({ data: contributions.map(serializeContribution) });
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
 
   // Global error handler (must be last)
   app.use(createErrorHandler(logger));

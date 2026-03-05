@@ -2,7 +2,7 @@
 
 > Tracks which external service integrations are mocked vs real.
 > Maintained by the Infrastructure Engineer agent.
-> Updated: 2026-03-05 (feat-004)
+> Updated: 2026-03-05 (feat-005)
 
 ---
 
@@ -12,7 +12,7 @@
 |---------|--------|-------------|--------------|-------------|---------|
 | Clerk Auth | Real | — (module-level mock in tests only) | `clerk-auth.adapter.ts` | Task #1 | feat-001 |
 | KYC (Veriff) | Mocked | `stub-kyc-provider.adapter.ts` | `veriff-kyc-adapter.ts` (not yet built) | Task #3 | feat-002 |
-| Payments (Stripe) | Mocked | `mock-payment-adapter.ts` | `stripe-payment-adapter.ts` (not yet built) | TBD | feat-005 |
+| Payments (Stripe) | Mocked | `StubPaymentGatewayAdapter` (`stub-payment-gateway.adapter.ts`), selected via `MOCK_PAYMENTS=true` | `stripe-payment-adapter.ts` (not yet built) | TBD | feat-005 |
 | Email (AWS SES) | Mocked | `mock-email-adapter.ts` | `ses-email-adapter.ts` (not yet built) | TBD | feat-TBD |
 | PostgreSQL | Real | `in-memory-user-repository.adapter.ts` (unit tests only) | `pg-user-repository.adapter.ts` | Task #2 | feat-001 |
 | Campaign (bounded context) | Real | — (no external service) | PostgreSQL via `pg` pool | — | feat-003 |
@@ -55,6 +55,11 @@
   Full-text search uses PostgreSQL native `tsvector`/`tsquery` with a GIN index on the
   `campaigns.search_vector` column — no Elasticsearch, Algolia, or other search provider.
   No new environment variable flags are required. No new mock adapters are needed.
+
+- **Payments (feat-005)** uses `StubPaymentGatewayAdapter` (`stub-payment-gateway.adapter.ts`)
+  as the mock payment gateway. Controlled by `MOCK_PAYMENTS=true`. Token `tok_fail` triggers a
+  simulated decline; any other non-empty token returns a successful capture with a generated
+  `transactionRef`. A real Stripe adapter (`stripe-payment-adapter.ts`) is not yet built.
 
 
 
