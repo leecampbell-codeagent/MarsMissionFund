@@ -29,6 +29,23 @@ Builds a single feature end-to-end: spec → implement → test → merge. Use `
 - If none specced: find highest-priority "🔲 TODO" and spec it first
 - If backlog empty: report "No features to build" and exit
 
+#### 1b. Resolve Base Branch
+
+- Read this feature's dependencies from `.claude/backlog.md`
+- For each dependency:
+  - If "SHIPPED" → already in upstream/main, skip
+  - Otherwise → check if a branch `ralph/feat-XXX-*` exists on origin:
+    ```bash
+    git ls-remote --heads origin "ralph/feat-XXX-*"
+    ```
+  - If branch exists on origin → candidate base
+- **If all dependencies are SHIPPED or have no remote branch:** `BASE_BRANCH = upstream/main`, `PR_TARGET = main`
+- **If one unmerged dependency branch exists:** `BASE_BRANCH` = that branch (fetch it first), `PR_TARGET` = that branch
+- **If multiple unmerged dependency branches exist:** `BASE_BRANCH` = the one with the highest feat number (likely the tip of the stack), `PR_TARGET` = that branch. Fetch it first:
+  ```bash
+  git fetch origin <branch-name>
+  ```
+
 ### 2. Spec Track (if needed)
 
 Only runs if the feature is not yet specced.
@@ -69,10 +86,10 @@ Only runs if the feature is not yet specced.
    - `.claude/context/patterns.md` — established code patterns to follow
    - `.claude/context/gotchas.md` — known pitfalls to avoid
 
-3. **Create feature branch:**
+3. **Create feature branch** (using `BASE_BRANCH` and `PR_TARGET` resolved in step 1b):
    ```bash
    git fetch upstream main
-   git checkout -b ralph/feat-XXX-[name] upstream/main
+   git checkout -b ralph/feat-XXX-[name] <BASE_BRANCH>
    ```
 
 4. **Update backlog:**
@@ -197,16 +214,17 @@ All quality checks passed. Create a PR for review.
    npx playwright test
    ```
 
-2. **Push and create PR:**
+2. **Push and create PR** (using `PR_TARGET` resolved in step 1b):
    ```bash
    git push origin ralph/feat-XXX-[name]
    gh pr create \
      --repo "${UPSTREAM_REPO}" \
      --head "leecampbell-codeagent:ralph/feat-XXX-[name]" \
-     --base main \
+     --base <PR_TARGET> \
      --title "feat-XXX: [name]" \
      --body "## Summary
    - [2-3 bullet points of what was built]
+   - **Stacked on:** <PR_TARGET> (if not main — merge parent PR first)
 
    ## Quality Gate
    - Tests: all passing
@@ -220,6 +238,7 @@ All quality checks passed. Create a PR for review.
    - Security: .claude/reports/feat-XXX-security.md
    - Audit: .claude/reports/feat-XXX-audit.md"
    ```
+   - If `PR_TARGET` is `main`, omit the "Stacked on" line from the body.
 
 ### 8. Post-PR
 

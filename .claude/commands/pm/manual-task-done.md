@@ -56,11 +56,19 @@ Read the task's "Config Required" section and verify each item:
 
 Read `.claude/agents/integration-engineer.md` and execute the swap:
 
-1. **Create feature branch:**
-   ```bash
-   git fetch upstream main
-   git checkout -b ralph/integrate-[service-name] upstream/main
-   ```
+1. **Resolve base branch and create feature branch:**
+   - Identify the parent feature that introduced the mock adapter for this service (from the manual task's "Blocked Feature" or context)
+   - Check if the parent feature's branch exists on origin:
+     ```bash
+     git ls-remote --heads origin "ralph/feat-XXX-*"
+     ```
+   - **If parent feature is SHIPPED or has no remote branch:** `BASE_BRANCH = upstream/main`, `PR_TARGET = main`
+   - **If parent feature has an unmerged branch on origin:** `BASE_BRANCH` = that branch, `PR_TARGET` = that branch. Fetch it first.
+   - Create the branch:
+     ```bash
+     git fetch upstream main
+     git checkout -b ralph/integrate-[service-name] <BASE_BRANCH>
+     ```
 
 2. **Implement real adapter** (if not already scaffolded):
    - Create `packages/backend/src/[context]/adapters/[service]/[service]-adapter.ts`
@@ -167,22 +175,24 @@ Read `.claude/agents/integration-engineer.md` and execute the swap:
    git push origin ralph/integrate-[service-name]
    ```
 
-4. **Create PR to upstream:**
+4. **Create PR to upstream** (using `PR_TARGET` resolved in step 4.1):
    ```bash
    gh pr create \
      --repo "${UPSTREAM_REPO}" \
      --head "leecampbell-codeagent:ralph/integrate-[service-name]" \
-     --base main \
+     --base <PR_TARGET> \
      --title "integrate: real [service] adapter" \
      --body "## Summary
    - Swaps mock-[service]-adapter for real [service]-adapter
    - Integration tests verify real connectivity
    - Mock adapter retained for test suite
    - Closes manual task #N
+   - **Stacked on:** <PR_TARGET> (if not main — merge parent PR first)
 
    ## Reports
    - Integration: .claude/reports/integrate-[service]-report.md"
    ```
+   - If `PR_TARGET` is `main`, omit the "Stacked on" line from the body.
 
 ### 7. Report
 

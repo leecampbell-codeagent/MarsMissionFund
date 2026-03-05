@@ -35,6 +35,7 @@ You are the **Pipeline Orchestrator**. Your job is to run the continuous product
    - Read `.ralphrc` for `MAX_FEATURES_PER_RUN` (default: 5)
    - Initialise feature counter: `features_shipped = 0`
    - Read `MAX_ITERATIONS` (default: 30) for per-agent loop cap
+   - Initialise dependency tracking: `PREVIOUS_FEATURE_BRANCH = ""`
 
 ### Phase 2: Spec Track — Populate the Backlog
 
@@ -63,10 +64,21 @@ You are the **Pipeline Orchestrator**. Your job is to run the continuous product
 
 ### Phase 3: Implementation Track — Build the Feature
 
-6. **Create a feature branch:**
-   ```bash
-   git checkout -b ralph/feat-XXX-[name] upstream/main
-   ```
+6. **Resolve base branch and create feature branch:**
+   - Read this feature's dependencies from `.claude/backlog.md`
+   - For each dependency:
+     - If status is "SHIPPED" → already in upstream/main, skip
+     - If it was built in this pipeline run and has an unmerged branch → candidate
+   - **If all dependencies are SHIPPED (or feature has none):**
+     - Base = `upstream/main`
+     - `PR_TARGET = "main"`
+   - **If any dependency has an unmerged branch from this run:**
+     - Base = `PREVIOUS_FEATURE_BRANCH` (the last-built feature's branch, which contains all stacked work)
+     - `PR_TARGET` = that branch name
+   - Create the branch:
+     ```bash
+     git checkout -b ralph/feat-XXX-[name] <resolved-base>
+     ```
 
 7. **Run Implementation agents in parallel (or sequential if dependencies exist):**
    - **Backend Engineer** (read `.claude/agents/backend-engineer.md`)
@@ -162,10 +174,11 @@ You are the **Pipeline Orchestrator**. Your job is to run the continuous product
     gh pr create \
       --repo "${UPSTREAM_REPO}" \
       --head "leecampbell-codeagent:ralph/feat-XXX-[name]" \
-      --base main \
+      --base <PR_TARGET> \
       --title "feat-XXX: [name]" \
       --body "## Summary
     - [2-3 bullet points of what was built]
+    - **Stacked on:** <PR_TARGET> (if not main — merge parent PR first)
 
     ## Quality Gate
     - Tests: all passing
@@ -179,6 +192,8 @@ You are the **Pipeline Orchestrator**. Your job is to run the continuous product
     - Security: .claude/reports/feat-XXX-security.md
     - Audit: .claude/reports/feat-XXX-audit.md"
     ```
+    - If `PR_TARGET` is `main`, omit the "Stacked on" line from the body.
+    - After PR creation, update tracking: `PREVIOUS_FEATURE_BRANCH = "ralph/feat-XXX-[name]"`
 
 13. **If ANY fail — return to the Quality Track:**
     - Identify which criterion failed
@@ -236,6 +251,7 @@ When the pipeline stops (max features, empty backlog, or safety limit):
    - Manual tasks waiting for human
    - Total test count and coverage
    - Any issues or blockers encountered
+   - **PR merge order:** List stacked PRs in the order they must be merged (parent first). When a parent PR merges, GitHub auto-retargets the child PR to its new base.
 3. Commit the summary to a chore branch and push:
    ```bash
    git checkout -b ralph/chore/pipeline-summary-[date] upstream/main
