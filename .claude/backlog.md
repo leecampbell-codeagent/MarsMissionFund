@@ -66,15 +66,15 @@ These groups can be built concurrently by separate agents:
 | 002 | [Database Schema Foundation](prds/feat-002-database-schema-foundation.md) | Cross-cutting | P0 | SHIPPED | 001 | M |
 | 003 | [Authentication with Clerk](prds/feat-003-authentication.md) | Account | P0 | SHIPPED | 001 | M |
 | 004 | [Account Registration & Onboarding](prds/feat-004-account-registration-onboarding.md) | Account | P0 | ✅ SHIPPED | 002, 003 | M |
-| 005 | [Campaign Creation (Draft & Submit)](prds/feat-005-campaign-creation.md) | Campaign, Account | P1 | TODO | 004, 013 | L |
-| 006 | [Campaign Review Pipeline](prds/feat-006-campaign-review-pipeline.md) | Campaign, Account | P1 | TODO | 005 | M |
+| 005 | [Campaign Creation (Draft & Submit)](prds/feat-005-campaign-creation.md) | Campaign, Account | P1 | ✅ SHIPPED | 004, 013 | L |
+| 006 | [Campaign Review Pipeline](prds/feat-006-campaign-review-pipeline.md) | Campaign, Account | P1 | ✅ SHIPPED | 005 | M |
 | 007 | [Campaign Public Page & Discovery](prds/feat-007-campaign-public-page-discovery.md) | Campaign, Donor | P1 | TODO | 006 | L |
 | 008 | [Contribution Flow](prds/feat-008-contribution-flow.md) | Donor, Payments | P1 | TODO | 007, 009 | L |
-| 009 | [Payment Processing (Mock Gateway)](prds/feat-009-payment-processing.md) | Payments | P1 | TODO | 002 | L |
+| 009 | [Payment Processing (Mock Gateway)](prds/feat-009-payment-processing.md) | Payments | P1 | ✅ SHIPPED | 002 | L |
 | 010 | [Campaign Lifecycle (Funding, Deadline, Failure)](prds/feat-010-campaign-lifecycle.md) | Campaign, Payments | P1 | TODO | 008, 009 | M |
 | 011 | [Milestone Verification & Settlement](prds/feat-011-milestone-verification-settlement.md) | Campaign, Payments | P1 | TODO | 010 | L |
 | 012 | [Donor Dashboard & Contribution History](prds/feat-012-donor-dashboard.md) | Donor | P2 | TODO | 008 | M |
-| 013 | [KYC Verification (Mock Provider)](prds/feat-013-kyc-verification.md) | KYC, Account | P1 | TODO | 004 | M |
+| 013 | [KYC Verification (Mock Provider)](prds/feat-013-kyc-verification.md) | KYC, Account | P1 | ✅ SHIPPED | 004 | M |
 | 014 | [Campaign Search & Filtering](prds/feat-014-campaign-search-filtering.md) | Donor | P2 | TODO | 007 | M |
 | 015 | [Admin Dashboard](prds/feat-015-admin-dashboard.md) | Account, Campaign, Payments | P2 | TODO | 004, 010 | L |
 

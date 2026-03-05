@@ -112,3 +112,39 @@
 
 - Co-located `__tests__/` directory adjacent to source files.
 - Test files named `*.test.ts` (backend) or `*.test.tsx` (frontend).
+
+## Domain Patterns (established in feat-004–006)
+
+### Transactional Event Store Writes
+
+- ALL state mutations in application services use `transactionPort.withTransaction()`.
+- The callback receives a `TransactionClient` that is passed to both the repository and the event store append.
+- `PgTransactionAdapter.withTransaction()` guarantees `COMMIT` on success and `ROLLBACK` on error, with `PoolClient.release()` in `finally`.
+
+### ALLOWED_TRANSITIONS Guard
+
+- Domain entities with non-trivial state machines define an `ALLOWED_TRANSITIONS` map (Record<State, State[]>).
+- A private `assertTransition(from, to)` helper validates the map; throws a typed `DomainError` on violation.
+- This gives O(1) transition lookup and a single guard point, rather than per-method branching.
+
+### Reconstitute vs Create
+
+- `Entity.create(input)` — validates invariants, throws DomainError on violation. Used for new instances.
+- `Entity.reconstitute(row)` — skips validation, maps raw DB row to entity. Used in repositories. Never bypasses the state column.
+
+### Role-Gated Application Service Operations
+
+- Role assertions happen at the *application service* layer (not the domain layer, not the HTTP handler).
+- Pattern: `if (!account.roles.includes('reviewer')) throw new InsufficientPermissionsError()`.
+- HTTP handler just maps the error to 403 — no role logic in router/controller.
+
+### Optional Comment on State Transitions
+
+- When a transition optionally carries a human comment (e.g., approve with a note), define the field as `string | undefined` in the input type.
+- Never hardcode default comment strings — leave it undefined if the caller omits it.
+
+### Audit Event Emission
+
+- Approve/reject transitions emit `campaign_approved` / `campaign_rejected` events to the event store.
+- Event payload includes `reviewer_id`, `comment` (when present), and timestamp (ISO string).
+- Audit events are appended inside the same transaction as the aggregate update.
