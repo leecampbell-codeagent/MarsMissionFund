@@ -32,6 +32,7 @@ interface ApiClient {
   readonly get: <T>(path: string, params?: Record<string, string>) => Promise<T>;
   readonly post: <T>(path: string, body?: unknown) => Promise<T>;
   readonly put: <T>(path: string, body?: unknown) => Promise<T>;
+  readonly patch: <T>(path: string, body?: unknown) => Promise<T>;
   readonly del: <T>(path: string) => Promise<T>;
 }
 
@@ -100,6 +101,8 @@ export function createApiClient(getToken: () => Promise<string | null>): ApiClie
       makeRequest<T>(getToken, { method: 'POST', path, body }),
     put: <T>(path: string, body?: unknown) =>
       makeRequest<T>(getToken, { method: 'PUT', path, body }),
+    patch: <T>(path: string, body?: unknown) =>
+      makeRequest<T>(getToken, { method: 'PATCH', path, body }),
     del: <T>(path: string) => makeRequest<T>(getToken, { method: 'DELETE', path }),
   };
 }

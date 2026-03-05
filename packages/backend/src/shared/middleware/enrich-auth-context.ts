@@ -68,6 +68,7 @@ export function createEnrichAuthContext(
       roles: account.roles,
       accountStatus: account.status,
       onboardingCompleted: account.onboardingCompleted,
+      onboardingStep: account.onboardingStep,
     };
 
     next();

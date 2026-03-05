@@ -5,6 +5,7 @@ import { MockWebhookVerificationAdapter } from './account/adapters/mock/mock-web
 import { AccountAppService } from './account/application/account-app-service.js';
 import type { AppDependencies } from './app.js';
 import { logger } from './logger.js';
+import { InMemoryEventStore } from './shared/adapters/mock/in-memory-event-store.js';
 import type { AuthClaimsExtractor } from './shared/middleware/enrich-auth-context.js';
 import type { AuthExtractor } from './shared/middleware/require-authentication.js';
 
@@ -84,7 +85,8 @@ export async function createDependencies(): Promise<AppDependencies> {
     const authPort = new MockAuthAdapter();
     const webhookVerifier = new MockWebhookVerificationAdapter();
     const accountRepository = new InMemoryAccountRepository();
-    const accountAppService = new AccountAppService(accountRepository, logger);
+    const eventStore = new InMemoryEventStore();
+    const accountAppService = new AccountAppService(accountRepository, eventStore, logger);
     const extractor = createMockAuthExtractor();
 
     return {
@@ -114,6 +116,7 @@ export async function createDependencies(): Promise<AppDependencies> {
     './account/adapters/clerk/clerk-webhook-verification-adapter.js'
   );
   const { PgAccountRepository } = await import('./account/adapters/pg/pg-account-repository.js');
+  const { PgEventStoreAdapter } = await import('./shared/adapters/pg/pg-event-store-adapter.js');
   const { Pool } = await import('pg');
 
   const pool = new Pool({
@@ -123,7 +126,8 @@ export async function createDependencies(): Promise<AppDependencies> {
   const authPort = new ClerkAuthAdapter();
   const webhookVerifier = new ClerkWebhookVerificationAdapter(webhookSigningSecret);
   const accountRepository = new PgAccountRepository(pool);
-  const accountAppService = new AccountAppService(accountRepository, logger);
+  const eventStore = new PgEventStoreAdapter(pool);
+  const accountAppService = new AccountAppService(accountRepository, eventStore, logger);
   const extractor = await createClerkAuthExtractor();
 
   return {

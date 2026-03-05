@@ -8,7 +8,9 @@ export interface WebhookAccountInput {
 
 export interface AccountRepository {
   findByClerkUserId(clerkUserId: string): Promise<Account | null>;
+  findById(id: string): Promise<Account | null>;
   save(account: Account): Promise<void>;
+  update(account: Account): Promise<void>;
   upsertFromWebhook(input: WebhookAccountInput): Promise<void>;
   updateStatusByClerkUserId(clerkUserId: string, status: AccountStatus): Promise<void>;
 }
