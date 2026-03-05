@@ -11,6 +11,12 @@ const OnboardingPage = lazy(() => import('./pages/account/onboarding-page'));
 const SettingsProfilePage = lazy(() => import('./pages/account/settings-profile-page'));
 const SettingsNotificationsPage = lazy(() => import('./pages/account/settings-notifications-page'));
 
+// Campaign pages
+const CampaignCreatePage = lazy(() => import('./pages/campaign/campaign-create-page'));
+const CampaignDetailPage = lazy(() => import('./pages/campaign/campaign-detail-page'));
+const MyCampaignsPage = lazy(() => import('./pages/campaign/my-campaigns-page'));
+const ReviewQueuePage = lazy(() => import('./pages/campaign/review-queue-page'));
+
 function FullPageSpinner(): ReactElement {
   return (
     <div
@@ -130,6 +136,48 @@ export function AppRoutes(): ReactElement {
           element={
             <ProtectedRoute>
               <SettingsNotificationsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Campaign routes */}
+        <Route
+          path="/campaigns/new"
+          element={
+            <ProtectedRoute>
+              <CampaignCreatePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/campaigns/:id/edit"
+          element={
+            <ProtectedRoute>
+              <CampaignCreatePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/campaigns/:id"
+          element={
+            <ProtectedRoute>
+              <CampaignDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/me/campaigns"
+          element={
+            <ProtectedRoute>
+              <MyCampaignsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/review-queue"
+          element={
+            <ProtectedRoute>
+              <ReviewQueuePage />
             </ProtectedRoute>
           }
         />

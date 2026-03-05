@@ -17,7 +17,7 @@
 |---|---------|---------|----------|--------|-------------|------------|
 | 001 | Account Registration and Authentication | Account (L4-001) | P0 | ✅ SHIPPED | None | M |
 | 002 | KYC Verification Stub | KYC (L4-005) | P0 | ✅ SHIPPED | feat-001 | S |
-| 003 | Campaign Creation, Submission, and Review Pipeline | Campaign (L4-002) | P0 | 🔲 | feat-001, feat-002 | L |
+| 003 | Campaign Creation, Submission, and Review Pipeline | Campaign (L4-002) | P0 | ✅ SPECCED | feat-001, feat-002 | L |
 | 004 | Campaign Discovery and Public Campaign Pages | Donor (L4-003), Campaign (L4-002) | P1 | 🔲 | feat-003 | M |
 | 005 | Contribution Flow and Payment Processing (Stubbed Gateway) | Payments (L4-004), Donor (L4-003) | P1 | 🔲 | feat-001, feat-003, feat-004 | L |
 | 006 | Donor Dashboard and Contribution History | Donor (L4-003) | P1 | 🔲 | feat-001, feat-005 | M |

@@ -1,6 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
 import type { Logger } from 'pino';
 import {
+  AccountNotActiveError,
+  AccountSuspendedError,
   BioTooLongError,
   DisplayNameTooLongError,
   InvalidAvatarUrlError,
@@ -9,6 +11,28 @@ import {
   SecurityAlertsCannotBeDisabledError,
   UserNotFoundError,
 } from '../../account/domain/errors/account-errors.js';
+import {
+  AdminRoleRequiredError,
+  CampaignAlreadyClaimedError,
+  CampaignAlreadySubmittedError,
+  CampaignCannotArchiveError,
+  CampaignInvalidStateError,
+  CampaignNotApprovableError,
+  CampaignNotClaimableError,
+  CampaignNotEditableError,
+  CampaignNotFoundError,
+  CampaignNotLaunchableError,
+  CampaignNotRejectableError,
+  CampaignNotRevizableError,
+  CampaignNotSubmittableError,
+  CreatorRoleRequiredError,
+  KycNotVerifiedError,
+  MilestoneValidationError,
+  NotAssignedReviewerError,
+  ReassignTargetNotReviewerError,
+  ReviewerRoleRequiredError,
+  SubmissionValidationError,
+} from '../../campaign/domain/errors/campaign-errors.js';
 import {
   KycAccountNotActiveError,
   KycAccountSuspendedError,
@@ -75,6 +99,108 @@ export function createErrorHandler(logger: Logger) {
         error: {
           code: 'UNAUTHENTICATED',
           message: 'Authentication required. Sign in to continue.',
+          correlation_id: correlationId,
+        },
+      });
+      return;
+    }
+
+    // Account context errors (WARN-002 fix — AccountNotActiveError/AccountSuspendedError)
+    if (err instanceof AccountNotActiveError) {
+      res.status(403).json({
+        error: {
+          code: 'ACCOUNT_NOT_ACTIVE',
+          message: err.message,
+          correlation_id: correlationId,
+        },
+      });
+      return;
+    }
+
+    if (err instanceof AccountSuspendedError) {
+      res.status(403).json({
+        error: {
+          code: 'ACCOUNT_SUSPENDED',
+          message: err.message,
+          correlation_id: correlationId,
+        },
+      });
+      return;
+    }
+
+    // Campaign 404 errors
+    if (err instanceof CampaignNotFoundError) {
+      res.status(404).json({
+        error: {
+          code: 'CAMPAIGN_NOT_FOUND',
+          message: 'Campaign not found.',
+          correlation_id: correlationId,
+        },
+      });
+      return;
+    }
+
+    // Campaign 403 errors
+    if (
+      err instanceof CreatorRoleRequiredError ||
+      err instanceof ReviewerRoleRequiredError ||
+      err instanceof AdminRoleRequiredError ||
+      err instanceof NotAssignedReviewerError ||
+      err instanceof KycNotVerifiedError
+    ) {
+      res.status(403).json({
+        error: {
+          code: err.code,
+          message: err.message,
+          correlation_id: correlationId,
+        },
+      });
+      return;
+    }
+
+    // Campaign 409 Conflict errors
+    if (
+      err instanceof CampaignNotEditableError ||
+      err instanceof CampaignNotSubmittableError ||
+      err instanceof CampaignAlreadySubmittedError ||
+      err instanceof CampaignNotRevizableError ||
+      err instanceof CampaignNotClaimableError ||
+      err instanceof CampaignAlreadyClaimedError ||
+      err instanceof CampaignNotApprovableError ||
+      err instanceof CampaignNotRejectableError ||
+      err instanceof CampaignNotLaunchableError ||
+      err instanceof CampaignCannotArchiveError ||
+      err instanceof CampaignInvalidStateError
+    ) {
+      res.status(409).json({
+        error: {
+          code: err.code,
+          message: err.message,
+          correlation_id: correlationId,
+        },
+      });
+      return;
+    }
+
+    // Campaign 400 validation errors
+    if (err instanceof SubmissionValidationError || err instanceof MilestoneValidationError) {
+      res.status(400).json({
+        error: {
+          code: err.code,
+          message: err.message,
+          field: err.field,
+          correlation_id: correlationId,
+        },
+      });
+      return;
+    }
+
+    // Campaign reassign target 400
+    if (err instanceof ReassignTargetNotReviewerError) {
+      res.status(400).json({
+        error: {
+          code: err.code,
+          message: err.message,
           correlation_id: correlationId,
         },
       });

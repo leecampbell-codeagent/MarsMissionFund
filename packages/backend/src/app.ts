@@ -12,18 +12,23 @@ const httpLogger =
 import { createAccountRouter } from './account/api/account-router.js';
 import { createWebhookRouter } from './account/api/webhook-router.js';
 import type { AccountAppService } from './account/application/account-app-service.js';
+import { createCampaignRouter } from './campaign/api/campaign-router.js';
+import { serializeCampaign } from './campaign/api/campaign-serializer.js';
+import type { CampaignAppService } from './campaign/application/campaign-app-service.js';
 import { createKycRouter } from './kyc/api/kyc-router.js';
 import type { KycAppService } from './kyc/application/kyc-app-service.js';
 import {
   clerkMiddleware,
   correlationIdMiddleware,
   createRequireAuth,
+  getClerkAuth,
 } from './shared/middleware/auth.js';
 import { createErrorHandler } from './shared/middleware/error-handler.js';
 
 export interface AppServices {
   accountAppService: AccountAppService;
   kycAppService: KycAppService;
+  campaignAppService: CampaignAppService;
   logger: Logger;
 }
 
@@ -63,6 +68,33 @@ export function createApp(services: AppServices): Application {
   const requireAuth = createRequireAuth();
   app.use('/api/v1', requireAuth, createAccountRouter(services.accountAppService));
   app.use('/api/v1/kyc', requireAuth, createKycRouter(services.kycAppService, logger));
+  app.use(
+    '/api/v1/campaigns',
+    requireAuth,
+    createCampaignRouter(services.campaignAppService, logger),
+  );
+
+  // GET /api/v1/me/campaigns — served directly here since campaign router is mounted at /campaigns
+  // This avoids cross-context contamination in the account router.
+  app.get('/api/v1/me/campaigns', requireAuth, async (req, res, next) => {
+    try {
+      const auth = getClerkAuth(req);
+      if (!auth) {
+        res.status(401).json({
+          error: {
+            code: 'UNAUTHENTICATED',
+            message: 'Authentication required. Sign in to continue.',
+            correlation_id: req.correlationId ?? null,
+          },
+        });
+        return;
+      }
+      const campaigns = await services.campaignAppService.listMyCampaigns(auth.userId);
+      res.status(200).json({ data: campaigns.map(serializeCampaign) });
+    } catch (err) {
+      next(err);
+    }
+  });
 
   // Global error handler (must be last)
   app.use(createErrorHandler(logger));

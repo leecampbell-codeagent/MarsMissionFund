@@ -5,6 +5,9 @@ import { MockClerkAuthAdapter } from './account/adapters/mock-clerk-auth.adapter
 import { PgUserRepository } from './account/adapters/pg-user-repository.adapter.js';
 import { PinoAuditLoggerAdapter } from './account/adapters/pino-audit-logger.adapter.js';
 import { AccountAppService } from './account/application/account-app-service.js';
+import { PgCampaignAuditRepository } from './campaign/adapters/pg-campaign-audit-repository.adapter.js';
+import { PgCampaignRepository } from './campaign/adapters/pg-campaign-repository.adapter.js';
+import { CampaignAppService } from './campaign/application/campaign-app-service.js';
 import { PgKycAuditRepository } from './kyc/adapters/pg-kyc-audit-repository.adapter.js';
 import { StubKycVerificationAdapter } from './kyc/adapters/stub-kyc-provider.adapter.js';
 import { KycAppService } from './kyc/application/kyc-app-service.js';
@@ -17,7 +20,11 @@ import type { KycVerificationPort } from './kyc/ports/kyc-provider.port.js';
 export function createServices(
   pool: Pool,
   logger: Logger,
-): { accountAppService: AccountAppService; kycAppService: KycAppService } {
+): {
+  accountAppService: AccountAppService;
+  kycAppService: KycAppService;
+  campaignAppService: CampaignAppService;
+} {
   const userRepository = new PgUserRepository(pool);
 
   // Use mock Clerk adapter when MOCK_CLERK=true (local dev / CI without Clerk credentials)
@@ -42,7 +49,19 @@ export function createServices(
   // KYC app service — shares userRepository with AccountAppService
   const kycAppService = new KycAppService(userRepository, kycProvider, kycAuditRepository, logger);
 
-  return { accountAppService, kycAppService };
+  // Campaign repositories
+  const campaignRepository = new PgCampaignRepository(pool);
+  const campaignAuditRepository = new PgCampaignAuditRepository(pool);
+
+  // Campaign app service — shares userRepository with AccountAppService and KycAppService
+  const campaignAppService = new CampaignAppService(
+    campaignRepository,
+    campaignAuditRepository,
+    userRepository,
+    logger,
+  );
+
+  return { accountAppService, kycAppService, campaignAppService };
 }
 
 

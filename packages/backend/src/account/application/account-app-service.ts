@@ -1,5 +1,7 @@
 import type { Logger } from 'pino';
 import {
+  AccountNotActiveError,
+  AccountSuspendedError,
   InvalidClerkUserIdError,
   SecurityAlertsCannotBeDisabledError,
   UserNotFoundError,
@@ -8,6 +10,7 @@ import { type UpdateProfileInput, User } from '../domain/models/user.js';
 import { AccountStatus } from '../domain/value-objects/account-status.js';
 import type { NotificationPreferences } from '../domain/value-objects/notification-preferences.js';
 import { Role } from '../domain/value-objects/role.js';
+import { KycNotVerifiedError } from '../../campaign/domain/errors/campaign-errors.js';
 import { AuditActions, type AuditLoggerPort } from '../ports/audit-logger.port.js';
 import type { ClerkAuthPort } from '../ports/clerk-auth.port.js';
 import type { UserRepository } from '../ports/user-repository.port.js';
@@ -229,6 +232,79 @@ export class AccountAppService {
     });
 
     return updatedUser;
+  }
+
+  /**
+   * Assigns the Creator role to the authenticated user.
+   * Idempotent — returns user unchanged if already a Creator.
+   * Called by POST /api/v1/me/roles/creator.
+   */
+  async assignCreatorRole(clerkUserId: string): Promise<User> {
+    // Step 1: Load user
+    const user = await this.userRepository.findByClerkUserId(clerkUserId);
+    if (!user) {
+      throw new UserNotFoundError(clerkUserId);
+    }
+
+    // Step 2: Account status check
+    if (user.accountStatus === AccountStatus.PendingVerification) {
+      throw new AccountNotActiveError();
+    }
+    if (
+      user.accountStatus === AccountStatus.Suspended ||
+      user.accountStatus === AccountStatus.Deactivated
+    ) {
+      throw new AccountSuspendedError();
+    }
+
+    // Step 3: KYC check
+    if (user.kycStatus !== 'verified') {
+      throw new KycNotVerifiedError();
+    }
+
+    // Step 4: Idempotency — return user unchanged if already creator
+    if (user.roles.includes(Role.Creator)) {
+      return user;
+    }
+
+    // Step 5: Assign role
+    const updatedUser = user.assignRole(Role.Creator);
+
+    // Step 6: Persist
+    const persistedUser = await this.userRepository.updateAccountStatus(
+      clerkUserId,
+      user.accountStatus,
+      updatedUser.roles,
+    );
+
+    // Step 7: Sync Clerk metadata (best-effort)
+    try {
+      await this.clerkAuth.setPublicMetadata(clerkUserId, { role: updatedUser.roles[0] ?? 'backer' });
+    } catch (err) {
+      this.logger.warn(
+        { clerkUserId, err },
+        'Failed to sync publicMetadata to Clerk after creator role assignment — JWT cache may be stale',
+      );
+    }
+
+    // Step 8: Audit (best-effort)
+    try {
+      await this.auditLogger.log({
+        action: AuditActions.RoleAssigned,
+        actorClerkUserId: clerkUserId,
+        resourceType: 'user',
+        resourceId: user.id,
+        timestamp: new Date(),
+        metadata: { role: 'creator' },
+      });
+    } catch (auditErr) {
+      this.logger.error(
+        { err: auditErr, clerkUserId },
+        'Failed to write audit event for creator role assignment',
+      );
+    }
+
+    return persistedUser;
   }
 
   /**

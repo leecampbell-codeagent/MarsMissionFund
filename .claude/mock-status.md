@@ -2,7 +2,7 @@
 
 > Tracks which external service integrations are mocked vs real.
 > Maintained by the Infrastructure Engineer agent.
-> Updated: 2026-03-05 (feat-002)
+> Updated: 2026-03-05 (feat-003)
 
 ---
 
@@ -15,6 +15,7 @@
 | Payments (Stripe) | Mocked | `mock-payment-adapter.ts` | `stripe-payment-adapter.ts` (not yet built) | TBD | feat-005 |
 | Email (AWS SES) | Mocked | `mock-email-adapter.ts` | `ses-email-adapter.ts` (not yet built) | TBD | feat-TBD |
 | PostgreSQL | Real | `in-memory-user-repository.adapter.ts` (unit tests only) | `pg-user-repository.adapter.ts` | Task #2 | feat-001 |
+| Campaign (bounded context) | Real | — (no external service) | PostgreSQL via `pg` pool | — | feat-003 |
 
 ---
 
@@ -43,6 +44,11 @@
 
 - **PostgreSQL** is always real. The `in-memory-user-repository.adapter.ts` is used only in unit
   tests — it is not an application-level mock controlled by an environment variable.
+
+- **Campaign bounded context (feat-003)** introduces no new external service integrations.
+  Campaigns are stored in PostgreSQL using the existing `pg` pool. No new environment variable
+  flags are required. No new mock adapters are needed — the Campaign feature is entirely
+  database-backed with no third-party service dependencies.
 
 
 

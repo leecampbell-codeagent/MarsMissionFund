@@ -309,6 +309,228 @@ Key constraints on `users` table:
 - All `TIMESTAMPTZ` — never bare `TIMESTAMP`
 - `updated_at` auto-trigger via `update_updated_at_column()` function
 
+---
+
+### P-018: Campaign status state machine with status-set constants
+
+The Campaign entity exposes named sets of statuses for guard checks rather than
+hardcoding status comparisons everywhere:
+
+```typescript
+export const EDITABLE_STATUSES: readonly CampaignStatus[] = ['draft', 'rejected'];
+export const SUBMITTABLE_STATUSES: readonly CampaignStatus[] = ['draft', 'rejected'];
+export const CREATOR_ARCHIVABLE_STATUSES: readonly CampaignStatus[] = ['draft', 'rejected'];
+```
+
+Entity methods check membership against these constants:
+
+```typescript
+submit(): Campaign {
+  if (!SUBMITTABLE_STATUSES.includes(this.status)) {
+    throw new CampaignNotSubmittableError();
+  }
+  return Campaign.reconstitute({ ...this.props, status: CampaignStatus.Submitted, submittedAt: new Date() });
+}
+```
+
+This keeps transition rules in one place and avoids scattered inline status comparisons.
+
+**Files:** `packages/backend/src/campaign/domain/value-objects/campaign-status.ts`,
+`packages/backend/src/campaign/domain/models/campaign.ts`
+
+---
+
+### P-019: Dynamic SQL SET clause for partial draft updates
+
+When a PATCH operation accepts any subset of optional fields, build the SET clause
+dynamically using a field map and a parameters array:
+
+```typescript
+const fieldMap: Record<string, string> = {
+  title: 'title',
+  shortDescription: 'short_description',
+  fundingGoalCents: 'funding_goal_cents',
+  milestones: 'milestones',   // JSONB
+};
+
+const setClauses: string[] = [];
+const values: unknown[] = [campaignId];
+
+for (const [key, col] of Object.entries(fieldMap)) {
+  if (key in input && (input as Record<string, unknown>)[key] !== undefined) {
+    const isJsonb = ['milestones', 'teamMembers', ...].includes(key);
+    setClauses.push(`${col} = $${values.length + 1}${isJsonb ? '::JSONB' : ''}`);
+    values.push(isJsonb ? JSON.stringify(value) : value);
+  }
+}
+
+if (setClauses.length === 0) return currentCampaign; // no-op
+
+const sql = `UPDATE campaigns SET ${setClauses.join(', ')}, updated_at = NOW()
+             WHERE id = $1 RETURNING *`;
+```
+
+Key points:
+- Always append `updated_at = NOW()` regardless of which fields are provided.
+- JSONB columns must be cast with `::JSONB` in the SET clause.
+- If `setClauses` is empty, return the existing entity without hitting the DB.
+
+**File:** `packages/backend/src/campaign/adapters/pg-campaign-repository.adapter.ts`
+
+---
+
+### P-020: Atomic conditional status transition (optimistic locking)
+
+To prevent race conditions on campaign status changes, use a conditional WHERE clause
+that checks the current status as part of the UPDATE:
+
+```sql
+UPDATE campaigns
+SET status = $2, reviewer_user_id = $3, updated_at = NOW()
+WHERE id = $1 AND status = $fromStatus
+RETURNING *
+```
+
+If 0 rows are affected, another concurrent request already changed the status.
+The repository throws a specific conflict error (e.g., `CampaignAlreadyClaimedError`)
+which the error handler maps to HTTP 409:
+
+```typescript
+const result = await this.db.query(sql, [campaignId, toStatus, reviewerId]);
+if (result.rowCount === 0) {
+  throw new CampaignAlreadyClaimedError();
+}
+```
+
+This is the same technique as the KYC `not_started → pending` pattern (G-020).
+
+**File:** `packages/backend/src/campaign/adapters/pg-campaign-repository.adapter.ts`
+
+---
+
+### P-021: Best-effort audit events — error does not roll back main operation
+
+Audit event inserts (and external metadata sync calls like Clerk `setPublicMetadata`)
+must not cause the primary operation to fail if they throw. Wrap in try/catch and log:
+
+```typescript
+// Step 6: Persist (primary — must succeed)
+const persistedUser = await this.userRepository.updateAccountStatus(...);
+
+// Step 7: Sync Clerk metadata (best-effort)
+try {
+  await this.clerkAuth.setPublicMetadata(clerkUserId, { role: updatedUser.roles[0] ?? 'backer' });
+} catch (err) {
+  this.logger.warn({ clerkUserId, err }, 'Failed to sync publicMetadata to Clerk');
+}
+
+// Step 8: Audit (best-effort)
+try {
+  await this.auditLogger.log({ ... });
+} catch (auditErr) {
+  this.logger.error({ err: auditErr }, 'Failed to write audit event');
+}
+```
+
+Log Clerk sync failures at `warn` (recoverable — JWT cache stale until next refresh).
+Log audit failures at `error` (data integrity concern worth alerting on).
+
+**Files:** `packages/backend/src/account/application/account-app-service.ts`,
+`packages/backend/src/campaign/application/campaign-app-service.ts`
+
+---
+
+### P-022: `GET /api/v1/me/<resource>` served directly in app.ts
+
+When a sub-resource belongs to the user context (`/me/campaigns`) but its service
+is mounted at a different prefix (`/api/v1/campaigns`), add the `/me/...` route
+directly in `app.ts` rather than in either router. This avoids cross-context
+contamination and keeps each router's scope clean:
+
+```typescript
+// In app.ts — after mounting both routers
+app.get('/api/v1/me/campaigns', requireAuth(), async (req, res, next) => {
+  try {
+    const clerkUserId = getClerkAuth(req)!;
+    const campaigns = await services.campaignAppService.listMyCampaigns(clerkUserId);
+    res.status(200).json({ data: campaigns.map(serializeCampaign) });
+  } catch (err) {
+    next(err);
+  }
+});
+```
+
+**File:** `packages/backend/src/app.ts`
+
+---
+
+### P-023: Cross-context read via shared repository injection
+
+When a bounded context needs to read an entity owned by another context (e.g., Campaign
+app service needs to verify the creator's role), inject the foreign repository as a
+constructor parameter — do NOT import the foreign application service:
+
+```typescript
+export class CampaignAppService {
+  constructor(
+    private readonly campaignRepository: CampaignRepository,
+    private readonly campaignAuditRepository: CampaignAuditRepository,
+    private readonly userRepository: UserRepository,  // Cross-context read
+    private readonly logger: Logger,
+  ) {}
+}
+```
+
+In the composition root, pass the same `userRepository` instance to both
+`AccountAppService` and `CampaignAppService`:
+
+```typescript
+const userRepo = new PgUserRepository(db);
+const accountService = new AccountAppService(userRepo, ...);
+const campaignService = new CampaignAppService(campaignRepo, auditRepo, userRepo, logger);
+```
+
+No circular imports, no application-layer coupling between contexts.
+
+**Files:** `packages/backend/src/campaign/application/campaign-app-service.ts`,
+`packages/backend/src/composition-root.ts`
+
+---
+
+### P-024: `KycNotVerifiedError` lives in campaign errors, not kyc context
+
+`KycNotVerifiedError` is defined in `campaign/domain/errors/campaign-errors.ts` because
+it is a precondition error raised by the campaign context when it checks a user's KYC
+status before allowing creator role assignment or campaign creation. It is not a KYC
+workflow error (which would be in the `kyc` context).
+
+The `assignCreatorRole` method in `AccountAppService` imports it from campaign errors:
+
+```typescript
+import { KycNotVerifiedError } from '../../campaign/domain/errors/campaign-errors.js';
+```
+
+**File:** `packages/backend/src/account/application/account-app-service.ts`
+
+---
+
+### P-025: Zod `z.enum()` requires a tuple type from `as const` arrays
+
+Zod's `z.enum()` expects `[string, ...string[]]` (a non-empty tuple), not `string[]`.
+When deriving the enum from a domain `as const` array, cast it:
+
+```typescript
+import { CAMPAIGN_CATEGORIES } from '../../domain/value-objects/campaign-category.js';
+
+// Wrong — TypeScript error: Argument of type 'string[]' is not assignable to parameter
+z.enum(CAMPAIGN_CATEGORIES)
+
+// Correct
+z.enum(CAMPAIGN_CATEGORIES as [string, ...string[]])
+```
+
+**File:** `packages/backend/src/campaign/api/schemas/update-campaign.schema.ts`
+
 
 
 

@@ -242,6 +242,191 @@ The `MOCK_KYC=true` environment variable selects the stub adapter at composition
 
 ---
 
+---
+
+## Campaign Domain
+
+### Campaign State Machine (Full L4-002)
+
+Twelve states total. feat-003 implements the first segment only (Draft through Live):
+
+| State | Terminal? | feat-003 scope? |
+|-------|-----------|----------------|
+| `draft` | No | Yes |
+| `submitted` | No | Yes |
+| `under_review` | No | Yes |
+| `approved` | No | Yes |
+| `rejected` | No | Yes |
+| `live` | No | Yes (launch transition only) |
+| `funded` | No | Future feature |
+| `suspended` | No | Future feature |
+| `failed` | Yes | Future feature |
+| `settlement` | No | Future feature |
+| `complete` | Yes | Future feature |
+| `cancelled` | Yes | Future feature |
+
+### Campaign State Transitions (feat-003 scope)
+
+| From | To | Actor | Conditions |
+|------|----|-------|-----------|
+| (new) | `draft` | Creator | Creator role + KYC verified |
+| `draft` | `draft` | Creator | Auto-save (partial update, no validation) |
+| `draft` | `submitted` | Creator | All required fields valid; milestone % sum = 100%; deadline 1 week–1 year from now |
+| `submitted` | `under_review` | Reviewer | Reviewer claims from FIFO queue (atomic: conditional WHERE) |
+| `under_review` | `approved` | Reviewer | Written approval notes required |
+| `under_review` | `rejected` | Reviewer | Written rationale AND resubmission guidance required |
+| `rejected` | `draft` | Creator | Creator chooses to revise; prior data preserved |
+| `approved` | `live` | Creator | Launch action; triggers escrow creation (future) |
+
+### Campaign Required Fields (submission validation)
+
+All fields are optional at draft save time, required at submission time:
+
+| Field | Type | Constraint |
+|-------|------|-----------|
+| `title` | TEXT | max 100 chars, non-empty |
+| `summary` | TEXT | max 280 chars, non-empty |
+| `description` | TEXT | max 10,000 chars, non-empty |
+| `alignmentStatement` | TEXT | max 1,000 chars — "How does this contribute to Mars?" |
+| `category` | TEXT | one of 10 fixed categories (see below) |
+| `heroImageUrl` | TEXT | `https://` URL only, max 2048 chars |
+| `fundingGoalCents` | string (BIGINT) | min 100,000,000 (= $1M), max 100,000,000,000 (= $1B) |
+| `fundingCapCents` | string (BIGINT) | >= fundingGoalCents |
+| `deadline` | TIMESTAMPTZ | 7 days to 1 year from submission timestamp |
+| `teamMembers` | JSONB array | min 1, max 20 members |
+| `milestones` | JSONB array | min 2, max 10; percentages sum to 100% (basis points: 10000) |
+| `riskDisclosures` | JSONB array | min 1, max 10 |
+| `budgetBreakdown` | JSONB array | max 20 line items |
+
+### Campaign Categories (10 fixed values, L4-002 Section 4.4)
+
+Stored as TEXT with CHECK constraint:
+
+```
+'propulsion', 'entry_descent_landing', 'power_energy', 'habitats_construction',
+'life_support_crew_health', 'food_water_production', 'in_situ_resource_utilisation',
+'radiation_protection', 'robotics_automation', 'communications_navigation'
+```
+
+### Milestone Structure
+
+Each milestone in the JSONB array:
+
+```typescript
+interface Milestone {
+  title: string;            // max 100 chars
+  description: string;      // max 500 chars
+  targetDate: string;       // ISO 8601 date string
+  fundingBasisPoints: number; // integer 1–10000; all milestones must sum to 10000
+  verificationCriteria: string; // max 1,000 chars
+}
+```
+
+Using basis points (not whole percentages) avoids the 33+33+34 rounding problem with
+three equal milestones.
+
+### Campaign Monetary Values
+
+- All monetary amounts stored as `BIGINT` (integer cents) in PostgreSQL.
+- API accepts and returns monetary amounts as **strings** (to avoid JSON number precision loss).
+- PostgreSQL's `pg` library returns `BIGINT` columns as JavaScript strings automatically —
+  do NOT cast to Number.
+- Display formatting is frontend responsibility using `Intl.NumberFormat`.
+
+### Campaign Access Control Matrix
+
+| State | Creator (own) | Other Creator | Reviewer | Admin | Public |
+|-------|--------------|--------------|---------|-------|--------|
+| `draft` | Read + Write | 404 | 404 | Read | 404 |
+| `submitted` | Read | 404 | Read | Read | 404 |
+| `under_review` | Read | 404 | Read | Read | 404 |
+| `approved` | Read + Launch | 404 | Read | Read | 404 |
+| `rejected` | Read + Revise | 404 | Read | Read | 404 |
+| `live` and beyond | Read | Read | Read | Read | Read |
+
+### Campaign Bounded Context Directory
+
+```
+packages/backend/src/campaign/
+├── domain/
+│   ├── models/campaign.ts
+│   ├── value-objects/campaign-status.ts
+│   ├── value-objects/campaign-category.ts
+│   └── errors/campaign-errors.ts
+├── ports/campaign-repository.port.ts
+├── adapters/
+│   ├── pg-campaign-repository.adapter.ts
+│   └── in-memory-campaign-repository.adapter.ts
+├── application/campaign-app-service.ts
+└── api/
+    ├── campaign-router.ts
+    ├── campaign-serializer.ts
+    └── schemas/
+```
+
+### Campaign KYC and Role Gate
+
+Campaign creation AND submission require BOTH:
+1. `user.roles.includes('creator')` — true
+2. `user.kycStatus === 'verified'` — true
+
+Error codes:
+- Missing Creator role: `CREATOR_ROLE_REQUIRED`, HTTP 403
+- KYC not verified: `KYC_NOT_VERIFIED`, HTTP 403 (same error code from feat-002)
+
+The campaign application service checks both via `UserRepository.findByClerkUserId()`.
+It does NOT call the KYC application service directly.
+
+### Campaign Audit Events Table
+
+`campaign_audit_events` — follows same pattern as `kyc_audit_events`:
+
+```sql
+CREATE TABLE IF NOT EXISTS campaign_audit_events (
+  id                    UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  campaign_id           UUID        NOT NULL REFERENCES campaigns(id) ON DELETE RESTRICT,
+  actor_user_id         UUID        REFERENCES users(id) ON DELETE SET NULL,
+  actor_clerk_user_id   TEXT        NOT NULL,
+  action                TEXT        NOT NULL,
+  previous_status       TEXT,
+  new_status            TEXT,
+  rationale             TEXT,
+  metadata              JSONB,
+  created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+Audit events for campaigns:
+- `campaign.created` — Draft created
+- `campaign.updated` — Draft auto-saved
+- `campaign.submitted` — Draft → Submitted
+- `campaign.claimed` — Submitted → Under Review (reviewer assigned)
+- `campaign.approved` — Under Review → Approved
+- `campaign.rejected` — Under Review → Rejected
+- `campaign.revised` — Rejected → Draft
+- `campaign.launched` — Approved → Live
+- `campaign.reassigned` — Admin changes reviewer while Under Review
+
+### Review Queue Ordering
+
+The review queue is FIFO (oldest submitted_at first). The `GET /campaigns/review-queue`
+endpoint returns campaigns in `submitted` state ordered by `submitted_at ASC`.
+
+A reviewer claiming a campaign transitions it to `under_review` atomically using a conditional
+WHERE clause (`WHERE id = $1 AND status = 'submitted'`). If two reviewers claim simultaneously,
+the second receives a 409 conflict.
+
+### `AuditLoggerPort` Resource Type Union
+
+The `resourceType` field in `AuditEntry` (in `audit-logger.port.ts`) must be extended to
+include `'campaign'` when campaign audit events are introduced:
+
+```typescript
+readonly resourceType: 'user' | 'kyc' | 'campaign';
+```
+
+---
+
 ## Testing
 
 ### Clerk Mock Strategy

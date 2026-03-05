@@ -360,6 +360,118 @@ Remove the `-r` flag from grep (not needed when pre-commit passes explicit filen
 
 ---
 
+---
+
+## Campaign Domain Gotchas
+
+### G-023: Express Router Order — `review-queue` Matches `/:id` Parameter
+
+**Problem:** If `GET /api/v1/campaigns/:id` is registered before `GET /api/v1/campaigns/review-queue`,
+Express will interpret `review-queue` as a campaign ID. The route handler will look up a campaign
+with ID `"review-queue"`, find nothing, and return 404 instead of the review queue.
+
+**Fix:** Always register specific path segments before parameterised paths in Express:
+
+```typescript
+router.get('/review-queue', reviewerOnly, getReviewQueueHandler); // BEFORE /:id
+router.get('/:id', getCampaignHandler);
+```
+
+This is a general Express routing rule — literal path segments always match before param
+segments IF they are registered first.
+
+**Detected in:** feat-003 research
+
+---
+
+### G-024: BIGINT from PostgreSQL Returns as JavaScript String
+
+**Problem:** PostgreSQL's `BIGINT` type exceeds JavaScript's safe integer range for large
+monetary amounts (e.g., 100_000_000_000 cents = $1B, which is within `Number.MAX_SAFE_INTEGER`
+at 9,007,199,254,740,991, but 64-bit BIGINT can exceed this). The `pg` library returns BIGINT
+columns as JavaScript strings to be safe. Code that tries to use arithmetic operators directly
+on these values (e.g., `fundingGoalCents + 100`) will fail at runtime or produce incorrect results
+because the values are strings.
+
+**Fix:** Never parse BIGINT monetary amounts to `Number`. Pass them as strings throughout:
+- Backend: keep as `string` from DB result to API response.
+- Frontend: display via `Intl.NumberFormat` with cents-to-dollars conversion (`BigInt` or
+  `Number` is safe for values below $90 trillion).
+- Validation: Zod schema uses `z.string()` for monetary fields; validate that the string is a
+  valid integer using a regex or `z.string().regex(/^\d+$/)`.
+
+**Detected in:** feat-003 research
+
+---
+
+### G-025: Milestone Percentage Sum — Use Basis Points, Not Whole Percents
+
+**Problem:** Three equal milestones at 33% each sum to 99%, not 100%. If whole integer
+percentages are used for milestone funding allocation, equal splits of three or more milestones
+cannot be represented exactly (33+33+34 requires one milestone to absorb the rounding).
+Creators expecting "equal thirds" will be confused by the asymmetry.
+
+**Fix:** Use basis points (integers summing to 10,000) instead of whole percentages summing to
+100. Three equal milestones can be represented as 3333 + 3333 + 3334 = 10000.
+Store as `INTEGER NOT NULL CHECK (funding_basis_points > 0)` in the milestones JSONB or
+a future milestones table. Validate `SUM(funding_basis_points) = 10000` at submission time.
+Display to users as percentages in the frontend: `(basisPoints / 100).toFixed(2) + '%'`.
+
+**Detected in:** feat-003 research
+
+---
+
+### G-026: Campaign Draft Update and Submit are Different Operations
+
+**Problem:** Auto-save (partial draft update) and final submission have fundamentally different
+semantics. If the PATCH (auto-save) endpoint applies the same strict validation as the submit
+endpoint, creators cannot save incomplete drafts (they'd get validation errors for missing
+required fields while mid-form).
+
+**Fix:**
+- `PATCH /campaigns/:id` (auto-save): Accept partial updates, store whatever is provided,
+  apply only structural validation (max field lengths, valid URL formats, no XSS). Do NOT
+  validate required-field presence or business rules (milestone % sum, deadline range).
+- `POST /campaigns/:id/submit`: Read the full campaign from DB, apply ALL submission
+  validation rules. Reject if any required field is missing or any business rule fails.
+The two operations must use different Zod schemas: a lenient `updateCampaignSchema` and a
+strict `submitCampaignSchema`.
+
+**Detected in:** feat-003 research
+
+---
+
+### G-027: `campaigns.creator_user_id` ON DELETE Must Be `RESTRICT`
+
+**Problem:** If `campaigns.creator_user_id` is defined as `ON DELETE CASCADE` or `ON DELETE
+SET NULL`, deleting a user's account would cascade-delete all their campaigns (including Live
+or Funded campaigns), potentially erasing financial records and disrupting backers. `SET NULL`
+is marginally safer but leaves orphaned campaign records with no creator identity.
+
+**Fix:** Use `ON DELETE RESTRICT` for `campaigns.creator_user_id`. This prevents account
+deletion while any non-terminal campaign exists. The application layer must check for active
+campaigns before allowing account deletion (GDPR erasure requests from users with active
+campaigns require admin intervention). Terminal states are: `complete`, `cancelled`, `failed`.
+
+**Detected in:** feat-003 research
+
+---
+
+### G-028: Rich Text Description Is an XSS Vector
+
+**Problem:** If the campaign `description` field accepts and renders HTML (rich text), a
+malicious creator could inject `<script>alert('xss')</script>` or other payloads that execute
+in a backer's browser when viewing the campaign page.
+
+**Fix:** For feat-003 (local demo), treat `description` as plain text with newline preservation.
+Do NOT build a full WYSIWYG rich text editor for the demo. Render as `white-space: pre-wrap`
+in the frontend. If Markdown is desired later, sanitise server-side before rendering. Never
+render raw user-supplied HTML without sanitisation.
+
+**Detected in:** feat-003 research
+
+---
+
 ### G-017: `=======$` Grep Pattern Matches `=====...=====` Section Dividers
 
 **Problem:** The regex `=======$` (without `^`) matches any line that *ends* with 7+ `=` characters, including `# =============================================` comment dividers common in shell scripts.
@@ -367,6 +479,131 @@ Remove the `-r` flag from grep (not needed when pre-commit passes explicit filen
 **Fix:** Always anchor with `^`: use `^=======$` to match only a line that is *exactly* `=======` (a genuine merge conflict marker).
 
 **Detected in:** feat-001 pipeline
+
+---
+
+## Campaign Implementation Gotchas
+
+### G-029: `claimCampaign` pre-check fires before atomic DB conflict error
+
+**Problem:** Tests that assert `CampaignAlreadyClaimedError` for a second reviewer attempting
+to claim an already-claimed campaign will fail. By the time the second request reaches the
+`claimCampaign` method, the campaign's status has already been changed to `under_review` by
+the first claimer. The application service pre-checks `campaign.status !== 'submitted'` and
+throws `CampaignNotClaimableError` before even reaching the repository's atomic `updateStatus`
+call — which is the only place `CampaignAlreadyClaimedError` can be thrown.
+
+`CampaignAlreadyClaimedError` is only reachable in a true race condition where two requests
+read `status = 'submitted'` simultaneously and one wins the DB UPDATE's WHERE clause.
+That race cannot be simulated via sequential test steps.
+
+**Fix:** Test the second-claim scenario with `CampaignNotClaimableError`, not
+`CampaignAlreadyClaimedError`. Document that `CampaignAlreadyClaimedError` is for DB-level
+races (tested via the InMemory adapter's atomic check directly, not through the app service).
+
+**Detected in:** feat-003 implementation
+
+---
+
+### G-030: Test user IDs must be valid UUIDs when Zod schemas use `z.string().uuid()`
+
+**Problem:** Using non-UUID strings as user IDs in API integration tests (e.g.,
+`'user-id-reviewer_001'`, `'test-creator-id'`) causes 400 VALIDATION_ERROR responses when
+the request body is validated against a Zod schema that includes `z.string().uuid()` for
+a user ID field (e.g., `reassignCampaignSchema`'s `reviewerUserId`).
+
+The test appears to be testing a 403 or 200 path but receives 400 instead, causing
+misleading test failures.
+
+**Fix:** Always use `crypto.randomUUID()` for user IDs in test fixtures when the API
+schema validates them as UUIDs:
+
+```typescript
+function makeTestIds() {
+  return {
+    creatorId: crypto.randomUUID(),
+    reviewerId: crypto.randomUUID(),
+    adminId: crypto.randomUUID(),
+  };
+}
+```
+
+**Detected in:** feat-003 implementation
+
+---
+
+### G-031: `roles[0]` may be `undefined` — use nullish coalescing for string parameters
+
+**Problem:** When setting Clerk public metadata after a role change, TypeScript's strict
+mode will reject `roles[0]` as the argument to a parameter typed `string` because array
+element access can return `undefined`. This causes a type error at compile time:
+
+```typescript
+// Error: Type 'Role | undefined' is not assignable to type 'string'
+await this.clerkAuth.setPublicMetadata(clerkUserId, { role: updatedUser.roles[0] });
+```
+
+**Fix:** Use nullish coalescing to provide a fallback:
+
+```typescript
+await this.clerkAuth.setPublicMetadata(clerkUserId, { role: updatedUser.roles[0] ?? 'backer' });
+```
+
+The fallback `'backer'` is safe because by this point in `assignCreatorRole`, the roles
+array has just been updated and will contain at least `Role.Creator`.
+
+**Detected in:** feat-003 implementation
+
+---
+
+### G-032: `UpdateCampaignInput.category` type incompatibility with Zod inference
+
+**Problem:** `updateCampaignSchema` uses `z.enum(CAMPAIGN_CATEGORIES as [string, ...string[]])`
+which infers `category` as `string | undefined`. However `UpdateCampaignInput.category` is
+typed as `CampaignCategory | undefined`. TypeScript rejects passing the Zod parse result
+directly to `campaignAppService.updateDraft()`:
+
+```
+Type 'string | undefined' is not assignable to type 'CampaignCategory | undefined'
+```
+
+**Fix:** Cast the parse result to the expected input type at the router boundary:
+
+```typescript
+const campaign = await campaignAppService.updateDraft(
+  clerkUserId,
+  req.params.id,
+  parseResult.data as UpdateCampaignInput,  // Safe: Zod validated the enum value
+);
+```
+
+This is safe because Zod has already validated the `category` value is one of the
+`CAMPAIGN_CATEGORIES` values. The cast bridges the structural equivalence that TypeScript
+cannot infer automatically due to the tuple cast at the schema level.
+
+**Detected in:** feat-003 implementation
+
+---
+
+### G-033: Redeclaring a function parameter variable causes a build error
+
+**Problem:** Inside an application service method that takes `campaignId` as a parameter,
+adding `const campaignId = campaign.id` as a later line causes a variable redeclaration
+error (TypeScript/ESBuild: "Cannot redeclare block-scoped variable 'campaignId'").
+
+Example of the mistake:
+```typescript
+async claimCampaign(clerkUserId: string, campaignId: string): Promise<Campaign> {
+  const campaign = await this.campaignRepository.findById(campaignId);
+  // ...
+  const campaignId = campaign.id;  // ERROR: already declared as parameter
+}
+```
+
+**Fix:** Remove the redundant declaration. The parameter value and `campaign.id` are
+identical at this point; the parameter already holds the correct value.
+
+**Detected in:** feat-003 implementation
 
 
 

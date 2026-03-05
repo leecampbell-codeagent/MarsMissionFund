@@ -90,6 +90,26 @@ export class UserAlreadyExistsError extends DomainError {
   }
 }
 
+export class AccountNotActiveError extends DomainError {
+  readonly code = 'ACCOUNT_NOT_ACTIVE';
+  constructor() {
+    super(
+      'ACCOUNT_NOT_ACTIVE',
+      'Your account must be active to perform this action. Please verify your email.',
+    );
+  }
+}
+
+export class AccountSuspendedError extends DomainError {
+  readonly code = 'ACCOUNT_SUSPENDED';
+  constructor() {
+    super(
+      'ACCOUNT_SUSPENDED',
+      'Your account has been suspended. Please contact support.',
+    );
+  }
+}
+
 
 
 

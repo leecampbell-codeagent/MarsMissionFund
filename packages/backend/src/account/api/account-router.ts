@@ -211,6 +211,44 @@ export function createAccountRouter(accountAppService: AccountAppService): Route
   });
 
   /**
+   * POST /api/v1/me/roles/creator
+   * Self-designate as a Creator. Idempotent — no error if already Creator.
+   */
+  router.post('/me/roles/creator', async (req, res, next) => {
+    try {
+      const auth = getClerkAuth(req);
+      if (!auth) {
+        res.status(401).json({
+          error: {
+            code: 'UNAUTHENTICATED',
+            message: 'Authentication required. Sign in to continue.',
+            correlation_id: req.correlationId ?? null,
+          },
+        });
+        return;
+      }
+
+      // Reject any request body fields
+      const parseResult = z.object({}).strict().safeParse(req.body ?? {});
+      if (!parseResult.success) {
+        res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'No request body fields are accepted for this endpoint.',
+            correlation_id: req.correlationId ?? null,
+          },
+        });
+        return;
+      }
+
+      const user = await accountAppService.assignCreatorRole(auth.userId);
+      res.status(200).json({ data: serializeUser(user) });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  /**
    * PATCH /api/v1/me/notifications
    * Updates the authenticated user's notification preferences (partial merge).
    */
