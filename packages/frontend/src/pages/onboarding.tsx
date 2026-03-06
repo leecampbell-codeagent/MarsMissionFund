@@ -23,7 +23,7 @@ export default function OnboardingPage() {
   })();
 
   const [step, setStep] = useState<Step>(resolvedInitialStep);
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [selectedRoles, setSelectedRoles] = useState<('backer' | 'creator')[]>([]);
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [showKycModal, setShowKycModal] = useState(false);
@@ -53,7 +53,7 @@ export default function OnboardingPage() {
     saveOnboardingStep.mutate({ step: nextStep });
   };
 
-  const toggleRole = (role: string) => {
+  const toggleRole = (role: 'backer' | 'creator') => {
     setSelectedRoles((prev) => {
       if (prev.includes(role)) {
         return prev.filter((r) => r !== role);
@@ -69,7 +69,7 @@ export default function OnboardingPage() {
   const handleCompleteSetup = () => {
     const input: {
       step: number;
-      roles: string[];
+      roles: ('backer' | 'creator')[];
       displayName?: string;
       bio?: string;
     } = {

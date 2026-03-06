@@ -4,7 +4,7 @@ import type { MeResponse } from '../types/user.js';
 
 interface CompleteOnboardingInput {
   readonly step: number;
-  readonly roles: string[];
+  readonly roles: ('backer' | 'creator')[];
   readonly displayName?: string;
   readonly bio?: string;
 }
