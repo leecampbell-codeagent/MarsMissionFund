@@ -64,12 +64,15 @@ RUN ARCH=$(uname -m) && [ "$ARCH" = "aarch64" ] && ARCH="arm64" || ARCH="x64" \
 RUN npm install -g \
         "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
         "@biomejs/biome@${BIOME_VERSION}" \
-        "@j178/prek@${PREK_VERSION}"
+        "@j178/prek@${PREK_VERSION}" \
+        "@playwright/cli@0.1.1"
 
 # ---------------------------------------------------------------------------
 # Playwright (Chromium only — saves ~1 GB vs all browsers)
 # ---------------------------------------------------------------------------
-RUN npx playwright install --with-deps chromium
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright-browsers
+RUN npx --package @playwright/cli playwright install --with-deps chromium \
+    && chmod -R o+rx "${PLAYWRIGHT_BROWSERS_PATH}"
 
 # ---------------------------------------------------------------------------
 # Non-root agent user
