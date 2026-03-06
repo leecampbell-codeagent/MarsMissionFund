@@ -35,11 +35,12 @@ export function correlationIdMiddleware(req: Request, res: Response, next: NextF
 // ---------------------------------------------------------------------------
 
 function mockClerkMiddleware(req: Request, _res: Response, next: NextFunction): void {
-  // Inject a synthetic Clerk-like auth object so getAuth(req) can read it
-  // @clerk/express reads from req.auth internally via clerkMiddleware.
-  // For mocking, we directly set the internal _clerk_state that getAuth reads.
-  // The safest approach: attach a custom property that mmfAuthMiddleware reads directly.
-  (req as Request & { _mockClerkUserId?: string })._mockClerkUserId = 'user_test_mock';
+  // Only inject mock user if an Authorization header is present (any non-empty value).
+  // This preserves the 401 behaviour for unauthenticated requests in mock mode.
+  const authHeader = req.headers['authorization'];
+  if (authHeader && authHeader.length > 0) {
+    (req as Request & { _mockClerkUserId?: string })._mockClerkUserId = 'user_test_mock';
+  }
   next();
 }
 

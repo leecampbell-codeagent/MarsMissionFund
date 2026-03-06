@@ -77,7 +77,7 @@ describe('mmfAuthMiddleware (MOCK_AUTH=true)', () => {
 
   it('allows request with mock auth and populates req.auth', async () => {
     const app = buildTestApp(mockRepo);
-    const res = await request(app).get('/api/v1/test');
+    const res = await request(app).get('/api/v1/test').set('Authorization', 'Bearer mock-token');
     expect(res.status).toBe(200);
     expect(res.body.auth).toBeDefined();
     expect(res.body.auth.clerkUserId).toBe('user_test_mock');
@@ -90,21 +90,21 @@ describe('mmfAuthMiddleware (MOCK_AUTH=true)', () => {
     // Remove the pre-seeded test user to simulate first login
     // We'll use a different clerkId that's not pre-seeded
     const app = buildTestApp(freshRepo);
-    const res = await request(app).get('/api/v1/test');
+    const res = await request(app).get('/api/v1/test').set('Authorization', 'Bearer mock-token');
     expect(res.status).toBe(200);
     expect(res.body.auth.clerkUserId).toBe('user_test_mock');
   });
 
   it('returns X-Request-Id on authenticated responses', async () => {
     const app = buildTestApp(mockRepo);
-    const res = await request(app).get('/api/v1/test');
+    const res = await request(app).get('/api/v1/test').set('Authorization', 'Bearer mock-token');
     expect(res.headers['x-request-id']).toBeDefined();
   });
 
   it('returns 403 ACCOUNT_SUSPENDED for suspended account', async () => {
     mockRepo.setAccountStatus('user_test_mock', 'suspended');
     const app = buildTestApp(mockRepo);
-    const res = await request(app).get('/api/v1/test');
+    const res = await request(app).get('/api/v1/test').set('Authorization', 'Bearer mock-token');
     expect(res.status).toBe(403);
     expect(res.body.error.code).toBe('ACCOUNT_SUSPENDED');
   });
@@ -112,7 +112,7 @@ describe('mmfAuthMiddleware (MOCK_AUTH=true)', () => {
   it('returns 403 ACCOUNT_DEACTIVATED for deactivated account', async () => {
     mockRepo.setAccountStatus('user_test_mock', 'deactivated');
     const app = buildTestApp(mockRepo);
-    const res = await request(app).get('/api/v1/test');
+    const res = await request(app).get('/api/v1/test').set('Authorization', 'Bearer mock-token');
     expect(res.status).toBe(403);
     expect(res.body.error.code).toBe('ACCOUNT_DEACTIVATED');
   });
@@ -120,7 +120,7 @@ describe('mmfAuthMiddleware (MOCK_AUTH=true)', () => {
   it('returns 403 ACCOUNT_DELETED for deleted account', async () => {
     mockRepo.setAccountStatus('user_test_mock', 'deleted');
     const app = buildTestApp(mockRepo);
-    const res = await request(app).get('/api/v1/test');
+    const res = await request(app).get('/api/v1/test').set('Authorization', 'Bearer mock-token');
     expect(res.status).toBe(403);
     expect(res.body.error.code).toBe('ACCOUNT_DELETED');
   });
@@ -128,7 +128,7 @@ describe('mmfAuthMiddleware (MOCK_AUTH=true)', () => {
   it('returns 403 ACCOUNT_PENDING for pending_verification account', async () => {
     mockRepo.setAccountStatus('user_test_mock', 'pending_verification');
     const app = buildTestApp(mockRepo);
-    const res = await request(app).get('/api/v1/test');
+    const res = await request(app).get('/api/v1/test').set('Authorization', 'Bearer mock-token');
     expect(res.status).toBe(403);
     expect(res.body.error.code).toBe('ACCOUNT_PENDING');
   });

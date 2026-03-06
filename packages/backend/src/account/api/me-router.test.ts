@@ -40,7 +40,7 @@ describe('GET /api/v1/me', () => {
 
   it('returns 200 with full user profile and roles', async () => {
     const app = buildTestApp(mockRepo);
-    const res = await request(app).get('/api/v1/me');
+    const res = await request(app).get('/api/v1/me').set('Authorization', 'Bearer mock-token');
     expect(res.status).toBe(200);
     expect(res.body.data).toBeDefined();
     expect(res.body.data.id).toBeDefined();
@@ -61,7 +61,7 @@ describe('GET /api/v1/me', () => {
     const freshRepo = new MockUserRepository();
     const app = buildTestApp(freshRepo);
 
-    const res = await request(app).get('/api/v1/me');
+    const res = await request(app).get('/api/v1/me').set('Authorization', 'Bearer mock-token');
     expect(res.status).toBe(200);
     expect(res.body.data.clerkUserId).toBe('user_test_mock');
     expect(res.body.data.roles).toContain('backer');
@@ -92,7 +92,9 @@ describe('GET /api/v1/me', () => {
       },
     );
 
-    const res = await request(appWithBrokenRepo).get('/api/v1/me');
+    const res = await request(appWithBrokenRepo)
+      .get('/api/v1/me')
+      .set('Authorization', 'Bearer mock-token');
     expect(res.status).toBe(404);
     expect(res.body.error.code).toBe('USER_NOT_FOUND');
 

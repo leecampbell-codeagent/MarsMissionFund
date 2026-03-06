@@ -19,7 +19,9 @@ describe('GET /health', () => {
   });
 
   it('returns 404 for unknown routes', async () => {
-    const response = await request(app).get('/nonexistent');
+    const response = await request(app)
+      .get('/nonexistent')
+      .set('Authorization', 'Bearer mock-token');
     expect(response.status).toBe(404);
   });
 });
