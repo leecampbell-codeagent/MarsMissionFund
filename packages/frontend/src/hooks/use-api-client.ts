@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export function useApiClient() {
-  const { getToken, isSignedIn } = useAuth();
+  const { getToken } = useAuth();
   const navigate = useNavigate();
 
   const fetchWithAuth = useCallback(
@@ -38,7 +38,7 @@ export function useApiClient() {
 
       return response;
     },
-    [getToken, isSignedIn, navigate],
+    [getToken, navigate],
   );
 
   return { fetchWithAuth };

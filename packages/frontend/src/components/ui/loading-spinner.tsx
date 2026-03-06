@@ -26,6 +26,7 @@ export function LoadingSpinner({ label = 'Loading', size = 'md' }: LoadingSpinne
         gap: '16px',
       }}
     >
+      {/* biome-ignore lint/a11y/useSemanticElements: SVG spinner requires role="status"; <output> cannot contain SVG */}
       <svg
         role="status"
         aria-label={label}

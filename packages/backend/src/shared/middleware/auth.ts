@@ -37,7 +37,7 @@ export function correlationIdMiddleware(req: Request, res: Response, next: NextF
 function mockClerkMiddleware(req: Request, _res: Response, next: NextFunction): void {
   // Only inject mock user if an Authorization header is present (any non-empty value).
   // This preserves the 401 behaviour for unauthenticated requests in mock mode.
-  const authHeader = req.headers['authorization'];
+  const authHeader = req.headers.authorization;
   if (authHeader && authHeader.length > 0) {
     (req as Request & { _mockClerkUserId?: string })._mockClerkUserId = 'user_test_mock';
   }
@@ -67,8 +67,8 @@ export function createMmfAuthMiddleware(
         clerkUserId = auth.userId;
         // Extract email from session claims (requires custom JWT template in Clerk Dashboard)
         const claims = auth.sessionClaims;
-        if (claims && typeof claims['email'] === 'string') {
-          emailFromJwt = claims['email'];
+        if (claims && typeof claims.email === 'string') {
+          emailFromJwt = claims.email;
         }
       }
 
