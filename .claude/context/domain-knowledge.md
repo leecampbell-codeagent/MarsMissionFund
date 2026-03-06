@@ -128,3 +128,109 @@ A `CHECK (amount_raised_cents >= 0)` constraint prevents negative values from da
 All five bounded contexts share a single PostgreSQL database and schema in the local demo.
 Foreign keys cross bounded contexts: `contributions.donor_id → users`, `campaigns.creator_id → users`, etc.
 No separate schema-per-domain isolation is applied in the local demo.
+
+---
+
+## Authentication / Clerk (feat-003)
+
+### Clerk Package Landscape
+
+Two backend packages exist for Clerk integration with Node.js:
+
+- `@clerk/express` — current recommended package.
+  Provides `clerkMiddleware()` (global) and `requireAuth()` (route-level) as Express-native middleware.
+  `getAuth(req)` extracts the verified auth state inside handlers.
+- `@clerk/clerk-sdk-node` — legacy package, lower-level, requires manual token verification.
+
+The feature brief (feat-003) names `@clerk/clerk-sdk-node` but `@clerk/express` is the better choice for Express 5.
+All future auth-related research should assume `@clerk/express` unless overridden by a spec decision.
+
+### Clerk User ID Format
+
+Clerk user IDs are strings of the form `user_<alphanumeric>` (e.g., `user_2NNEqL2nrIRdJ194ndJqAHwjfxe`).
+They are not UUIDs.
+They are stored in `users.clerk_id` (TEXT, UNIQUE).
+The JWT `sub` claim contains the Clerk user ID.
+
+### Email in Clerk JWT
+
+By default, the Clerk JWT does not include the user's email address.
+To get email during lazy sync, either:
+1. Configure a custom JWT template in the Clerk Dashboard to add `email` as a claim (one-time setup; no extra API call at runtime), or
+2. Call the Clerk Backend API: `GET https://api.clerk.com/v1/users/{clerk_user_id}` with `Authorization: Bearer <CLERK_SECRET_KEY>`.
+
+Option 1 (custom JWT template) is preferred for the demo — no extra API round-trip on first login.
+
+### Clerk JWT Lifetime
+
+Clerk access tokens have a default lifetime of **60 seconds** (much shorter than a typical OAuth token).
+The frontend Clerk SDK auto-refreshes tokens transparently.
+The backend must verify the JWT on every request — never cache auth decisions based on a token.
+
+### Lazy Sync Pattern
+
+MMF uses lazy sync (not Clerk webhooks) to populate the `users` table.
+On the first authenticated request from a new Clerk user:
+1. Auth middleware verifies the Clerk JWT and extracts `clerkId`.
+2. Middleware queries `users` for `clerk_id = clerkId`.
+3. If not found: generate a UUID for `users.id` via `crypto.randomUUID()`, insert a `users` row, and insert a `user_roles` row with `role = 'backer'` (both in a single transaction).
+4. Populate `req.auth` with `{ userId, clerkId, roles }`.
+
+The upsert for `users` uses `ON CONFLICT (clerk_id) DO UPDATE SET email = EXCLUDED.email, updated_at = NOW()`.
+The upsert for `user_roles` uses `ON CONFLICT (user_id, role) DO NOTHING`.
+Both operations must be in a single database transaction to prevent partial state from concurrent first-login requests.
+
+### `req.auth` Type Augmentation
+
+Express's `Request` type does not include an `auth` property by default.
+The `AuthContext` type must be declared via module augmentation:
+
+```typescript
+declare global {
+  namespace Express {
+    interface Request {
+      auth?: AuthContext;
+    }
+  }
+}
+```
+
+Without this, TypeScript will error on every `req.auth` access in route handlers.
+
+### `MOCK_AUTH=true` Flag
+
+The `.env.example` includes `MOCK_AUTH=true`.
+When this flag is set, the auth middleware must bypass Clerk JWT verification and inject a pre-configured test `AuthContext` into `req.auth`.
+This is required for integration tests that cannot call the real Clerk API.
+The mock user identity should be a stable, deterministic test user with known `userId`, `clerkId`, and `roles`.
+
+### `users.id` is Application-Generated
+
+Per the UUID generation strategy (domain-knowledge.md, feat-002 section), `users.id` has no `DEFAULT gen_random_uuid()` in the schema.
+The lazy sync code must call `crypto.randomUUID()` (Node.js 22.x built-in) before the INSERT and pass the UUID as a parameter.
+Do not rely on the database to generate this value.
+
+### Account Status Gating in Auth Middleware
+
+After the DB lookup, the auth middleware must check `users.account_status`:
+- `active` → proceed, populate `req.auth`.
+- `suspended` → return HTTP 403, error code `ACCOUNT_SUSPENDED`.
+- `deactivated` → return HTTP 403, error code `ACCOUNT_DEACTIVATED`.
+- `deleted` → return HTTP 403, error code `ACCOUNT_DELETED`.
+- `pending_verification` → the lazy sync sets `active` directly (Clerk already verified email for most flows), so this state should not normally appear for users arriving via Clerk JWT. If it does, treat as 403.
+
+### Security Headers for Clerk
+
+The CSP defined in L3-002 (Section 7.2) includes `connect-src 'self' https://*.clerk.accounts.dev`.
+This is required because Clerk's frontend SDK communicates with Clerk's API domain.
+Without this `connect-src` entry, Clerk's components will fail under a strict CSP.
+The backend must set this header on all responses (use `helmet` or manual middleware).
+
+### Frontend Environment Variables
+
+| Variable | Scope | Notes |
+|----------|-------|-------|
+| `VITE_CLERK_PUBLISHABLE_KEY` | Frontend (exposed via Vite) | Starts with `pk_test_` or `pk_live_`. Safe to expose in client bundle. |
+| `CLERK_SECRET_KEY` | Backend only | Never prefix with `VITE_`. Exposing this in the frontend bundle would be a critical security incident. |
+| `CLERK_PUBLISHABLE_KEY` | Backend only | Used by `@clerk/express` for token issuer validation. Not required by frontend separately. |
+| `CLERK_WEBHOOK_SIGNING_SECRET` | Backend only | For webhook verification (not used in feat-003 lazy sync pattern). |

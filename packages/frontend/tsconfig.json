@@ -5,7 +5,7 @@
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
     "outDir": "dist",
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals", "vite/client"]
   },
   "include": ["src/**/*", "vite.config.ts"],
   "exclude": ["node_modules", "dist"]
