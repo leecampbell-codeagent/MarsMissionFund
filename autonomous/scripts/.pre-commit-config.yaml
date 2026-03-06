@@ -4,9 +4,10 @@ repos:
       - id: check-merge-conflict
         name: check-merge-conflict
         entry: >-
-          sh -c 'if grep -rn "<<<<<<< \|=======$\|>>>>>>> " -- "$@" 2>/dev/null; then echo "Merge conflict markers found"; exit 1; fi; exit 0'
+          sh -c 'if grep -rn "^<<<<<<< \|^=======$\|^>>>>>>> " -- "$@" 2>/dev/null; then echo "Merge conflict markers found"; exit 1; fi; exit 0'
         language: system
         types: [text]
+        exclude: node_modules/
       - id: detect-private-key
         name: detect-private-key
         entry: >-
@@ -16,7 +17,7 @@ repos:
       - id: end-of-file-fixer
         name: end-of-file-fixer
         entry: >-
-          sh -c 'for f in "$@"; do [ -s "$f" ] && [ "$(tail -c1 "$f" | xxd -p)" != "0a" ] && echo "" >> "$f" && echo "Fixed EOF: $f"; done; exit 0'
+          sh -c 'for f in "$@"; do [ -s "$f" ] && [ -n "$(tail -c1 "$f")" ] && echo "" >> "$f" && echo "Fixed EOF: $f"; done; exit 0'
         language: system
         types: [text]
       - id: trailing-whitespace

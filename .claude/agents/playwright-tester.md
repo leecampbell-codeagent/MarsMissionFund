@@ -28,7 +28,7 @@ Use the `playwright-cli` skill exclusively for browser interaction.
 
 **Start the exploration:**
 ```bash
-# Stack must already be running (make e2e-stack from the orchestrator)
+# Stack should be running from Phase 3b. If not: make dev-stack
 playwright-cli open http://localhost:5173
 playwright-cli snapshot        # see what's on screen
 playwright-cli goto /app/...   # navigate to the feature
@@ -48,7 +48,7 @@ playwright-cli close
 
 **Rebuild the stack first if needed:**
 ```bash
-make e2e-stack    # tears down, rebuilds, restarts with latest code and migrations
+make dev-stack    # kills existing, runs migrations, restarts with latest code
 ```
 
 ---
@@ -148,7 +148,7 @@ Write your findings to `.claude/reports/feat-XXX-exploratory.md`:
 
 Your task is done when:
 
-- [ ] Stack is running with latest code (`make e2e-stack`)
+- [ ] Stack is running with latest code (`make dev-stack`)
 - [ ] Every acceptance criterion from the spec has been visited and verified
 - [ ] At least one screenshot per major flow taken
 - [ ] Exploratory report written to `.claude/reports/feat-XXX-exploratory.md`

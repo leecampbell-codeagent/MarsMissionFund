@@ -26,11 +26,11 @@ You are the **Pipeline Orchestrator**. Your job is to run the continuous product
 
 2. **Verify git state:**
    - Confirm no uncommitted changes
-   - Sync main with upstream:
+   - Sync main with origin:
      ```bash
-     git fetch upstream main
+     git fetch origin main
      git checkout main
-     git reset --hard upstream/main
+     git reset --hard origin/main
      ```
 
 3. **Check safety limits:**
@@ -69,10 +69,10 @@ You are the **Pipeline Orchestrator**. Your job is to run the continuous product
 6. **Resolve base branch and create feature branch:**
    - Read this feature's dependencies from `.claude/backlog.md`
    - For each dependency:
-     - If status is "SHIPPED" → already in upstream/main, skip
+     - If status is "SHIPPED" → already in origin/main, skip
      - If it was built in this pipeline run and has an unmerged branch → candidate
    - **If all dependencies are SHIPPED (or feature has none):**
-     - Base = `upstream/main`
+     - Base = `origin/main`
      - `PR_TARGET = "main"`
    - **If any dependency has an unmerged branch from this run:**
      - Base = `PREVIOUS_FEATURE_BRANCH` (the last-built feature's branch, which contains all stacked work)
@@ -102,6 +102,28 @@ You are the **Pipeline Orchestrator**. Your job is to run the continuous product
    git commit -m "feat([context]): [description]"
    git push -u origin ralph/feat-XXX-[name]
    ```
+
+### Phase 3b: Start Dev Stack (before quality gate)
+
+After implementation is complete and before running the Quality Track:
+
+1. Run database migrations to apply any new migrations created by the implementation:
+   ```bash
+   dbmate --url "${DATABASE_URL}" up
+   ```
+
+2. Start the dev stack (backend + frontend):
+   ```bash
+   make dev-stack
+   ```
+
+3. Verify the stack is accessible:
+   ```bash
+   curl -sf http://localhost:5173 > /dev/null && echo "Frontend ready"
+   curl -sf http://localhost:3000/health > /dev/null && echo "Backend ready"
+   ```
+
+   If the stack fails to start, note it in the quality report but continue with static verification.
 
 ### Phase 4: Quality Track — Validate the Feature
 
@@ -171,27 +193,16 @@ Screenshots are uploaded to GitHub's CDN (not committed to the repo) to avoid bl
 2. Ensure the app stack is running (it should be from the Playwright tester step)
 3. Open browser once: `playwright-cli open http://localhost:5173`
 4. Resize once: `playwright-cli resize 1280 800`
-5. Resolve the upstream repo from git remotes (for the GitHub API calls):
-   ```bash
-   UPSTREAM_REPO=$(git remote get-url upstream | sed 's|.*github.com[:/]||;s|\.git$||')
-   ```
-6. For each affected route, capture to a temp file and upload to GitHub:
+5. For each affected route, capture to a temp file and upload to GitHub:
    ```bash
    playwright-cli goto /<route>
    # If auth required: playwright-cli state-load (use saved auth state from Playwright tester)
    playwright-cli screenshot --filename=/tmp/feat-XXX-{route-slug}.png
 
-   # Upload to GitHub CDN — returns a markdown image URL
+   # Upload screenshot as a blob to GitHub CDN
    SCREENSHOT_URL=$(gh api \
      --method POST \
-     -H "Accept: application/json" \
-     "repos/${UPSTREAM_REPO}/issues/1/comments" \
-     -f body="![{route-slug}](placeholder)" \
-     --jq '.body' 2>/dev/null || true)
-   # Alternative: use the repository's upload mechanism
-   SCREENSHOT_URL=$(gh api \
-     --method POST \
-     "repos/${UPSTREAM_REPO}/git/blobs" \
+     "repos/{owner}/{repo}/git/blobs" \
      -f content="$(base64 < /tmp/feat-XXX-{route-slug}.png)" \
      -f encoding=base64 \
      --jq '.url' 2>/dev/null || true)
@@ -216,14 +227,11 @@ Screenshots are uploaded to GitHub's CDN (not committed to the repo) to avoid bl
     - [ ] No TODO/FIXME in new code
     - [ ] Build succeeds (`npm run build`)
 
-12. **If ALL pass — create a PR to upstream:**
+12. **If ALL pass — create a PR on the fork:**
     ```bash
-    UPSTREAM_REPO=$(git remote get-url upstream | sed 's|.*github.com[:/]||;s|\.git$||')
-    ORIGIN_OWNER=$(git remote get-url origin | sed 's|.*github.com[:/]||;s|/.*||')
     git push origin ralph/feat-XXX-[name]
     gh pr create \
-      --repo "${UPSTREAM_REPO}" \
-      --head "${ORIGIN_OWNER}:ralph/feat-XXX-[name]" \
+      --head "ralph/feat-XXX-[name]" \
       --base <PR_TARGET> \
       --title "feat-XXX: [name]" \
       --body "## Summary
@@ -310,7 +318,7 @@ When the pipeline stops (max features, empty backlog, or safety limit):
    - **PR merge order:** List stacked PRs in the order they must be merged (parent first). When a parent PR merges, GitHub auto-retargets the child PR to its new base.
 3. Commit the summary to a chore branch and push:
    ```bash
-   git checkout -b ralph/chore/pipeline-summary-[date] upstream/main
+   git checkout -b ralph/chore/pipeline-summary-[date] origin/main
    git add .claude/reports/pipeline-run-[date].md
    git commit -m "chore: pipeline run complete — [N] features shipped"
    git push -u origin ralph/chore/pipeline-summary-[date]
