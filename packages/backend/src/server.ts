@@ -12,6 +12,8 @@ import { createApiRouter } from './account/api/api-router.js';
 import { AuthSyncService } from './account/application/auth-sync-service.js';
 import { ProfileService } from './account/application/profile-service.js';
 import { healthRouter } from './health/api/health-router.js';
+import { StubKycAdapter } from './kyc/adapters/stub/stub-kyc-adapter.js';
+import { KycService } from './kyc/application/kyc-service.js';
 import { pool } from './shared/infra/db.js';
 import {
   buildClerkMiddleware,
@@ -40,6 +42,14 @@ const clerkPort = IS_MOCK_AUTH ? new MockClerkAdapter() : new ClerkAdapter();
 const authSyncService = new AuthSyncService(userRepository, clerkPort);
 
 const profileService = new ProfileService(userRepository);
+
+const IS_MOCK_KYC = process.env.MOCK_KYC !== 'false'; // default: true
+// Both branches use StubKycAdapter for feat-005 — real Veriff adapter is out of scope.
+// IS_MOCK_KYC is wired now so the future branch (StubKycAdapter vs VeriffKycAdapter) is a one-liner.
+const kycAdapter = IS_MOCK_KYC
+  ? new StubKycAdapter(pool, logger)
+  : new StubKycAdapter(pool, logger);
+const kycService = new KycService(kycAdapter, logger);
 
 // ---------------------------------------------------------------------------
 // Express app
@@ -127,7 +137,7 @@ app.use(buildClerkMiddleware(IS_MOCK_AUTH));
 app.use(createMmfAuthMiddleware(authSyncService, IS_MOCK_AUTH));
 
 // Protected API routes
-app.use('/api/v1', createApiRouter(userRepository, profileService));
+app.use('/api/v1', createApiRouter(userRepository, profileService, kycService));
 
 // Global error handler
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction): void => {

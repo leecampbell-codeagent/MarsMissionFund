@@ -1,7 +1,10 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
+import pino from 'pino';
 import request from 'supertest';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { healthRouter } from '../../health/api/health-router.js';
+import { MockKycAdapter } from '../../kyc/adapters/mock/mock-kyc-adapter.js';
+import { KycService } from '../../kyc/application/kyc-service.js';
 import {
   buildClerkMiddleware,
   correlationIdMiddleware,
@@ -13,10 +16,13 @@ import { AuthSyncService } from '../application/auth-sync-service.js';
 import { ProfileService } from '../application/profile-service.js';
 import { createApiRouter } from './api-router.js';
 
+const silentLogger = pino({ level: 'silent' });
+
 function buildTestApp(mockUserRepo: MockUserRepository) {
   const clerkPort = new MockClerkAdapter();
   const authSyncService = new AuthSyncService(mockUserRepo, clerkPort);
   const profileService = new ProfileService(mockUserRepo);
+  const kycService = new KycService(new MockKycAdapter(), silentLogger);
 
   const app = express();
   app.use(express.json());
@@ -24,7 +30,7 @@ function buildTestApp(mockUserRepo: MockUserRepository) {
   app.use('/health', healthRouter);
   app.use(buildClerkMiddleware(true));
   app.use(createMmfAuthMiddleware(authSyncService, true));
-  app.use('/api/v1', createApiRouter(mockUserRepo, profileService));
+  app.use('/api/v1', createApiRouter(mockUserRepo, profileService, kycService));
 
   app.use((err: unknown, _req: Request, res: Response, _next: NextFunction): void => {
     res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: String(err) } });
@@ -95,7 +101,8 @@ describe('GET /api/v1/me', () => {
     brokenRepo.findById = async () => null;
 
     const profileService = new ProfileService(brokenRepo);
-    appWithBrokenRepo.use('/api/v1', createApiRouter(brokenRepo, profileService));
+    const kycService2 = new KycService(new MockKycAdapter(), silentLogger);
+    appWithBrokenRepo.use('/api/v1', createApiRouter(brokenRepo, profileService, kycService2));
     appWithBrokenRepo.use(
       (err: unknown, _req: Request, res: Response, _next: NextFunction): void => {
         res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: String(err) } });
