@@ -58,8 +58,10 @@ export function createMmfAuthMiddleware(
       let emailFromJwt: string | null = null;
 
       const mockReq = req as Request & { _mockClerkUserId?: string };
-      if (isMockAuth && mockReq._mockClerkUserId) {
-        clerkUserId = mockReq._mockClerkUserId;
+      if (isMockAuth) {
+        // In mock mode, never call getAuth() — real Clerk middleware is not mounted.
+        // clerkUserId is the injected mock value, or null if no Authorization header.
+        clerkUserId = mockReq._mockClerkUserId ?? null;
       } else {
         const auth = getAuth(req);
         clerkUserId = auth.userId;

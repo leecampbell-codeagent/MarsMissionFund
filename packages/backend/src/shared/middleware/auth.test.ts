@@ -75,6 +75,13 @@ describe('mmfAuthMiddleware (MOCK_AUTH=true)', () => {
     mockRepo = new MockUserRepository();
   });
 
+  it('returns 401 when no Authorization header is provided', async () => {
+    const app = buildTestApp(mockRepo);
+    const res = await request(app).get('/api/v1/test');
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe('UNAUTHORIZED');
+  });
+
   it('allows request with mock auth and populates req.auth', async () => {
     const app = buildTestApp(mockRepo);
     const res = await request(app).get('/api/v1/test').set('Authorization', 'Bearer mock-token');
