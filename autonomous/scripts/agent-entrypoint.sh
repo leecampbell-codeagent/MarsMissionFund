@@ -62,6 +62,54 @@ if [ -n "${UPSTREAM_REPO}" ]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Step 1c: Generate .env from template with container env vars
+# ---------------------------------------------------------------------------
+STEP="dotenv"
+if [ -f .env.example ]; then
+    echo "Generating .env from .env.example..."
+    cp .env.example .env
+
+    # Override placeholder values with env vars set in the container
+    ENV_VARS=(
+        DATABASE_URL
+        POSTGRES_USER
+        POSTGRES_PASSWORD
+        POSTGRES_DB
+        PORT
+        NODE_ENV
+        LOG_LEVEL
+        VITE_API_URL
+        CLERK_PUBLISHABLE_KEY
+        CLERK_SECRET_KEY
+        VITE_CLERK_PUBLISHABLE_KEY
+        CLERK_WEBHOOK_SIGNING_SECRET
+        MOCK_PAYMENTS
+        MOCK_KYC
+        MOCK_EMAIL
+        MOCK_AUTH
+        POSTHOG_API_KEY
+        POSTHOG_HOST
+    )
+
+    for var in "${ENV_VARS[@]}"; do
+        val="${!var:-}"
+        if [ -n "${val}" ]; then
+            # Replace existing line or append if commented out / missing
+            if grep -qE "^${var}=" .env; then
+                sed -i "s|^${var}=.*|${var}=${val}|" .env
+            elif grep -qE "^#.*${var}=" .env; then
+                sed -i "s|^#.*${var}=.*|${var}=${val}|" .env
+            else
+                echo "${var}=${val}" >> .env
+            fi
+        fi
+    done
+    echo ".env generated."
+else
+    echo "No .env.example found, skipping .env generation."
+fi
+
+# ---------------------------------------------------------------------------
 # Step 2: Install dependencies
 # ---------------------------------------------------------------------------
 STEP="npm_install"
@@ -89,7 +137,7 @@ prek install
 # ---------------------------------------------------------------------------
 STEP="firewall"
 echo "Initialising firewall..."
-sudo /opt/agent/scripts/init-firewall.sh
+sudo CLERK_INSTANCE_DOMAIN="${CLERK_INSTANCE_DOMAIN:-}" /opt/agent/scripts/init-firewall.sh
 
 # ---------------------------------------------------------------------------
 # Step 4: Reset database

@@ -18,6 +18,9 @@ ipset create allowed_hosts hash:ip hashsize 4096 timeout 0 2>/dev/null || ipset 
 # ---------------------------------------------------------------------------
 # Allowed domains — resolve to IPs
 # ---------------------------------------------------------------------------
+# Clerk instance domain — derived from publishable key; override via env var
+CLERK_INSTANCE_DOMAIN="${CLERK_INSTANCE_DOMAIN:-promoted-tiger-9.clerk.accounts.dev}"
+
 ALLOWED_DOMAINS=(
     github.com
     api.github.com
@@ -27,6 +30,10 @@ ALLOWED_DOMAINS=(
     statsig.anthropic.com
     cdn.clerk.io
     us.posthog.com
+    clerk.accounts.dev
+    "${CLERK_INSTANCE_DOMAIN}"
+    api.clerk.dev
+    clerk.dev
 )
 
 for domain in "${ALLOWED_DOMAINS[@]}"; do
