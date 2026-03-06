@@ -2,9 +2,125 @@ import { NotificationPreferencesForm } from '../components/profile/notification-
 import { ProfileEditForm } from '../components/profile/profile-edit-form.js';
 import { LoadingSpinner } from '../components/ui/loading-spinner.js';
 import { useCurrentUser } from '../hooks/use-current-user.js';
+import { useKycStatus } from '../hooks/use-kyc-status.js';
+
+interface KycStatusDisplayProps {
+  readonly status: string;
+  readonly isLoading: boolean;
+}
+
+export function KycStatusDisplay({ status, isLoading }: KycStatusDisplayProps) {
+  return (
+    <div
+      style={{
+        padding: '16px 20px',
+        backgroundColor: 'var(--color-bg-surface)',
+        border: '1px solid var(--color-border-subtle)',
+        borderRadius: 'var(--radius-card)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '16px',
+      }}
+    >
+      {isLoading ? (
+        <>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              color: 'var(--color-text-tertiary)',
+              margin: 0,
+            }}
+          >
+            Loading verification status…
+          </p>
+          <LoadingSpinner size="sm" label="Loading KYC status" />
+        </>
+      ) : status === 'verified' ? (
+        <p
+          style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '14px',
+            color: 'var(--color-status-success)',
+            margin: 0,
+          }}
+        >
+          ✓ Identity verified.
+        </p>
+      ) : status === 'pending' ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <LoadingSpinner size="sm" />
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              color: 'var(--color-status-warning)',
+              margin: 0,
+            }}
+          >
+            Verification pending review.
+          </p>
+        </div>
+      ) : status === 'not_verified' ? (
+        <>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              color: 'var(--color-text-secondary)',
+              margin: 0,
+            }}
+          >
+            Identity verification not yet started.
+          </p>
+          <a
+            href="/kyc"
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              color: 'var(--color-action-ghost-text)',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Start verification →
+          </a>
+        </>
+      ) : (
+        <>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              color: 'var(--color-text-secondary)',
+              margin: 0,
+            }}
+          >
+            {`Verification status: ${status}`}
+          </p>
+          <a
+            href="/kyc"
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              color: 'var(--color-action-ghost-text)',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Retry verification →
+          </a>
+        </>
+      )}
+    </div>
+  );
+}
 
 export default function ProfilePage() {
   const { data, isLoading, isError, refetch } = useCurrentUser();
+  const { data: kycData, isLoading: kycLoading } = useKycStatus();
+  const kycStatus = kycData?.data.status ?? 'not_verified';
 
   if (isLoading) {
     return (
@@ -239,41 +355,7 @@ export default function ProfilePage() {
             >
               IDENTITY VERIFICATION
             </h2>
-            <div
-              style={{
-                padding: '16px 20px',
-                backgroundColor: 'var(--color-bg-surface)',
-                border: '1px solid var(--color-border-subtle)',
-                borderRadius: 'var(--radius-card)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '16px',
-              }}
-            >
-              <p
-                style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '14px',
-                  color: 'var(--color-text-secondary)',
-                  margin: 0,
-                }}
-              >
-                Identity verification not yet started.
-              </p>
-              <a
-                href="/kyc"
-                style={{
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '14px',
-                  color: 'var(--color-action-ghost-text)',
-                  textDecoration: 'none',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                Start verification →
-              </a>
-            </div>
+            <KycStatusDisplay status={kycStatus} isLoading={kycLoading} />
           </section>
 
           {/* Notification Preferences section */}

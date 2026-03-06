@@ -8,6 +8,10 @@ vi.mock('../hooks/use-current-user.js', () => ({
   useCurrentUser: vi.fn(),
 }));
 
+vi.mock('../hooks/use-kyc-status.js', () => ({
+  useKycStatus: vi.fn(),
+}));
+
 // Mock child components that use their own hooks
 vi.mock('../components/profile/profile-edit-form.js', () => ({
   ProfileEditForm: () => <div data-testid="profile-edit-form">ProfileEditForm</div>,
@@ -20,8 +24,10 @@ vi.mock('../components/profile/notification-preferences-form.js', () => ({
 }));
 
 import { useCurrentUser } from '../hooks/use-current-user.js';
+import { useKycStatus } from '../hooks/use-kyc-status.js';
 
 const mockUseCurrentUser = vi.mocked(useCurrentUser);
+const mockUseKycStatus = vi.mocked(useKycStatus);
 const mockRefetch = vi.fn();
 
 const mockUserData = {
@@ -58,6 +64,11 @@ describe('ProfilePage', () => {
       isError: false,
       refetch: mockRefetch,
     } as unknown as ReturnType<typeof useCurrentUser>);
+    mockUseKycStatus.mockReturnValue({
+      data: { data: { status: 'not_verified', verifiedAt: null } },
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useKycStatus>);
   });
 
   it('renders loading spinner while loading', () => {
@@ -214,6 +225,72 @@ describe('ProfilePage', () => {
     );
 
     expect(screen.getByText(/Identity verification not yet started/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Start verification/i })).toBeInTheDocument();
+  });
+
+  it('shows "Identity verified." (with success colour) when KYC status is "verified"', () => {
+    mockUseKycStatus.mockReturnValue({
+      data: { data: { status: 'verified', verifiedAt: '2026-03-06T00:00:00Z' } },
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useKycStatus>);
+
+    render(
+      <MemoryRouter>
+        <ProfilePage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText(/Identity verified\./i)).toBeInTheDocument();
+  });
+
+  it('shows "Verification pending review." when KYC status is "pending"', () => {
+    mockUseKycStatus.mockReturnValue({
+      data: { data: { status: 'pending', verifiedAt: null } },
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useKycStatus>);
+
+    render(
+      <MemoryRouter>
+        <ProfilePage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText(/Verification pending review\./i)).toBeInTheDocument();
+  });
+
+  it('shows "Identity verification not yet started." and Start verification link when status is "not_verified"', () => {
+    mockUseKycStatus.mockReturnValue({
+      data: { data: { status: 'not_verified', verifiedAt: null } },
+      isLoading: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useKycStatus>);
+
+    render(
+      <MemoryRouter>
+        <ProfilePage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText(/Identity verification not yet started\./i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Start verification/i })).toBeInTheDocument();
+  });
+
+  it('shows "Identity verification not yet started." and Start verification link when useKycStatus returns undefined (loading/error)', () => {
+    mockUseKycStatus.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    } as unknown as ReturnType<typeof useKycStatus>);
+
+    render(
+      <MemoryRouter>
+        <ProfilePage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText(/Identity verification not yet started\./i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Start verification/i })).toBeInTheDocument();
   });
 
