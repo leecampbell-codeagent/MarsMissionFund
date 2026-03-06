@@ -110,7 +110,14 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 2: Install dependencies
+# Step 2: Lock down outbound network
+# ---------------------------------------------------------------------------
+STEP="firewall"
+echo "Initialising firewall..."
+sudo CLERK_INSTANCE_DOMAIN="${CLERK_INSTANCE_DOMAIN:-}" /opt/agent/scripts/init-firewall.sh
+
+# ---------------------------------------------------------------------------
+# Step 3: Install dependencies
 # ---------------------------------------------------------------------------
 STEP="npm_install"
 if [ -f package.json ]; then
@@ -125,19 +132,12 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 2b: Configure prek pre-commit hooks
+# Step 3b: Configure prek pre-commit hooks
 # ---------------------------------------------------------------------------
 STEP="prek"
 echo "Installing prek pre-commit hooks..."
 cp /opt/agent/scripts/.pre-commit-config.yaml /workspace/.pre-commit-config.yaml
 prek install
-
-# ---------------------------------------------------------------------------
-# Step 3: Lock down outbound network
-# ---------------------------------------------------------------------------
-STEP="firewall"
-echo "Initialising firewall..."
-sudo CLERK_INSTANCE_DOMAIN="${CLERK_INSTANCE_DOMAIN:-}" /opt/agent/scripts/init-firewall.sh
 
 # ---------------------------------------------------------------------------
 # Step 4: Reset database

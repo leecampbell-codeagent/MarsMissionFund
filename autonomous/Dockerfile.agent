@@ -18,7 +18,7 @@ ARG DBMATE_VERSION=2.22.0
 ARG CLAUDE_CODE_VERSION=latest
 ARG BIOME_VERSION=latest
 ARG PREK_VERSION=latest
-ARG GITLEAKS_VERSION=8.24.3
+ARG GITLEAKS_VERSION=8.30.0
 
 # ---------------------------------------------------------------------------
 # System packages
@@ -53,7 +53,7 @@ RUN ARCH=$(uname -m) && [ "$ARCH" = "aarch64" ] && ARCH="arm64" || ARCH="amd64" 
 # ---------------------------------------------------------------------------
 # gitleaks (required by prek gitleaks hook)
 # ---------------------------------------------------------------------------
-RUN ARCH=$(uname -m) && [ "$ARCH" = "aarch64" ] && ARCH="arm64" || ARCH="amd64" \
+RUN ARCH=$(uname -m) && [ "$ARCH" = "aarch64" ] && ARCH="arm64" || ARCH="x64" \
     && curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_${ARCH}.tar.gz" \
         | tar xz -C /usr/local/bin gitleaks \
     && chmod +x /usr/local/bin/gitleaks

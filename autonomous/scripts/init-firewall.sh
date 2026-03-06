@@ -64,9 +64,10 @@ iptables -A OUTPUT -o lo -j ACCEPT
 # Allow established/related connections
 iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
-# Allow Docker embedded DNS (127.0.0.11:53)
-iptables -A OUTPUT -d 127.0.0.11 -p udp --dport 53 -j ACCEPT
-iptables -A OUTPUT -d 127.0.0.11 -p tcp --dport 53 -j ACCEPT
+# Allow all outbound DNS — resolution path varies across Docker runtimes
+# (e.g. Docker Desktop for Windows/WSL2 may not use 127.0.0.11)
+iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 53 -j ACCEPT
 
 # Allow internal Docker network (RFC1918 ranges cover compose networks)
 iptables -A OUTPUT -d 10.0.0.0/8 -j ACCEPT
