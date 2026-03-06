@@ -127,3 +127,45 @@ afterEach(() => pool.query(`DELETE FROM users WHERE clerk_id LIKE $1`, [`${TEST_
 - JSX: `{/* biome-ignore lint/a11y/useSemanticElements: reason */}` on line before element
 - CSS `!important` in `prefers-reduced-motion`: leave as warnings (not errors) — suppression not supported for CSS blocks
 - Dot notation: always use `obj.property` not `obj['property']` for known keys
+### TanStack Query + typed API client pattern (feat-004)
+
+```typescript
+// lib/api-client.ts — typed wrappers around fetchWithAuth hook
+export function useTypedApiClient() {
+  const { fetchWithAuth } = useApiClient();
+  async function get<T>(path: string): Promise<T> { ... }
+  async function put<T>(path: string, body: unknown): Promise<T> { ... }
+  return { get, put, post, patch };
+}
+
+// hooks/use-current-user.ts
+export function useCurrentUser() {
+  const client = useTypedApiClient();
+  return useQuery({ queryKey: ['me'], queryFn: () => client.get<MeResponse>('/api/v1/me'), staleTime: 30_000 });
+}
+```
+
+- `invalidateQueries({ queryKey: ['me'] })` in mutation `onSuccess` refreshes user data
+- Fire-and-forget mutations: call `mutate()` without awaiting/handling errors for best-effort updates
+
+### Zod schema patterns (feat-004)
+
+- Always add `.strict()` to object schemas for endpoint request bodies — rejects unknown fields with 400
+- Exception: schemas where `display_name: null` means "clear" vs undefined means "keep" use
+  `'display_name' in parsed.data` to distinguish between not-provided and explicitly-null
+- Use `z.enum(['backer', 'creator'])` for role allowlists — type-safe and auto-documented
+- Zod v4: error object uses `.issues` not `.errors` for validation error access
+
+### DB CHECK constraint pattern (feat-004)
+
+```sql
+-- Always add CHECK constraints for enum-like string columns
+ALTER TABLE user_roles
+  ADD CONSTRAINT chk_user_roles_role
+    CHECK (role IN ('backer', 'creator', 'admin', 'moderator'));
+
+-- For range-constrained nullable integers
+ALTER TABLE users
+  ADD CONSTRAINT chk_users_onboarding_step
+    CHECK (onboarding_step IS NULL OR (onboarding_step >= 1 AND onboarding_step <= 3));
+```
