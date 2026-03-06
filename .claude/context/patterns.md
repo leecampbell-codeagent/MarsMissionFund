@@ -82,3 +82,17 @@ chore: description
 fix(context): description
 ```
 Always include `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>` trailer.
+
+### dbmate migration pattern (feat-002)
+
+- Files in `db/migrations/YYYYMMDDHHMMSS_description.sql`
+- Format: `-- migrate:up` / `-- migrate:down` sections (no BEGIN/COMMIT — dbmate wraps in its own transaction)
+- `CREATE TABLE IF NOT EXISTS` for idempotency
+- Apply `update_updated_at_column()` trigger to every table with `updated_at`
+- Append-only tables (escrow_ledger): no `updated_at`, no trigger
+- User_roles: no `updated_at` (revocation via deletion, not update)
+- All FKs: explicit ON DELETE (RESTRICT for financial records, CASCADE for parent-child)
+- All status/enum columns: CHECK constraint with exhaustive value list
+- All monetary: BIGINT only — never FLOAT/NUMERIC/DECIMAL for money
+- UUID PKs: `DEFAULT gen_random_uuid()` on id column
+- Trigger name pattern: `set_{table_name}_updated_at`
