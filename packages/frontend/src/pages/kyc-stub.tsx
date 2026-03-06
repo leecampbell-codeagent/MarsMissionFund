@@ -178,8 +178,7 @@ export default function KycStubPage() {
 
               {/* Pending status banner */}
               {status === 'pending' && (
-                <div
-                  role="status"
+                <output
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -200,7 +199,7 @@ export default function KycStubPage() {
                   >
                     Your verification is pending review.
                   </span>
-                </div>
+                </output>
               )}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
