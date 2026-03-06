@@ -18,8 +18,8 @@ function buildTestApp(mockUserRepo: MockUserRepository) {
   app.use(express.json());
   app.use(correlationIdMiddleware);
   app.use('/health', healthRouter);
-  app.use(buildClerkMiddleware());
-  app.use(createMmfAuthMiddleware(authSyncService));
+  app.use(buildClerkMiddleware(true));
+  app.use(createMmfAuthMiddleware(authSyncService, true));
 
   app.get('/api/v1/test', (_req: Request, res: Response) => {
     res.json({ data: 'ok', auth: _req.auth });
@@ -136,40 +136,32 @@ describe('mmfAuthMiddleware (MOCK_AUTH=true)', () => {
 
 describe('mmfAuthMiddleware (MOCK_AUTH=false — no JWT)', () => {
   it('returns 401 when no authorization header is provided', async () => {
-    // When MOCK_AUTH is false and clerkMiddleware is real but no token provided,
+    // When isMockAuth is false and clerkMiddleware is real but no token provided,
     // getAuth(req).userId will be null — middleware should return 401.
-    // We simulate this by temporarily disabling mock mode via a custom test app.
-    const originalMockAuth = process.env.MOCK_AUTH;
-    process.env.MOCK_AUTH = 'false';
+    const mockRepo = new MockUserRepository();
+    const clerkPort = new MockClerkAdapter();
+    const authSyncService = new AuthSyncService(mockRepo, clerkPort);
 
-    try {
-      const mockRepo = new MockUserRepository();
-      const clerkPort = new MockClerkAdapter();
-      const authSyncService = new AuthSyncService(mockRepo, clerkPort);
+    const app = express();
+    app.use(express.json());
+    app.use(correlationIdMiddleware);
+    app.use('/health', healthRouter);
+    // Use the real buildClerkMiddleware with isMockAuth=false
+    // clerkMiddleware() in test env won't verify, but getAuth(req).userId will be null
+    app.use(buildClerkMiddleware(false));
+    app.use(createMmfAuthMiddleware(authSyncService, false));
 
-      const app = express();
-      app.use(express.json());
-      app.use(correlationIdMiddleware);
-      app.use('/health', healthRouter);
-      // Use the real buildClerkMiddleware but with MOCK_AUTH=false
-      // clerkMiddleware() in test env won't verify, but getAuth(req).userId will be null
-      app.use(buildClerkMiddleware());
-      app.use(createMmfAuthMiddleware(authSyncService));
+    app.get('/api/v1/test', (_req: Request, res: Response) => {
+      res.json({ data: 'ok' });
+    });
 
-      app.get('/api/v1/test', (_req: Request, res: Response) => {
-        res.json({ data: 'ok' });
-      });
+    app.use((err: unknown, _req: Request, res: Response, _next: NextFunction): void => {
+      res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: String(err) } });
+    });
 
-      app.use((err: unknown, _req: Request, res: Response, _next: NextFunction): void => {
-        res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: String(err) } });
-      });
-
-      const res = await request(app).get('/api/v1/test');
-      // No Authorization header → Clerk middleware sets userId to null → 401
-      expect(res.status).toBe(401);
-      expect(res.body.error.code).toBe('UNAUTHORIZED');
-    } finally {
-      process.env.MOCK_AUTH = originalMockAuth;
-    }
+    const res = await request(app).get('/api/v1/test');
+    // No Authorization header → Clerk middleware sets userId to null → 401
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe('UNAUTHORIZED');
   });
 });

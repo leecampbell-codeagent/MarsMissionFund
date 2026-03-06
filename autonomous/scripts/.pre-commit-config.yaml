@@ -4,32 +4,32 @@ repos:
       - id: check-merge-conflict
         name: check-merge-conflict
         entry: >-
-          sh -c 'if grep -rn "^<<<<<<< \|^=======$\|^>>>>>>> " -- "$@" 2>/dev/null; then echo "Merge conflict markers found"; exit 1; fi; exit 0'
+          sh -c '[ "$#" -eq 0 ] && exit 0; if grep -n "^<<<<<<< \|^=======$\|^>>>>>>> " -- "$@" 2>/dev/null; then echo "Merge conflict markers found"; exit 1; fi; exit 0'
         language: system
         types: [text]
         exclude: node_modules/
       - id: detect-private-key
         name: detect-private-key
         entry: >-
-          sh -c 'if grep -rn "BEGIN.*PRIVATE KEY" -- "$@" 2>/dev/null; then echo "Private key detected"; exit 1; fi; exit 0'
+          sh -c '[ "$#" -eq 0 ] && exit 0; PAT="PRIVATE KEY"; if grep -n "BEGIN.*$PAT" -- "$@" 2>/dev/null; then echo "Private key detected"; exit 1; fi; exit 0'
         language: system
         types: [text]
       - id: end-of-file-fixer
         name: end-of-file-fixer
         entry: >-
-          sh -c 'for f in "$@"; do [ -s "$f" ] && [ -n "$(tail -c1 "$f")" ] && echo "" >> "$f" && echo "Fixed EOF: $f"; done; exit 0'
+          sh -c '[ "$#" -eq 0 ] && exit 0; for f in "$@"; do [ -s "$f" ] && [ -n "$(tail -c1 "$f")" ] && echo "" >> "$f" && echo "Fixed EOF: $f"; done; exit 0'
         language: system
         types: [text]
       - id: trailing-whitespace
         name: trailing-whitespace
         entry: >-
-          sh -c 'sed -i "s/[[:space:]]*$//" "$@"'
+          sh -c '[ "$#" -eq 0 ] && exit 0; sed -i "s/[[:space:]]*$//" "$@"'
         language: system
         types: [text]
       - id: check-json
         name: check-json
         entry: >-
-          sh -c 'for f in "$@"; do jq . < "$f" > /dev/null || exit 1; done'
+          sh -c '[ "$#" -eq 0 ] && exit 0; for f in "$@"; do jq . < "$f" > /dev/null || exit 1; done'
         language: system
         types: [json]
       - id: no-commit-to-branch

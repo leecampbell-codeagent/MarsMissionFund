@@ -20,8 +20,8 @@ function buildTestApp(mockUserRepo: MockUserRepository) {
   app.use(express.json());
   app.use(correlationIdMiddleware);
   app.use('/health', healthRouter);
-  app.use(buildClerkMiddleware());
-  app.use(createMmfAuthMiddleware(authSyncService));
+  app.use(buildClerkMiddleware(true));
+  app.use(createMmfAuthMiddleware(authSyncService, true));
   app.use('/api/v1', createApiRouter(mockUserRepo));
 
   app.use((err: unknown, _req: Request, res: Response, _next: NextFunction): void => {
@@ -36,8 +36,6 @@ describe('GET /api/v1/me', () => {
 
   beforeEach(() => {
     mockRepo = new MockUserRepository();
-    // Ensure MOCK_AUTH is set
-    process.env.MOCK_AUTH = 'true';
   });
 
   it('returns 200 with full user profile and roles', async () => {
@@ -79,8 +77,8 @@ describe('GET /api/v1/me', () => {
     // Auth middleware passes (user exists), but me endpoint's findById returns null
     const clerkPort = new MockClerkAdapter();
     const authSyncService = new AuthSyncService(mockRepo, clerkPort);
-    appWithBrokenRepo.use(buildClerkMiddleware());
-    appWithBrokenRepo.use(createMmfAuthMiddleware(authSyncService));
+    appWithBrokenRepo.use(buildClerkMiddleware(true));
+    appWithBrokenRepo.use(createMmfAuthMiddleware(authSyncService, true));
 
     // Create a repo where findById returns null
     const brokenRepo = new MockUserRepository();

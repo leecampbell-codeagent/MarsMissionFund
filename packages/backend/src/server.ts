@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import helmet from 'helmet';
 import pino from 'pino';
@@ -17,6 +18,12 @@ import {
   createMmfAuthMiddleware,
 } from './shared/middleware/auth.js';
 
+// ---------------------------------------------------------------------------
+// Module-level constants — evaluated ONCE at startup, never per-request
+// ---------------------------------------------------------------------------
+
+const IS_MOCK_AUTH = process.env.MOCK_AUTH === 'true';
+
 const transport = process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined;
 
 const logger = pino({ level: process.env.LOG_LEVEL ?? 'info', transport });
@@ -25,10 +32,9 @@ const logger = pino({ level: process.env.LOG_LEVEL ?? 'info', transport });
 // Composition root — wire dependencies
 // ---------------------------------------------------------------------------
 
-const userRepository =
-  process.env.MOCK_AUTH === 'true' ? new MockUserRepository() : new PgUserRepository(pool);
+const userRepository = IS_MOCK_AUTH ? new MockUserRepository() : new PgUserRepository(pool);
 
-const clerkPort = process.env.MOCK_AUTH === 'true' ? new MockClerkAdapter() : new ClerkAdapter();
+const clerkPort = IS_MOCK_AUTH ? new MockClerkAdapter() : new ClerkAdapter();
 
 const authSyncService = new AuthSyncService(userRepository, clerkPort);
 
@@ -37,6 +43,18 @@ const authSyncService = new AuthSyncService(userRepository, clerkPort);
 // ---------------------------------------------------------------------------
 
 const app = express();
+
+// CORS — allow frontend origin (dev: localhost:5173)
+const allowedOrigin = process.env.CORS_ORIGIN ?? 'http://localhost:5173';
+app.use(
+  cors({
+    origin: allowedOrigin,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
+    exposedHeaders: ['X-Request-Id'],
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 
@@ -68,6 +86,18 @@ app.use(
   }),
 );
 
+// Permissions-Policy header (not yet in helmet — add manually)
+app.use((_req: Request, res: Response, next: NextFunction): void => {
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+  next();
+});
+
+// Cache-Control: no-store for all API routes
+app.use('/api', (_req: Request, res: Response, next: NextFunction): void => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+});
+
 // HTTP request logging — must run before correlationId so we can integrate the ID
 app.use(
   pinoHttp({
@@ -88,10 +118,10 @@ app.use(correlationIdMiddleware);
 app.use('/health', healthRouter);
 
 // Clerk middleware — verifies JWT (or mock in test mode)
-app.use(buildClerkMiddleware());
+app.use(buildClerkMiddleware(IS_MOCK_AUTH));
 
 // MMF auth middleware — lazy sync, account status gating, populates req.auth
-app.use(createMmfAuthMiddleware(authSyncService));
+app.use(createMmfAuthMiddleware(authSyncService, IS_MOCK_AUTH));
 
 // Protected API routes
 app.use('/api/v1', createApiRouter(userRepository));

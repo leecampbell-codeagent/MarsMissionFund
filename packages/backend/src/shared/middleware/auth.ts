@@ -47,14 +47,17 @@ function mockClerkMiddleware(req: Request, _res: Response, next: NextFunction): 
 // MMF auth middleware factory
 // ---------------------------------------------------------------------------
 
-export function createMmfAuthMiddleware(authSyncService: AuthSyncService): RequestHandler {
+export function createMmfAuthMiddleware(
+  authSyncService: AuthSyncService,
+  isMockAuth: boolean,
+): RequestHandler {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       let clerkUserId: string | null | undefined;
       let emailFromJwt: string | null = null;
 
       const mockReq = req as Request & { _mockClerkUserId?: string };
-      if (process.env.MOCK_AUTH === 'true' && mockReq._mockClerkUserId) {
+      if (isMockAuth && mockReq._mockClerkUserId) {
         clerkUserId = mockReq._mockClerkUserId;
       } else {
         const auth = getAuth(req);
@@ -155,11 +158,11 @@ export function createMmfAuthMiddleware(authSyncService: AuthSyncService): Reque
 // ---------------------------------------------------------------------------
 
 /**
- * Returns the appropriate Clerk middleware based on MOCK_AUTH flag.
+ * Returns the appropriate Clerk middleware based on the isMockAuth flag.
  * Use this BEFORE mmfAuthMiddleware in server.ts.
  */
-export function buildClerkMiddleware(): RequestHandler {
-  if (process.env.MOCK_AUTH === 'true') {
+export function buildClerkMiddleware(isMockAuth: boolean): RequestHandler {
+  if (isMockAuth) {
     return mockClerkMiddleware as RequestHandler;
   }
   return clerkMiddleware() as unknown as RequestHandler;

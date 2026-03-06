@@ -19,6 +19,13 @@ fi
 
 # Start backend if it exists
 if [ -f "${WORKSPACE}/packages/backend/package.json" ]; then
+    # Source .env so MOCK_AUTH and other vars are available at startup
+    if [ -f "${WORKSPACE}/.env" ]; then
+        set -o allexport
+        # shellcheck source=/dev/null
+        source "${WORKSPACE}/.env"
+        set +o allexport
+    fi
     (cd "${WORKSPACE}/packages/backend" && npm run dev &)
 fi
 
