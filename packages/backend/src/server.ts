@@ -12,6 +12,7 @@ import { createApiRouter } from './account/api/api-router.js';
 import { AuthSyncService } from './account/application/auth-sync-service.js';
 import { ProfileService } from './account/application/profile-service.js';
 import { healthRouter } from './health/api/health-router.js';
+import { MockKycAdapter } from './kyc/adapters/mock/mock-kyc-adapter.js';
 import { StubKycAdapter } from './kyc/adapters/stub/stub-kyc-adapter.js';
 import { KycService } from './kyc/application/kyc-service.js';
 import { pool } from './shared/infra/db.js';
@@ -44,11 +45,11 @@ const authSyncService = new AuthSyncService(userRepository, clerkPort);
 const profileService = new ProfileService(userRepository);
 
 const IS_MOCK_KYC = process.env.MOCK_KYC !== 'false'; // default: true
-// Both branches use StubKycAdapter for feat-005 — real Veriff adapter is out of scope.
-// IS_MOCK_KYC is wired now so the future branch (StubKycAdapter vs VeriffKycAdapter) is a one-liner.
-const kycAdapter = IS_MOCK_KYC
-  ? new StubKycAdapter(pool, logger)
-  : new StubKycAdapter(pool, logger);
+// Use MockKycAdapter when MOCK_AUTH=true (in-memory users have no Postgres row, so FK constraint
+// prevents StubKycAdapter from inserting into kyc_verifications).
+// Use StubKycAdapter otherwise — it writes to the real DB with the real user FK.
+const kycAdapter =
+  IS_MOCK_AUTH || IS_MOCK_KYC ? new MockKycAdapter() : new StubKycAdapter(pool, logger);
 const kycService = new KycService(kycAdapter, logger);
 
 // ---------------------------------------------------------------------------
