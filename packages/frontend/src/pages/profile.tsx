@@ -224,6 +224,58 @@ export default function ProfilePage() {
             <ProfileEditForm initialDisplayName={user.displayName} initialBio={user.bio} />
           </section>
 
+          {/* KYC Status section */}
+          <section aria-label="Identity verification">
+            <h2
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: '24px',
+                fontWeight: 400,
+                letterSpacing: '0.04em',
+                color: 'var(--color-text-primary)',
+                textTransform: 'uppercase',
+                margin: '0 0 24px 0',
+              }}
+            >
+              IDENTITY VERIFICATION
+            </h2>
+            <div
+              style={{
+                padding: '16px 20px',
+                backgroundColor: 'var(--color-bg-surface)',
+                border: '1px solid var(--color-border-subtle)',
+                borderRadius: 'var(--radius-card)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '16px',
+              }}
+            >
+              <p
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '14px',
+                  color: 'var(--color-text-secondary)',
+                  margin: 0,
+                }}
+              >
+                Identity verification not yet started.
+              </p>
+              <a
+                href="/kyc"
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '14px',
+                  color: 'var(--color-action-ghost-text)',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Start verification →
+              </a>
+            </div>
+          </section>
+
           {/* Notification Preferences section */}
           <section aria-label="Notification preferences">
             <h2
