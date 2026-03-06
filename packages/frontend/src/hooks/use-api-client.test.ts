@@ -44,7 +44,7 @@ describe('useApiClient', () => {
     expect(mockFetch).toHaveBeenCalledOnce();
     const [, options] = mockFetch.mock.calls[0] as [string, RequestInit];
     const headers = options.headers as Record<string, string>;
-    expect(headers['Authorization']).toBe('Bearer test-jwt-token');
+    expect(headers.Authorization).toBe('Bearer test-jwt-token');
   });
 
   it('calls getToken() on every request (no caching)', async () => {
