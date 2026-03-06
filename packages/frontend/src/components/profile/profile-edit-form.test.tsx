@@ -79,4 +79,15 @@ describe('ProfileEditForm', () => {
     expect(screen.getByRole('alert')).toBeInTheDocument();
     expect(screen.getByText('Update failed')).toBeInTheDocument();
   });
+
+  it('does not call mutate when display name is whitespace-only', async () => {
+    const user = userEvent.setup();
+    render(<ProfileEditForm initialDisplayName={null} initialBio={null} />);
+
+    const nameInput = screen.getByRole('textbox', { name: /display name/i });
+    await user.type(nameInput, '   ');
+    await user.click(screen.getByRole('button', { name: /save changes/i }));
+
+    expect(mockMutate).not.toHaveBeenCalled();
+  });
 });

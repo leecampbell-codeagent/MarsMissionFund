@@ -205,4 +205,27 @@ describe('ProfilePage', () => {
 
     expect(screen.getByLabelText('Avatar placeholder')).toBeInTheDocument();
   });
+
+  it('renders KYC status placeholder with link to /kyc', () => {
+    render(
+      <MemoryRouter>
+        <ProfilePage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText(/Identity verification not yet started/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Start verification/i })).toBeInTheDocument();
+  });
+
+  it('renders NotificationPreferencesForm (which contains always-on Security Alerts toggle)', () => {
+    render(
+      <MemoryRouter>
+        <ProfilePage />
+      </MemoryRouter>,
+    );
+
+    // NotificationPreferencesForm is rendered; its Security Alerts always-on behavior
+    // is covered by notification-preferences-form.test.tsx
+    expect(screen.getByTestId('notification-preferences-form')).toBeInTheDocument();
+  });
 });
