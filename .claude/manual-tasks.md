@@ -5,10 +5,21 @@
 
 ## Status Key
 
-- ⬜ TODO — Not started
-- 🔄 IN PROGRESS — Being worked on
-- ✅ DONE — Completed
+- Not started — TODO
+- IN PROGRESS — Being worked on
+- DONE — Completed
 
 ---
 
-*No manual tasks yet. Tasks will be added as features requiring external services are built (Clerk, Stripe, Veriff, AWS SES).*
+## Database Schema (feat-002)
+
+The core PostgreSQL schema has been deployed via dbmate migrations. All seven migration files
+covering the five bounded contexts (Account, KYC, Campaign, Payments/Escrow, Contributions) are
+in place in `db/migrations/`. No manual steps are required — schema deployment is fully automated
+via `dbmate up`.
+
+*No manual tasks for feat-002. The database schema is ready for application features (feat-003+).*
+
+---
+
+*Future tasks will be added here as features requiring external services are built (Clerk, Stripe, Veriff, AWS SES).*

@@ -1,12 +1,11 @@
-# Mock / Real Adapter Status
+# Mock/Real Integration Status
 
-> Tracks which external service integrations are mocked vs real.
-> Updated by infrastructure engineer agent after each feature cycle.
+> Updated: 2026-03-06
 
-| Service | Status | Mock Adapter | Real Adapter | Manual Task |
-|---------|--------|-------------|-------------|-------------|
-| Clerk (Auth) | ⬜ Not yet integrated | — | — | — |
-| Stripe (Payments) | ⬜ Not yet integrated | — | — | — |
-| Veriff (KYC) | ⬜ Not yet integrated | — | — | — |
-| AWS SES (Email) | ⬜ Not yet integrated | — | — | — |
-| PostHog (Analytics) | ⬜ Not yet integrated | — | — | — |
+| Service | Status | Mock Adapter | Real Adapter | Blocked By |
+|---------|--------|-------------|-------------|------------|
+| Database (PostgreSQL) | Schema deployed | N/A (direct) | N/A (direct) | — |
+| Auth (Clerk) | Not integrated | N/A | N/A | feat-003 |
+| Payments (Stripe) | Not integrated | N/A | N/A | feat-011 |
+| KYC (Veriff) | Not integrated | N/A | N/A | feat-005 |
+| Email (AWS SES) | Not integrated | N/A | N/A | feat-015 |
