@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { User } from '../domain/models/user.js';
+import { DEFAULT_NOTIFICATION_PREFERENCES } from '../domain/value-objects/notification-preferences.js';
 import type { ClerkPort } from '../ports/clerk-port.js';
 import type { UserRepository } from '../ports/user-repository.js';
 import { AuthSyncService } from './auth-sync-service.js';
@@ -12,8 +13,11 @@ function makeUser(id = '550e8400-e29b-41d4-a716-446655440001'): User {
       email: 'alice@example.com',
       displayName: null,
       avatarUrl: null,
+      bio: null,
       accountStatus: 'active',
       onboardingCompleted: false,
+      onboardingStep: null,
+      notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
       createdAt: new Date('2026-03-06T00:00:00Z'),
       updatedAt: new Date('2026-03-06T00:00:00Z'),
     },
@@ -26,6 +30,10 @@ function makeRepo(overrides: Partial<UserRepository> = {}): UserRepository {
     findByClerkId: vi.fn().mockResolvedValue(null),
     upsertWithBackerRole: vi.fn().mockResolvedValue(makeUser()),
     findById: vi.fn().mockResolvedValue(makeUser()),
+    updateProfile: vi.fn().mockResolvedValue(makeUser()),
+    updateNotificationPreferences: vi.fn().mockResolvedValue(makeUser()),
+    completeOnboarding: vi.fn().mockResolvedValue(makeUser()),
+    saveOnboardingStep: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }
@@ -135,6 +143,10 @@ describe('AuthSyncService', () => {
         ids.push(input.id);
         return makeUser(input.id);
       }),
+      updateProfile: vi.fn().mockResolvedValue(makeUser()),
+      updateNotificationPreferences: vi.fn().mockResolvedValue(makeUser()),
+      completeOnboarding: vi.fn().mockResolvedValue(makeUser()),
+      saveOnboardingStep: vi.fn().mockResolvedValue(undefined),
     };
     const clerkPort = makeClerkPort();
     const service = new AuthSyncService(repo, clerkPort);

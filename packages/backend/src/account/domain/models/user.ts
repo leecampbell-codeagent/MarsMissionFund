@@ -1,3 +1,5 @@
+import type { NotificationPreferences } from '../value-objects/notification-preferences.js';
+
 export type AccountStatus =
   | 'pending_verification'
   | 'active'
@@ -11,8 +13,11 @@ export interface UserData {
   readonly email: string;
   readonly displayName: string | null;
   readonly avatarUrl: string | null;
+  readonly bio: string | null;
   readonly accountStatus: AccountStatus;
   readonly onboardingCompleted: boolean;
+  readonly onboardingStep: number | null;
+  readonly notificationPreferences: NotificationPreferences;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -47,12 +52,24 @@ export class User {
     return this.data.avatarUrl;
   }
 
+  get bio(): string | null {
+    return this.data.bio;
+  }
+
   get accountStatus(): AccountStatus {
     return this.data.accountStatus;
   }
 
   get onboardingCompleted(): boolean {
     return this.data.onboardingCompleted;
+  }
+
+  get onboardingStep(): number | null {
+    return this.data.onboardingStep;
+  }
+
+  get notificationPreferences(): NotificationPreferences {
+    return this.data.notificationPreferences;
   }
 
   get createdAt(): Date {

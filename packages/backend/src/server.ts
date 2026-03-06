@@ -10,6 +10,7 @@ import { MockUserRepository } from './account/adapters/mock/mock-user-repository
 import { PgUserRepository } from './account/adapters/pg/pg-user-repository.js';
 import { createApiRouter } from './account/api/api-router.js';
 import { AuthSyncService } from './account/application/auth-sync-service.js';
+import { ProfileService } from './account/application/profile-service.js';
 import { healthRouter } from './health/api/health-router.js';
 import { pool } from './shared/infra/db.js';
 import {
@@ -37,6 +38,8 @@ const userRepository = IS_MOCK_AUTH ? new MockUserRepository() : new PgUserRepos
 const clerkPort = IS_MOCK_AUTH ? new MockClerkAdapter() : new ClerkAdapter();
 
 const authSyncService = new AuthSyncService(userRepository, clerkPort);
+
+const profileService = new ProfileService(userRepository);
 
 // ---------------------------------------------------------------------------
 // Express app
@@ -124,7 +127,7 @@ app.use(buildClerkMiddleware(IS_MOCK_AUTH));
 app.use(createMmfAuthMiddleware(authSyncService, IS_MOCK_AUTH));
 
 // Protected API routes
-app.use('/api/v1', createApiRouter(userRepository));
+app.use('/api/v1', createApiRouter(userRepository, profileService));
 
 // Global error handler
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction): void => {
