@@ -15,7 +15,7 @@
 
 | # | Feature | Context | Priority | Status | Dependencies | Complexity |
 |---|---------|---------|----------|--------|-------------|------------|
-| 001 | Project Infrastructure and Monorepo Setup | Cross-cutting | P0 | ✅ SPECCED | None | M |
+| 001 | Project Infrastructure and Monorepo Setup | Cross-cutting | P0 | ✅ SHIPPED | None | M |
 | 002 | Core Database Schema | Cross-cutting | P0 | 🔲 | feat-001 | M |
 | 003 | Authentication Integration (Clerk) | Account | P0 | 🔲 | feat-001, feat-002 | M |
 | 004 | Account Onboarding and Profile Management | Account | P0 | 🔲 | feat-003 | M |

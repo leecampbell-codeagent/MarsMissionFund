@@ -74,3 +74,34 @@ Load it conditionally: only when `NODE_ENV !== 'production'`.
 Async route handlers in Express 5 automatically propagate rejected promises to error middleware.
 No `asyncHandler` wrapper (`express-async-handler` package) is needed.
 Express 4 patterns using `next(err)` manually still work but are redundant for async routes.
+
+### Pre-commit hooks (prek) — empty `$@` causes recursive grep
+
+prek (Rust pre-commit tool) invokes `sh -c 'script' file1 file2` without a dummy `$0` placeholder.
+This makes the first filename become `$0`, so `$@` may be empty when only one file is staged.
+Empty `$@` causes `grep -rn "pattern" -- "$@"` to scan the entire working directory (including node_modules).
+Fix: add `[ "$#" -eq 0 ] && exit 0` guard at the start of every `sh -c` hook script.
+Also: use `grep -n` (not `grep -rn`) to avoid recursive directory scanning on unexpected paths.
+
+### gitleaks matches Stripe-format placeholder strings
+
+gitleaks (RuleID: `stripe-access-token`) matches strings beginning with `sk_test_` or `whsec_` — even as placeholders.
+Never use realistic-format placeholder strings for Stripe keys in report or doc files.
+Instead, use descriptive prose: "non-sensitive placeholder strings (no real credentials)".
+
+### `.pre-commit-config.yaml` is gitignored but prek reads it from disk
+
+The `.pre-commit-config.yaml` file is in `.gitignore` and is NOT tracked by git.
+It exists locally (managed outside git) and prek reads it from disk at commit time.
+Changes to this file take effect immediately without being committed.
+
+### `gh pr create` fails with personal access token (GraphQL limitation)
+
+`gh pr create` uses the GraphQL API and fails with: "Resource not accessible by personal access token".
+Workaround: use `gh api repos/{owner}/{repo}/pulls --method POST` (REST API) — this works with PATs.
+
+### Backend listens on port 3001, not 3000
+
+The backend runs on `PORT=3001` (from `.env`), not the commonly assumed `3000`.
+Frontend Vite proxy and health checks must target `http://localhost:3001`.
+The `.claude/agents/spec-writer.md` and specs may reference port 3000 — override with 3001.
