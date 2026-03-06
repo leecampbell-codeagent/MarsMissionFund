@@ -96,3 +96,34 @@ Always include `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>` trail
 - All monetary: BIGINT only — never FLOAT/NUMERIC/DECIMAL for money
 - UUID PKs: `DEFAULT gen_random_uuid()` on id column
 - Trigger name pattern: `set_{table_name}_updated_at`
+
+### Auth middleware pattern (feat-003)
+
+```typescript
+// server.ts — order matters:
+app.use(correlationIdMiddleware)      // sets X-Request-Id + req.correlationId
+app.use('/health', healthRouter)      // PUBLIC — before Clerk
+app.use(buildClerkMiddleware(IS_MOCK_AUTH))  // Clerk or mock
+app.use(createMmfAuthMiddleware(authSyncService, IS_MOCK_AUTH))
+app.use('/api/v1', apiRouter)         // all protected routes
+```
+
+- `IS_MOCK_AUTH = process.env.MOCK_AUTH === 'true'` at module scope (not per-request)
+- Mock middleware ONLY injects mock user if `Authorization` header is present
+- In mock mode, `createMmfAuthMiddleware` MUST NOT call `getAuth(req)` — real Clerk middleware not mounted
+- Use the `isMockAuth` parameter to branch before calling `getAuth()`
+
+### PostgreSQL repository integration test pattern (feat-003)
+
+```typescript
+const TEST_PREFIX = 'test_pg_repo_';
+beforeEach(() => pool.query(`DELETE FROM users WHERE clerk_id LIKE $1`, [`${TEST_PREFIX}%`]));
+afterEach(() => pool.query(`DELETE FROM users WHERE clerk_id LIKE $1`, [`${TEST_PREFIX}%`]));
+// Use TEST_PREFIX on all test clerk_ids for isolation
+```
+
+### Biome lint suppressions (feat-003)
+
+- JSX: `{/* biome-ignore lint/a11y/useSemanticElements: reason */}` on line before element
+- CSS `!important` in `prefers-reduced-motion`: leave as warnings (not errors) — suppression not supported for CSS blocks
+- Dot notation: always use `obj.property` not `obj['property']` for known keys

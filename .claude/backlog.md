@@ -17,7 +17,7 @@
 |---|---------|---------|----------|--------|-------------|------------|
 | 001 | Project Infrastructure and Monorepo Setup | Cross-cutting | P0 | ✅ SHIPPED | None | M |
 | 002 | Core Database Schema | Cross-cutting | P0 | ✅ SHIPPED | feat-001 | M |
-| 003 | Authentication Integration (Clerk) | Account | P0 | ✅ SPECCED | feat-001, feat-002 | M |
+| 003 | Authentication Integration (Clerk) | Account | P0 | ✅ SHIPPED | feat-001, feat-002 | M |
 | 004 | Account Onboarding and Profile Management | Account | P0 | 🔲 | feat-003 | M |
 | 005 | KYC Identity Verification (Stub Adapter) | KYC, Account | P1 | 🔲 | feat-003, feat-002 | M |
 | 006 | Campaign Creation and Draft Management | Campaign | P1 | 🔲 | feat-003, feat-002, feat-005 | L |

@@ -100,6 +100,18 @@ Changes to this file take effect immediately without being committed.
 `gh pr create` uses the GraphQL API and fails with: "Resource not accessible by personal access token".
 Workaround: use `gh api repos/{owner}/{repo}/pulls --method POST` (REST API) — this works with PATs.
 
+### Mock auth middleware must not call `getAuth()` when isMockAuth=true
+
+When `MOCK_AUTH=true`, the real `clerkMiddleware()` is NOT mounted — only `mockClerkMiddleware` is mounted.
+Calling `getAuth(req)` when the real Clerk middleware was never run throws an error (500).
+Fix: branch on `isMockAuth` BEFORE calling `getAuth(req)`. In mock mode, read only `req._mockClerkUserId`.
+
+### Mock auth middleware requires Authorization header to inject mock user
+
+The mock Clerk middleware only sets `_mockClerkUserId` if an `Authorization` header is present.
+Tests for authenticated endpoints MUST include `.set('Authorization', 'Bearer mock-token')`.
+Tests for unauthenticated behaviour should omit the header — they will correctly get 401.
+
 ### Backend listens on port 3001, not 3000
 
 The backend runs on `PORT=3001` (from `.env`), not the commonly assumed `3000`.
