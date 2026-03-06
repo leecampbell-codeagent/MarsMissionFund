@@ -5,16 +5,18 @@ import type { ProfileService } from '../application/profile-service.js';
 import type { User } from '../domain/models/user.js';
 import type { UserRepository } from '../ports/user-repository.js';
 
-const updateProfileSchema = z.object({
-  display_name: z
-    .string()
-    .trim()
-    .min(1, 'Display name cannot be empty')
-    .max(100)
-    .nullable()
-    .optional(),
-  bio: z.string().max(500).nullable().optional(),
-});
+const updateProfileSchema = z
+  .object({
+    display_name: z
+      .string()
+      .trim()
+      .min(1, 'Display name cannot be empty')
+      .max(100)
+      .nullable()
+      .optional(),
+    bio: z.string().max(500).nullable().optional(),
+  })
+  .strict();
 
 const updateNotificationPreferencesSchema = z
   .object({
