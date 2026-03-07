@@ -1,0 +1,73 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap");
+@import "./tokens.css";
+
+/* ==========================================================================
+   GLOBAL RESETS & DEFAULTS
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--color-bg-page);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.7;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Display font — always uppercase per L2-001 Section 2.8 */
+h1,
+h2,
+h3,
+[data-font="display"] {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+/* Data font */
+code,
+pre,
+[data-font="data"] {
+  font-family: var(--font-data);
+}
+
+/* Focus visible — global baseline (components override as needed) */
+:focus-visible {
+  outline: 2px solid var(--color-action-primary-hover);
+  outline-offset: 2px;
+}
+
+/* Remove focus outline for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* noscript fallback — branded, consistent with dark theme */
+noscript {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  background-color: var(--color-bg-page);
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  text-align: center;
+  padding: 2rem;
+}

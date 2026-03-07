@@ -2,17 +2,24 @@
   "name": "mars-mission-fund",
   "private": true,
   "description": "Sample crowdfunding app for Autonomous Agentic Coding workshops",
+  "workspaces": [
+    "packages/backend",
+    "packages/frontend"
+  ],
   "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=packages/backend\" \"npm run dev --workspace=packages/frontend\"",
+    "build": "npm run build --workspace=packages/backend && npm run build --workspace=packages/frontend",
+    "typecheck": "npm run typecheck --workspace=packages/backend && npm run typecheck --workspace=packages/frontend",
+    "test": "npm test --workspace=packages/backend && npm test --workspace=packages/frontend",
     "lint": "biome check . && markdownlint-cli2 '**/*.md'",
     "lint:fix": "biome check --write . && markdownlint-cli2 --fix '**/*.md'",
     "format": "biome format .",
-    "format:fix": "biome format --write .",
-    "typecheck": "echo 'No workspaces to typecheck yet'",
-    "test": "echo 'No workspaces to test yet'"
+    "format:fix": "biome format --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.5",
     "@playwright/cli": "^0.1.1",
+    "concurrently": "^9.0.0",
     "markdownlint-cli2": "^0.21.0"
   }
 }
