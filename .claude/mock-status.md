@@ -4,7 +4,7 @@
 
 | Service | Adapter | Status | Feature | Notes |
 |---------|---------|--------|---------|-------|
-| Clerk | Auth | Mock available via `MOCK_AUTH=true` | feat-002 | Not yet implemented |
+| Clerk | Auth | Real (with MOCK_AUTH=true fallback for tests) | feat-002 | ClerkAuthAdapter + MockAuthAdapter implemented |
 | Stripe | Payments | Mock (stub) | feat-010 | Not yet implemented |
 | Veriff | KYC | Mock (auto-approve) | feat-007 | Not yet implemented |
 | AWS SES | Email | Mock (log only) | feat-014 | Not yet implemented |

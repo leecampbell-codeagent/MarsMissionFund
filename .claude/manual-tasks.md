@@ -25,6 +25,11 @@ Or use the GitHub UI to open a PR from `ralph/feat-001-monorepo-scaffold` → `m
 - `POSTHOG_API_KEY` — PostHog project settings > Project API Key
 - All mock adapter flags default to `true` for local dev — no action needed
 
+### MANUAL-004: Re-run migrations after merging feat-002
+**Feature:** feat-002
+**Action:** After merging feat-002 to main, run: `dbmate --url "$DATABASE_URL" up`
+This applies the `create_users` migration.
+
 ### MANUAL-002: Start PostgreSQL
 **Feature:** feat-001
 **Action:** Start the PostgreSQL container: `docker-compose up -d postgres`
