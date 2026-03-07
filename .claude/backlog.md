@@ -16,7 +16,7 @@
 | # | Feature | Context | Priority | Status | Dependencies | Complexity |
 |---|---------|---------|----------|--------|-------------|------------|
 | 001 | Monorepo Scaffold — Backend and Frontend Packages | Platform | P0 | ✅ SHIPPED | None | M |
-| 002 | Authentication and User Management | Account | P0 | 🔲 | feat-001 | M |
+| 002 | Authentication and User Management | Account | P0 | ✅ SHIPPED | feat-001 | M |
 | 003 | Design System Foundation — Tokens and Primitives | Frontend | P0 | 🔲 | feat-001 | M |
 | 004 | Application Shell and Navigation | Frontend / Account | P0 | 🔲 | feat-001, feat-002, feat-003 | S |
 | 005 | Campaign and Donor Database Schema | Campaign / Donor / Payments | P0 | 🔲 | feat-001 | M |
