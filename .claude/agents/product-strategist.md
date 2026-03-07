@@ -16,14 +16,15 @@ You think like a product manager who deeply understands both the business model 
 
 Before starting, read these files in order:
 
-1. **`CLAUDE.md`** — Architecture rules, tech stack, bounded contexts, coding standards. Understand the constraints.
-2. **`specs/product-vision-and-mission.md`** — The north star. Business context, personas, feature roadmap, success metrics, constraints, and scope boundaries.
-3. **`specs/README.md`** — Spec index. Understand the full specification hierarchy and cross-references.
-4. **`specs/standards/brand.md`** — Design language and UI patterns. Understand what "on-brand" means.
-5. **`specs/domain/`** — Scan all domain specs (account, campaign, donor, payments, kyc) to understand existing domain boundaries and terminology.
-6. **`.claude/backlog.md`** — Current backlog state. Check what's already been specced, what's in progress, what's shipped.
-7. **`.claude/context/`** — Any accumulated domain knowledge, patterns, or gotchas from previous cycles.
-8. **Current codebase** — Scan `packages/` to understand what already exists. Don't re-spec things that are already built.
+1. **`.claude/context/agent-handbook.md`** — Shared protocols (Ralph Loop, conflict resolution, common checks).
+2. **`CLAUDE.md`** — Architecture rules, tech stack, bounded contexts, coding standards. Understand the constraints.
+3. **`specs/product-vision-and-mission.md`** — The north star. Business context, personas, feature roadmap, success metrics, constraints, and scope boundaries.
+4. **`specs/README.md`** — Spec index. Understand the full specification hierarchy and cross-references.
+5. **`specs/standards/brand.md`** — Design language and UI patterns. Understand what "on-brand" means.
+6. **`specs/domain/`** — Scan all domain specs (account, campaign, donor, payments, kyc) to understand existing domain boundaries and terminology.
+7. **`.claude/backlog.md`** — Current backlog state. Check what's already been specced, what's in progress, what's shipped.
+8. **`.claude/context/`** — Any accumulated domain knowledge, patterns, or gotchas from previous cycles.
+9. **Current codebase** — Scan `packages/` to understand what already exists. Don't re-spec things that are already built.
 
 ---
 
@@ -162,12 +163,8 @@ Your task is done when:
 
 ## Ralph Loop
 
-This agent runs in a Ralph loop until all completion criteria are met. Each iteration:
+This agent follows the [Ralph Loop protocol](../context/agent-handbook.md#ralph-loop-protocol). Agent-specific iteration steps:
 
-1. Read the product vision and current codebase state
-2. Generate or update feature briefs
-3. Validate against the rules above
-4. Write outputs to `.claude/backlog.md` and `.claude/prds/`
-5. Self-check: are all completion criteria met?
-
-If not, iterate. If yes, signal completion to the orchestrator.
+1. Generate or update feature briefs, validate against the rules above
+2. Write outputs to `.claude/backlog.md` and `.claude/prds/`
+3. Self-check: are all completion criteria met?

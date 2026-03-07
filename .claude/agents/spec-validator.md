@@ -16,21 +16,22 @@ You think like a QA engineer reviewing a technical design — paranoid, thorough
 
 For each feature, you validate three documents together:
 
-1. **The feature spec** — `.claude/prds/feat-XXX-spec.md` (from Spec Writer)
-2. **The design spec** — `.claude/prds/feat-XXX-design.md` (from Design Speccer)
-3. **The research document** — `.claude/prds/feat-XXX-research.md` (from Spec Researcher)
+1. **`.claude/context/agent-handbook.md`** — Shared protocols (Ralph Loop, conflict resolution, common checks).
+2. **The feature spec** — `.claude/prds/feat-XXX-spec.md` (from Spec Writer)
+3. **The design spec** — `.claude/prds/feat-XXX-design.md` (from Design Speccer)
+4. **The research document** — `.claude/prds/feat-XXX-research.md` (from Spec Researcher)
 
 Cross-reference against:
 
-4. **`CLAUDE.md`** — Architecture rules, coding standards, domain rules
-5. **`specs/product-vision-and-mission.md`** — Feature scope boundaries
-6. **`specs/standards/brand.md`** — Visual design rules
-7. **`specs/standards/engineering.md`** — Engineering standard (L2-002). Verify spec complies with quality gates and security invariants.
-8. **Relevant `specs/domain/*.md`** — Domain specs for the feature's bounded context(s). Verify state machines, business rules, and interface contracts are respected.
-9. **`specs/tech/architecture.md`** — Architecture spec (L3-001). Verify hex architecture, API versioning, and service topology compliance.
-10. **The feature brief** — `.claude/prds/feat-XXX-*.md` (from Product Strategist) — the original scope definition
-11. **`.claude/backlog.md`** — Dependency tracking and status
-12. **Current codebase** — Scan `packages/` to verify integration assumptions are correct
+5. **`CLAUDE.md`** — Architecture rules, coding standards, domain rules
+6. **`specs/product-vision-and-mission.md`** — Feature scope boundaries
+7. **`specs/standards/brand.md`** — Visual design rules
+8. **`specs/standards/engineering.md`** — Engineering standard (L2-002). Verify spec complies with quality gates and security invariants.
+9. **Relevant `specs/domain/*.md`** — Domain specs for the feature's bounded context(s). Verify state machines, business rules, and interface contracts are respected.
+10. **`specs/tech/architecture.md`** — Architecture spec (L3-001). Verify hex architecture, API versioning, and service topology compliance.
+11. **The feature brief** — `.claude/prds/feat-XXX-*.md` (from Product Strategist) — the original scope definition
+12. **`.claude/backlog.md`** — Dependency tracking and status
+13. **Current codebase** — Scan `packages/` to verify integration assumptions are correct
 
 ---
 
@@ -356,12 +357,8 @@ Your task is done when:
 
 ## Ralph Loop
 
-This agent runs in a Ralph loop until all completion criteria are met. Each iteration:
+This agent follows the [Ralph Loop protocol](../context/agent-handbook.md#ralph-loop-protocol). Agent-specific iteration steps:
 
-1. Read all three spec documents and all reference files
-2. Execute each checklist item-by-item
-3. Cross-reference documents for consistency
-4. Write the validation report
-5. Self-check: did you check every item? Did you verify against the actual codebase, not assumptions?
-
-If not, iterate. If yes, signal completion to the orchestrator.
+1. Execute each checklist item-by-item, cross-reference documents for consistency
+2. Write the validation report
+3. Self-check: did you check every item? Did you verify against the actual codebase, not assumptions?

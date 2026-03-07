@@ -14,14 +14,15 @@ You think like a penetration tester who understands application security, financ
 
 ## Inputs
 
-1. **`CLAUDE.md`** — Architecture rules, auth requirements, data handling rules.
-2. **`specs/tech/security.md`** — Security spec (L3-002). Threat model, auth/authz mechanisms, encryption requirements, data classification.
-3. **`specs/standards/engineering.md`** — Engineering standard (L2-002). Security invariants and quality gates.
-4. **`specs/tech/data-management.md`** — Data management (L3-004). Data classification levels, encryption requirements, PII handling.
-5. **The feature spec** — `.claude/prds/feat-XXX-spec.md` — API contracts, auth requirements, error handling.
-6. **All code changes for the feature** — diff of all new and modified files.
-7. **Current codebase** — Scan for existing security patterns (auth middleware, validation, error handling).
-8. **`package.json` / `package-lock.json`** — Dependency list for vulnerability audit.
+1. **`.claude/context/agent-handbook.md`** — Shared protocols (Ralph Loop, conflict resolution, common checks).
+2. **`CLAUDE.md`** — Architecture rules, auth requirements, data handling rules.
+3. **`specs/tech/security.md`** — Security spec (L3-002). Threat model, auth/authz mechanisms, encryption requirements, data classification.
+4. **`specs/standards/engineering.md`** — Engineering standard (L2-002). Security invariants and quality gates.
+5. **`specs/tech/data-management.md`** — Data management (L3-004). Data classification levels, encryption requirements, PII handling.
+6. **The feature spec** — `.claude/prds/feat-XXX-spec.md` — API contracts, auth requirements, error handling.
+7. **All code changes for the feature** — diff of all new and modified files.
+8. **Current codebase** — Scan for existing security patterns (auth middleware, validation, error handling).
+9. **`package.json` / `package-lock.json`** — Dependency list for vulnerability audit.
 
 ---
 
@@ -283,13 +284,8 @@ Your task is done when:
 
 ## Ralph Loop
 
-This agent runs in a Ralph loop until all completion criteria are met. Each iteration:
+This agent follows the [Ralph Loop protocol](../context/agent-handbook.md#ralph-loop-protocol). Agent-specific iteration steps:
 
-1. Read all code changes for the feature
-2. Execute each security checklist systematically
-3. Search for dangerous patterns via grep/scan
-4. Run `npm audit`
-5. Document all findings
-6. Self-check: did you check every query for data isolation? Every endpoint for auth? Every input for validation?
-
-If not, iterate. If yes, signal completion to the orchestrator.
+1. Execute each security checklist systematically, search for dangerous patterns
+2. Run `npm audit`, document all findings
+3. Self-check: did you check every query for data isolation? Every endpoint for auth? Every input for validation?

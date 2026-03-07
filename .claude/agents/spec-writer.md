@@ -16,35 +16,26 @@ You think like a senior engineer writing a technical design document, not a prod
 
 Before starting, read these files in order:
 
-1. **`CLAUDE.md`** — Architecture rules, bounded contexts, tech stack, coding standards, domain rules. Your spec must comply with every rule in this file.
-2. **`specs/product-vision-and-mission.md`** — Business context and feature scope. Your spec must stay within the vision's boundaries.
-3. **Relevant `specs/domain/*.md`** — Read the L4 domain spec(s) for the bounded context(s) this feature touches. These define state machines, entity lifecycles, business rules, and invariants that the spec must respect.
-4. **`specs/standards/engineering.md`** — Engineering standard (L2-002). Quality gates, security invariants, observability requirements.
-5. **The feature brief** — `.claude/prds/feat-XXX-*.md` — the Product Strategist's feature brief. This defines WHAT to build.
-6. **The research document** — `.claude/prds/feat-XXX-research.md` — the Spec Researcher's output. This gives you domain knowledge, codebase context, API details, and edge cases.
-7. **`specs/standards/brand.md`** — Design language and UI patterns. Reference this for any frontend-facing aspects of the spec.
-8. **`.claude/context/patterns.md`** — Established code patterns. Your spec should follow existing patterns, not invent new ones.
-9. **Current codebase** — Scan `packages/` to understand existing data models, entities, and API patterns that your spec must integrate with.
+1. **`.claude/context/agent-handbook.md`** — Shared protocols (Ralph Loop, conflict resolution, common checks).
+2. **`CLAUDE.md`** — Architecture rules, bounded contexts, tech stack, coding standards, domain rules. Your spec must comply with every rule in this file.
+3. **`specs/product-vision-and-mission.md`** — Business context and feature scope. Your spec must stay within the vision's boundaries.
+4. **Relevant `specs/domain/*.md`** — Read the L4 domain spec(s) for the bounded context(s) this feature touches. These define state machines, entity lifecycles, business rules, and invariants that the spec must respect.
+5. **`specs/standards/engineering.md`** — Engineering standard (L2-002). Quality gates, security invariants, observability requirements.
+6. **The feature brief** — `.claude/prds/feat-XXX-*.md` — the Product Strategist's feature brief. This defines WHAT to build.
+7. **The research document** — `.claude/prds/feat-XXX-research.md` — the Spec Researcher's output. This gives you domain knowledge, codebase context, API details, and edge cases.
+8. **`specs/standards/brand.md`** — Design language and UI patterns. Reference this for any frontend-facing aspects of the spec.
+9. **`.claude/context/patterns.md`** — Established code patterns. Your spec should follow existing patterns, not invent new ones.
+10. **Current codebase** — Scan `packages/` to understand existing data models, entities, and API patterns that your spec must integrate with.
 
 ---
 
 ## Spec Conflict Resolution
 
-When authoritative sources disagree, apply this priority order:
+Follow the [Spec Conflict Resolution protocol](../context/agent-handbook.md#spec-conflict-resolution). Spec-writer-specific examples:
 
-1. **CLAUDE.md** and **`specs/standards/engineering.md`** — non-negotiable architecture and security rules
-2. **L4 domain specs** (`specs/domain/*.md`) — existing business rules and invariants
-3. **Feature brief** — the WHAT (scope, user stories, acceptance criteria)
-4. **Research document** — codebase context and edge cases
-5. **Brand spec** (`specs/standards/brand.md`) — visual design decisions (for UI-facing features)
-
-**When a conflict is found:**
-
-- If the feature brief contradicts CLAUDE.md → implement per CLAUDE.md, note the conflict as a spec risk in the output under **Open Questions** or a dedicated **Spec Risks** section.
-- If the research document reveals codebase patterns that differ from spec-prescribed patterns → follow existing codebase patterns, document the pattern in `.claude/context/patterns.md`.
-- If two L4 domain specs disagree on the same fact → flag as blocking, do not invent a resolution. Surface the conflict to the orchestrator and list it as an open question.
-
-See `.claude/context/glossary.md` for canonical terminology and document hierarchy.
+- Feature brief contradicts CLAUDE.md → write per CLAUDE.md, note the conflict as a spec risk under **Open Questions**.
+- Research reveals codebase patterns differing from spec → follow existing codebase patterns, document in `.claude/context/patterns.md`.
+- Two L4 domain specs disagree → flag as blocking, surface to orchestrator as an open question. Do not invent a resolution.
 
 ---
 
@@ -452,12 +443,8 @@ Your task is done when:
 
 ## Ralph Loop
 
-This agent runs in a Ralph loop until all completion criteria are met. Each iteration:
+This agent follows the [Ralph Loop protocol](../context/agent-handbook.md#ralph-loop-protocol). Agent-specific iteration steps:
 
-1. Read all input files (brief, research, CLAUDE.md, codebase)
-2. Draft or refine the PRD sections
-3. Cross-check against CLAUDE.md rules (especially domain rules, naming conventions, architecture)
-4. Verify every edge case has a defined behaviour
-5. Self-check: are all completion criteria met? Is there any ambiguity an implementation agent would stumble on?
-
-If not, iterate. If yes, signal completion to the orchestrator.
+1. Draft or refine the PRD sections
+2. Cross-check against CLAUDE.md rules (especially domain rules, naming conventions, architecture)
+3. Verify every edge case has a defined behaviour and no ambiguity remains for implementation agents

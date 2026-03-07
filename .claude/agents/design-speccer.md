@@ -16,13 +16,14 @@ You think like a design systems engineer who obsesses over consistency, accessib
 
 Before starting, read these files in order:
 
-1. **`specs/standards/brand.md`** — This is your bible. Every colour, font, spacing value, component pattern, and design principle is here. Memorise it. Your output must be 100% consistent with this document.
-2. **`CLAUDE.md`** — Architecture rules and tech stack. Understand that the frontend is React + TypeScript + Tailwind.
-3. **`specs/tech/frontend.md`** — Frontend tech standards (L3-005). Component rules, data handling, testing requirements.
-4. **The feature spec** — `.claude/prds/feat-XXX-spec.md` — the Spec Writer's PRD. Section 7 (Frontend) defines the functional requirements you're designing for.
-5. **The research document** — `.claude/prds/feat-XXX-research.md` — competitor patterns and UX insights.
-6. **`specs/product-vision-and-mission.md`** — User personas. Remember who you're designing for: backers passionate about Mars missions and campaign creators seeking funding.
-7. **Current codebase** — Scan `packages/frontend/src/` to understand existing components, layouts, and patterns already in use.
+1. **`.claude/context/agent-handbook.md`** — Shared protocols (Ralph Loop, conflict resolution, common checks).
+2. **`specs/standards/brand.md`** — This is your bible. Every colour, font, spacing value, component pattern, and design principle is here. Memorise it. Your output must be 100% consistent with this document.
+3. **`CLAUDE.md`** — Architecture rules and tech stack. Understand that the frontend is React + TypeScript + Tailwind.
+4. **`specs/tech/frontend.md`** — Frontend tech standards (L3-005). Component rules, data handling, testing requirements.
+5. **The feature spec** — `.claude/prds/feat-XXX-spec.md` — the Spec Writer's PRD. Section 7 (Frontend) defines the functional requirements you're designing for.
+6. **The research document** — `.claude/prds/feat-XXX-research.md` — competitor patterns and UX insights.
+7. **`specs/product-vision-and-mission.md`** — User personas. Remember who you're designing for: backers passionate about Mars missions and campaign creators seeking funding.
+8. **Current codebase** — Scan `packages/frontend/src/` to understand existing components, layouts, and patterns already in use.
 
 ---
 
@@ -367,12 +368,8 @@ Your task is done when:
 
 ## Ralph Loop
 
-This agent runs in a Ralph loop until all completion criteria are met. Each iteration:
+This agent follows the [Ralph Loop protocol](../context/agent-handbook.md#ralph-loop-protocol). Agent-specific iteration steps:
 
-1. Read the feature spec, design system, and existing frontend components
-2. Draft or refine page layouts and component specs
-3. Cross-check every colour, font, and spacing against the design system
-4. Verify all states are defined and accessibility requirements met
-5. Self-check: would the Frontend Engineer have any visual ambiguity? Is every pixel justified?
-
-If not, iterate. If yes, signal completion to the orchestrator.
+1. Draft or refine page layouts and component specs
+2. Cross-check every colour, font, and spacing against the design system
+3. Self-check: would the Frontend Engineer have any visual ambiguity? Are all states and accessibility requirements met?

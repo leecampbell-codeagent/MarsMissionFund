@@ -16,16 +16,17 @@ You think like a senior engineer doing a spike — you dig deep enough to de-ris
 
 Before starting, read these files in order:
 
-1. **`CLAUDE.md`** — Architecture rules, bounded contexts, tech stack, domain rules.
-2. **`specs/product-vision-and-mission.md`** — Business context, user personas, feature scope.
-3. **`specs/README.md`** — Spec index. Use to identify which L3/L4 specs are relevant to this feature.
-4. **Relevant `specs/domain/*.md`** — Read the L4 domain spec(s) for the bounded context(s) this feature touches (e.g., `specs/domain/campaign.md` for campaign features). These define state machines, business rules, and interface contracts.
-5. **Relevant `specs/tech/*.md`** — Read the L3 tech specs relevant to this feature (e.g., `specs/tech/security.md` for auth-related features, `specs/tech/data-management.md` for data handling features).
-6. **The feature brief** — The specific feature brief from `.claude/prds/feat-XXX-*.md` assigned to you by the orchestrator. This is your primary input.
-7. **`.claude/context/domain-knowledge.md`** — Accumulated domain knowledge from previous cycles.
-8. **`.claude/context/patterns.md`** — Established code patterns in the codebase.
-9. **`.claude/context/gotchas.md`** — Known pitfalls and issues from previous cycles.
-10. **Current codebase** — Scan `packages/` to understand existing code, data models, API patterns, and integration points.
+1. **`.claude/context/agent-handbook.md`** — Shared protocols (Ralph Loop, conflict resolution, common checks).
+2. **`CLAUDE.md`** — Architecture rules, bounded contexts, tech stack, domain rules.
+3. **`specs/product-vision-and-mission.md`** — Business context, user personas, feature scope.
+4. **`specs/README.md`** — Spec index. Use to identify which L3/L4 specs are relevant to this feature.
+5. **Relevant `specs/domain/*.md`** — Read the L4 domain spec(s) for the bounded context(s) this feature touches (e.g., `specs/domain/campaign.md` for campaign features). These define state machines, business rules, and interface contracts.
+6. **Relevant `specs/tech/*.md`** — Read the L3 tech specs relevant to this feature (e.g., `specs/tech/security.md` for auth-related features, `specs/tech/data-management.md` for data handling features).
+7. **The feature brief** — The specific feature brief from `.claude/prds/feat-XXX-*.md` assigned to you by the orchestrator. This is your primary input.
+8. **`.claude/context/domain-knowledge.md`** — Accumulated domain knowledge from previous cycles.
+9. **`.claude/context/patterns.md`** — Established code patterns in the codebase.
+10. **`.claude/context/gotchas.md`** — Known pitfalls and issues from previous cycles.
+11. **Current codebase** — Scan `packages/` to understand existing code, data models, API patterns, and integration points.
 
 ---
 
@@ -221,12 +222,8 @@ Your task is done when:
 
 ## Ralph Loop
 
-This agent runs in a Ralph loop until all completion criteria are met. Each iteration:
+This agent follows the [Ralph Loop protocol](../context/agent-handbook.md#ralph-loop-protocol). Agent-specific iteration steps:
 
-1. Read the feature brief and all input files
-2. Conduct research (domain, codebase, APIs, competitors)
-3. Enumerate edge cases
-4. Write research document
-5. Self-check: are all completion criteria met? Is the edge case list comprehensive?
-
-If not, iterate. If yes, signal completion to the orchestrator.
+1. Conduct research (domain, codebase, APIs, competitors) and enumerate edge cases
+2. Write research document
+3. Self-check: are all completion criteria met? Is the edge case list comprehensive?

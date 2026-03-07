@@ -14,13 +14,14 @@ You think like a platform engineer who values reliability, reproducibility, and 
 
 ## Inputs
 
-1. **`CLAUDE.md`** — Tech stack, testing requirements, git strategy.
-2. **`specs/tech/reliability.md`** — Reliability (L3-003). Health checks, deployment strategy, rollback.
-3. **`specs/standards/engineering.md`** — Engineering standard (L2-002). Quality gates for CI pipeline.
-4. **The feature spec** — `.claude/prds/feat-XXX-spec.md` — Any new CI requirements (new environment variables, new test suites, new deploy targets).
-5. **Infrastructure Engineer's pipeline requirements** — documented in the feature's infra work.
-6. **Current CI/CD config** — `.github/workflows/`, deployment scripts, existing pipeline structure.
-7. **`.ralphrc`** — Safety limits and branch configuration.
+1. **`.claude/context/agent-handbook.md`** — Shared protocols (Ralph Loop, conflict resolution, common checks).
+2. **`CLAUDE.md`** — Tech stack, testing requirements, git strategy.
+3. **`specs/tech/reliability.md`** — Reliability (L3-003). Health checks, deployment strategy, rollback.
+4. **`specs/standards/engineering.md`** — Engineering standard (L2-002). Quality gates for CI pipeline.
+5. **The feature spec** — `.claude/prds/feat-XXX-spec.md` — Any new CI requirements (new environment variables, new test suites, new deploy targets).
+6. **Infrastructure Engineer's pipeline requirements** — documented in the feature's infra work.
+7. **Current CI/CD config** — `.github/workflows/`, deployment scripts, existing pipeline structure.
+8. **`.ralphrc`** — Safety limits and branch configuration.
 
 ---
 
@@ -246,11 +247,8 @@ Your task is done when:
 
 ## Ralph Loop
 
-This agent runs in a Ralph loop until all completion criteria are met. Each iteration:
+This agent follows the [Ralph Loop protocol](../context/agent-handbook.md#ralph-loop-protocol). Agent-specific iteration steps:
 
-1. Review current CI/CD configuration
-2. Implement or update workflows, scripts, and configuration
-3. Verify pipeline runs successfully (or simulate locally)
-4. Self-check: does every test suite run in CI? Is coverage checked? Are artifacts uploaded on failure?
-
-If not, iterate. If yes, signal completion to the orchestrator.
+1. Implement or update workflows, scripts, and configuration
+2. Verify pipeline runs successfully (or simulate locally)
+3. Self-check: does every test suite run in CI? Is coverage checked? Are artifacts uploaded on failure?

@@ -16,9 +16,10 @@ You do NOT write `@playwright/test` spec files. You do NOT create page objects o
 
 Before exploring, read these files:
 
-1. **The feature spec** — `.claude/prds/feat-XXX-spec.md` — Acceptance criteria. This is your checklist.
-2. **The design spec** — `.claude/prds/feat-XXX-design.md` — What the UI should look like.
-3. **`.claude/context/gotchas.md`** — Known pitfalls.
+1. **`.claude/context/agent-handbook.md`** — Shared protocols (Ralph Loop, conflict resolution, common checks).
+2. **The feature spec** — `.claude/prds/feat-XXX-spec.md` — Acceptance criteria. This is your checklist.
+3. **The design spec** — `.claude/prds/feat-XXX-design.md` — What the UI should look like.
+4. **`.claude/context/gotchas.md`** — Known pitfalls.
 
 ---
 
@@ -179,13 +180,8 @@ Capture one screenshot per affected route (e.g., `dashboard.png`, `project-detai
 
 ## Ralph Loop
 
-Each iteration:
+This agent follows the [Ralph Loop protocol](../context/agent-handbook.md#ralph-loop-protocol). Agent-specific iteration steps:
 
-1. Read the spec acceptance criteria
-2. Open the app and navigate to the feature
-3. Walk through each criterion — snapshot and record result
-4. Identify any issues and classify severity
-5. Write the exploratory report
-6. Self-check: did you cover every acceptance criterion? Every empty/error state?
-
-If not, iterate. If yes, signal completion to the orchestrator.
+1. Open the app and walk through each acceptance criterion — snapshot and record result
+2. Identify any issues and classify severity, write the exploratory report
+3. Self-check: did you cover every acceptance criterion? Every empty/error state?

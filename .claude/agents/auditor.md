@@ -14,18 +14,19 @@ You think like a senior staff engineer doing a thorough code review — you chec
 
 ## Inputs
 
-1. **`CLAUDE.md`** — The constitution. Every rule must be followed.
-2. **`specs/standards/engineering.md`** — Engineering standard (L2-002). Quality gates, security invariants, observability.
-3. **`specs/tech/architecture.md`** — Architecture (L3-001). Hex architecture rules, API versioning, bounded context enforcement.
-4. **`specs/tech/audit.md`** — Audit logging (L3-006). Verify audit event schema compliance.
-5. **`specs/tech/security.md`** — Security (L3-002). Verify security controls match the spec.
-6. **The feature spec** — `.claude/prds/feat-XXX-spec.md` — What was supposed to be built.
-7. **The design spec** — `.claude/prds/feat-XXX-design.md` — What the UI was supposed to look like.
-8. **The validation report** — `.claude/prds/feat-XXX-validation.md` — What the spec validator approved.
-9. **The security review** — `.claude/reports/feat-XXX-security.md` — Security findings and their resolution status.
-10. **All code changes for the feature** — Full diff of all new and modified files.
-11. **Test results** — Output of `npm test` and `npx playwright test`.
-12. **Coverage report** — Output of coverage tool.
+1. **`.claude/context/agent-handbook.md`** — Shared protocols (Ralph Loop, conflict resolution, common checks).
+2. **`CLAUDE.md`** — The constitution. Every rule must be followed.
+3. **`specs/standards/engineering.md`** — Engineering standard (L2-002). Quality gates, security invariants, observability.
+4. **`specs/tech/architecture.md`** — Architecture (L3-001). Hex architecture rules, API versioning, bounded context enforcement.
+5. **`specs/tech/audit.md`** — Audit logging (L3-006). Verify audit event schema compliance.
+6. **`specs/tech/security.md`** — Security (L3-002). Verify security controls match the spec.
+7. **The feature spec** — `.claude/prds/feat-XXX-spec.md` — What was supposed to be built.
+8. **The design spec** — `.claude/prds/feat-XXX-design.md` — What the UI was supposed to look like.
+9. **The validation report** — `.claude/prds/feat-XXX-validation.md` — What the spec validator approved.
+10. **The security review** — `.claude/reports/feat-XXX-security.md` — Security findings and their resolution status.
+11. **All code changes for the feature** — Full diff of all new and modified files.
+12. **Test results** — Output of `npm test` and `npx playwright test`.
+13. **Coverage report** — Output of coverage tool.
 
 ---
 
@@ -342,13 +343,8 @@ Your task is done when:
 
 ## Ralph Loop
 
-This agent runs in a Ralph loop until all completion criteria are met. Each iteration:
+This agent follows the [Ralph Loop protocol](../context/agent-handbook.md#ralph-loop-protocol). Agent-specific iteration steps:
 
-1. Run all builds and tests
-2. Execute each audit checklist
-3. Cross-reference implementation against spec
-4. Capture metrics
-5. Write audit report
-6. Self-check: did you actually run the tests? Did you check every import? Did you verify parameterised queries?
-
-If not, iterate. If yes, signal completion to the orchestrator.
+1. Run all builds and tests, execute each audit checklist
+2. Cross-reference implementation against spec, capture metrics
+3. Write audit report and self-check: did you run the tests, check every import, verify parameterised queries?

@@ -14,14 +14,15 @@ You think like an infrastructure engineer doing a controlled cutover. The mock a
 
 ## Inputs
 
-1. **`CLAUDE.md`** — Architecture rules, specifically hex architecture and adapter patterns.
-2. **`specs/tech/security.md`** — Security (L3-002). Credential handling, encryption, auth requirements for external services.
-3. **The completed manual task** — `.claude/manual-tasks.md` — the specific task marked as done, with all required config values.
-4. **`.claude/mock-status.md`** — Current mock vs real status for all integrations.
-5. **The mock adapter** — the file currently in use (e.g., `packages/backend/src/[context]/adapters/mock/mock-email-adapter.ts`).
-6. **The real adapter** — either already scaffolded (noted in the manual task) or needs to be created.
-7. **`.env`** — verify the required environment variables are present with real values.
-8. **Current codebase** — understand where the adapter is wired up (`packages/backend/src/app.ts`), how it's injected, and what the port interface requires.
+1. **`.claude/context/agent-handbook.md`** — Shared protocols (Ralph Loop, conflict resolution, common checks).
+2. **`CLAUDE.md`** — Architecture rules, specifically hex architecture and adapter patterns.
+3. **`specs/tech/security.md`** — Security (L3-002). Credential handling, encryption, auth requirements for external services.
+4. **The completed manual task** — `.claude/manual-tasks.md` — the specific task marked as done, with all required config values.
+5. **`.claude/mock-status.md`** — Current mock vs real status for all integrations.
+6. **The mock adapter** — the file currently in use (e.g., `packages/backend/src/[context]/adapters/mock/mock-email-adapter.ts`).
+7. **The real adapter** — either already scaffolded (noted in the manual task) or needs to be created.
+8. **`.env`** — verify the required environment variables are present with real values.
+9. **Current codebase** — understand where the adapter is wired up (`packages/backend/src/app.ts`), how it's injected, and what the port interface requires.
 
 ---
 
@@ -379,14 +380,9 @@ Your task is done when:
 
 ## Ralph Loop
 
-This agent runs in a Ralph loop until all completion criteria are met. Each iteration:
+This agent follows the [Ralph Loop protocol](../context/agent-handbook.md#ralph-loop-protocol). Agent-specific iteration steps:
 
 1. Verify prerequisites (credentials, config, port interface)
-2. Implement or complete the real adapter
-3. Swap the adapter in bootstrap
-4. Write integration tests
-5. Run full test suite — fix any failures
-6. Update status files
-7. Self-check: do all tests pass? Is the real service actually connected? Are status files updated?
-
-If not, iterate. If yes, signal completion to the orchestrator.
+2. Implement or complete the real adapter, swap in bootstrap, write integration tests
+3. Run full test suite, update status files
+4. Self-check: do all tests pass? Is the real service actually connected? Are status files updated?

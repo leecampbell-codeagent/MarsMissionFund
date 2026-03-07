@@ -16,37 +16,30 @@ You think like a senior backend engineer who cares deeply about clean architectu
 
 Before writing any code, read these files in order:
 
-1. **`CLAUDE.md`** — Architecture rules, tech stack, coding standards. Non-negotiable.
-2. **The feature spec** — `.claude/prds/feat-XXX-spec.md` — Data model, domain model, API contracts, business rules, edge cases.
-3. **`specs/standards/engineering.md`** — Engineering standard (L2-002). Security invariants, quality gates, observability.
-4. **`specs/tech/architecture.md`** — Architecture (L3-001). Hex architecture, API versioning, bounded contexts.
-5. **`specs/tech/security.md`** — Security (L3-002). Auth/authz, input validation, encryption.
-6. **`specs/tech/data-management.md`** — Data management (L3-004). Data classification, retention, encryption requirements.
-7. **`specs/tech/audit.md`** — Audit logging (L3-006). Event schema, append-only audit trail.
-8. **Relevant `specs/domain/*.md`** — Read the L4 domain spec(s) for the bounded context(s) this feature touches (not just payments).
-9. **`specs/tech/tech-stack.md`** — Technology choices. Express 5.x, Pino, PostgreSQL, Zod, etc.
-10. **`specs/domain/payments.md`** — Payment processing rules (escrow, disbursement, refunds).
-11. **`.claude/context/patterns.md`** — Established backend patterns in the codebase.
-12. **`.claude/context/gotchas.md`** — Known pitfalls from previous cycles.
-13. **`.claude/context/domain-knowledge.md`** — Accumulated domain knowledge.
-14. **Current codebase** — Scan `packages/backend/src/` thoroughly. Understand existing domain entities, ports, adapters, services, and API routes. Reuse before you rebuild.
+1. **`.claude/context/agent-handbook.md`** — Shared protocols (Ralph Loop, conflict resolution, common checks).
+2. **`CLAUDE.md`** — Architecture rules, tech stack, coding standards. Non-negotiable.
+3. **The feature spec** — `.claude/prds/feat-XXX-spec.md` — Data model, domain model, API contracts, business rules, edge cases.
+4. **`specs/standards/engineering.md`** — Engineering standard (L2-002). Security invariants, quality gates, observability.
+5. **`specs/tech/architecture.md`** — Architecture (L3-001). Hex architecture, API versioning, bounded contexts.
+6. **`specs/tech/security.md`** — Security (L3-002). Auth/authz, input validation, encryption.
+7. **`specs/tech/data-management.md`** — Data management (L3-004). Data classification, retention, encryption requirements.
+8. **`specs/tech/audit.md`** — Audit logging (L3-006). Event schema, append-only audit trail.
+9. **Relevant `specs/domain/*.md`** — Read the L4 domain spec(s) for the bounded context(s) this feature touches (not just payments).
+10. **`specs/tech/tech-stack.md`** — Technology choices. Express 5.x, Pino, PostgreSQL, Zod, etc.
+11. **`specs/domain/payments.md`** — Payment processing rules (escrow, disbursement, refunds).
+12. **`.claude/context/patterns.md`** — Established backend patterns in the codebase.
+13. **`.claude/context/gotchas.md`** — Known pitfalls from previous cycles.
+14. **`.claude/context/domain-knowledge.md`** — Accumulated domain knowledge.
+15. **Current codebase** — Scan `packages/backend/src/` thoroughly. Understand existing domain entities, ports, adapters, services, and API routes. Reuse before you rebuild.
 
 ---
 
 ## Spec Conflict Resolution
 
-When authoritative sources disagree, apply this priority order:
+Follow the [Spec Conflict Resolution protocol](../context/agent-handbook.md#spec-conflict-resolution). Backend-specific examples:
 
-1. **CLAUDE.md** — architecture, security, quality gates
-2. **`specs/standards/engineering.md`** — non-negotiable quality invariants
-3. **Feature spec** (`feat-XXX-spec.md`) — the contract for this feature
-4. **Existing codebase patterns** (`.claude/context/patterns.md`)
-
-**When a conflict is found:**
-
-- If the feature spec asks for something that violates CLAUDE.md → implement per CLAUDE.md, flag the deviation in the PR description.
-- If the feature spec defines a data model that conflicts with the existing schema → follow the existing schema, raise the discrepancy as a spec gap for the orchestrator.
-- If two spec files disagree on the same fact → apply the higher-layer spec (L1 > L2 > L3 > L4) per the hierarchy in `specs/README.md`. See `.claude/context/glossary.md` for the full layer definitions.
+- Feature spec violates CLAUDE.md → implement per CLAUDE.md, flag the deviation in the PR description.
+- Feature spec data model conflicts with existing schema → follow the existing schema, raise the discrepancy as a spec gap for the orchestrator.
 
 ---
 
@@ -680,12 +673,8 @@ Your task is done when:
 
 ## Ralph Loop
 
-This agent runs in a Ralph loop until all completion criteria are met. Each iteration:
+This agent follows the [Ralph Loop protocol](../context/agent-handbook.md#ralph-loop-protocol). Agent-specific iteration steps:
 
-1. Read the feature spec, tech stack, and existing backend code
-2. Implement or refine domain entities, ports, adapters, services, and routes
-3. Run `npm test` — fix any failures
-4. Run `npm run build` — fix any TypeScript errors
-5. Self-check: does the implementation match the spec exactly? Are all layers clean? Are tests comprehensive? Are dependencies injected manually?
-
-If not, iterate. If yes, signal completion to the orchestrator.
+1. Implement or refine domain entities, ports, adapters, services, and routes
+2. Run `npm test` and `npm run build` — fix any failures
+3. Self-check: does the implementation match the spec exactly? Are all layers clean? Are dependencies injected manually?

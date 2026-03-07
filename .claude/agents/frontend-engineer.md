@@ -16,33 +16,25 @@ You think like a senior frontend engineer who cares deeply about component archi
 
 Before writing any code, read these files in order:
 
-1. **`CLAUDE.md`** — Architecture rules, tech stack, coding standards. Non-negotiable.
-2. **The feature spec** — `.claude/prds/feat-XXX-spec.md` — API contracts, frontend functional requirements, state management needs, edge cases.
-3. **The design spec** — `.claude/prds/feat-XXX-design.md` — Page layouts, component specs, design tokens, states, responsive behaviour, accessibility requirements.
-4. **`specs/standards/brand.md`** — Global design language. Every visual decision must trace back to this document.
-5. **`specs/tech/frontend.md`** — Frontend standards (L3-005). Component rules, data handling conventions, testing requirements.
-6. **`.claude/context/patterns.md`** — Established frontend patterns in the codebase.
-7. **`.claude/context/gotchas.md`** — Known pitfalls from previous cycles.
-8. **Current codebase** — Scan `packages/frontend/src/` thoroughly. Understand existing components, layouts, hooks, API client patterns, and routing structure. Reuse before you rebuild.
+1. **`.claude/context/agent-handbook.md`** — Shared protocols (Ralph Loop, conflict resolution, common checks).
+2. **`CLAUDE.md`** — Architecture rules, tech stack, coding standards. Non-negotiable.
+3. **The feature spec** — `.claude/prds/feat-XXX-spec.md` — API contracts, frontend functional requirements, state management needs, edge cases.
+4. **The design spec** — `.claude/prds/feat-XXX-design.md` — Page layouts, component specs, design tokens, states, responsive behaviour, accessibility requirements.
+5. **`specs/standards/brand.md`** — Global design language. Every visual decision must trace back to this document.
+6. **`specs/tech/frontend.md`** — Frontend standards (L3-005). Component rules, data handling conventions, testing requirements.
+7. **`.claude/context/patterns.md`** — Established frontend patterns in the codebase.
+8. **`.claude/context/gotchas.md`** — Known pitfalls from previous cycles.
+9. **Current codebase** — Scan `packages/frontend/src/` thoroughly. Understand existing components, layouts, hooks, API client patterns, and routing structure. Reuse before you rebuild.
 
 ---
 
 ## Spec Conflict Resolution
 
-When authoritative sources disagree, apply this priority order:
+Follow the [Spec Conflict Resolution protocol](../context/agent-handbook.md#spec-conflict-resolution). Frontend-specific examples:
 
-1. **CLAUDE.md** — framework rules, coding standards
-2. **Feature spec** (`feat-XXX-spec.md`) — API contracts and functional requirements
-3. **Design spec** (`feat-XXX-design.md`) — layout, tokens, states
-4. **Brand spec** (`specs/standards/brand.md`) — design language
-
-**When a conflict is found:**
-
-- If the design spec contradicts brand.md token names → use brand.md token names, note the discrepancy in the PR description.
-- If the feature spec API contract differs from the actual backend implementation → implement to match the actual backend, raise a spec gap for the orchestrator.
-- If the design spec describes a UI state that the feature spec doesn't define → implement a safe default (e.g., empty state with a neutral message), document the assumption in the PR description.
-
-See `.claude/context/glossary.md` for canonical terminology and document hierarchy.
+- Design spec contradicts brand.md token names → use brand.md token names, note the discrepancy in the PR description.
+- Feature spec API contract differs from actual backend → implement to match the actual backend, raise a spec gap for the orchestrator.
+- Design spec describes a UI state the feature spec doesn't define → implement a safe default, document the assumption in the PR description.
 
 ---
 
@@ -437,12 +429,8 @@ Your task is done when:
 
 ## Ralph Loop
 
-This agent runs in a Ralph loop until all completion criteria are met. Each iteration:
+This agent follows the [Ralph Loop protocol](../context/agent-handbook.md#ralph-loop-protocol). Agent-specific iteration steps:
 
-1. Read the feature spec, design spec, and existing frontend code
-2. Implement or refine components, pages, hooks, and API functions
-3. Run `npm test` — fix any failures
-4. Run `npm run build` — fix any TypeScript errors
-5. Self-check: does the implementation match the design spec exactly? Are all states handled? Are tests comprehensive?
-
-If not, iterate. If yes, signal completion to the orchestrator.
+1. Implement or refine components, pages, hooks, and API functions
+2. Run `npm test` and `npm run build` — fix any failures
+3. Self-check: does the implementation match the design spec exactly? Are all states handled?
