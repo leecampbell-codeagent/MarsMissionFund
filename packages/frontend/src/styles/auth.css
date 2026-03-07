@@ -1,0 +1,49 @@
+/* ==========================================================================
+   AUTH PAGE STYLES
+   Loading animation and responsive overrides for auth pages.
+   Corresponds to feat-002-design.md Section 5.
+   ========================================================================== */
+
+@keyframes mmf-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.auth-loading-icon {
+  /* --motion-urgency: 1.5s ease-in-out infinite */
+  animation: mmf-pulse 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-loading-icon {
+    animation: none;
+
+    /* Static glow at reduced opacity per L2-001 Section 5.2 */
+    opacity: 0.7;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE AUTH PAGE
+   Mobile-first breakpoint overrides for auth page wordmark.
+   ========================================================================== */
+
+/* Mobile: wordmark drops to --type-section-heading (40px) */
+@media (max-width: 479px) {
+  .auth-wordmark {
+    font-size: 40px;
+  }
+}
+
+/* 480px+: standard --type-page-title (56px) */
+@media (min-width: 480px) {
+  .auth-wordmark {
+    font-size: 56px;
+  }
+}
