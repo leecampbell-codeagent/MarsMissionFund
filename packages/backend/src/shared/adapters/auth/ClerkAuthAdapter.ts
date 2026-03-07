@@ -1,5 +1,5 @@
-import { clerkMiddleware, getAuth, requireAuth } from '@clerk/express';
-import type { Request, RequestHandler } from 'express';
+import { clerkMiddleware, getAuth } from '@clerk/express';
+import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import type { AuthContext, AuthPort } from '../../ports/AuthPort';
 
 export class ClerkAuthAdapter implements AuthPort {
@@ -10,7 +10,16 @@ export class ClerkAuthAdapter implements AuthPort {
   }
 
   requireAuthMiddleware(): RequestHandler {
-    return requireAuth();
+    return (req: Request, res: Response, next: NextFunction): void => {
+      const auth = getAuth(req);
+      if (!auth.userId) {
+        res
+          .status(401)
+          .json({ error: { code: 'UNAUTHORISED', message: 'Authentication required' } });
+        return;
+      }
+      next();
+    };
   }
 
   globalMiddleware(): RequestHandler {
