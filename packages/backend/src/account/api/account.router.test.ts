@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 import { MOCK_CLERK_USER_ID, MockAuthAdapter } from '../../shared/adapters/auth/MockAuthAdapter';
+import type { AuthPort } from '../../shared/ports/AuthPort';
 import type { AssignRolesService } from '../application/AssignRolesService';
 import type { GetOrCreateUserService } from '../application/GetOrCreateUserService';
 import type { UpdateUserProfileService } from '../application/UpdateUserProfileService';
@@ -82,6 +83,98 @@ function makeDefaultMocks() {
   };
   return { user, userRepo, getOrCreateSvc, updateProfileSvc, assignRolesSvc };
 }
+
+// Auth adapter that passes requireAuth but returns null from getAuthContext
+const nullAuthAdapter: AuthPort = {
+  getAuthContext: () => null,
+  requireAuthMiddleware: () => (_req: Request, _res: Response, next: NextFunction) => next(),
+  globalMiddleware: () => (_req: Request, _res: Response, next: NextFunction) => next(),
+};
+
+function buildNullAuthApp(
+  userRepo: UserRepository,
+  getOrCreateSvc: Pick<GetOrCreateUserService, 'execute'>,
+  updateProfileSvc: Pick<UpdateUserProfileService, 'execute'>,
+  assignRolesSvc: Pick<AssignRolesService, 'execute'>,
+) {
+  const app = express();
+  app.use(express.json());
+  app.use(nullAuthAdapter.globalMiddleware());
+
+  const router = createAccountRouter({
+    authAdapter: nullAuthAdapter,
+    userRepo,
+    getOrCreateUserService: getOrCreateSvc as GetOrCreateUserService,
+    updateUserProfileService: updateProfileSvc as UpdateUserProfileService,
+    assignRolesService: assignRolesSvc as AssignRolesService,
+  });
+
+  const v1 = express.Router();
+  v1.use(nullAuthAdapter.requireAuthMiddleware());
+  v1.use(router);
+  app.use('/v1', v1);
+
+  return app;
+}
+
+describe('null auth context — handler-level 401', () => {
+  it('GET /me returns 401 when auth context is null', async () => {
+    const { userRepo, getOrCreateSvc, updateProfileSvc, assignRolesSvc } = makeDefaultMocks();
+    const app = buildNullAuthApp(userRepo, getOrCreateSvc, updateProfileSvc, assignRolesSvc);
+
+    const res = await request(app).get('/v1/me');
+
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe('UNAUTHORIZED');
+  });
+
+  it('PATCH /me returns 401 when auth context is null', async () => {
+    const { userRepo, getOrCreateSvc, updateProfileSvc, assignRolesSvc } = makeDefaultMocks();
+    const app = buildNullAuthApp(userRepo, getOrCreateSvc, updateProfileSvc, assignRolesSvc);
+
+    const res = await request(app).patch('/v1/me').send({ display_name: 'Test' });
+
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe('UNAUTHORIZED');
+  });
+
+  it('GET /me/roles returns 401 when auth context is null', async () => {
+    const { userRepo, getOrCreateSvc, updateProfileSvc, assignRolesSvc } = makeDefaultMocks();
+    const app = buildNullAuthApp(userRepo, getOrCreateSvc, updateProfileSvc, assignRolesSvc);
+
+    const res = await request(app).get('/v1/me/roles');
+
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe('UNAUTHORIZED');
+  });
+
+  it('POST /admin/users/:id/roles returns 401 when auth context is null', async () => {
+    const { userRepo, getOrCreateSvc, updateProfileSvc, assignRolesSvc } = makeDefaultMocks();
+    const app = buildNullAuthApp(userRepo, getOrCreateSvc, updateProfileSvc, assignRolesSvc);
+
+    const res = await request(app)
+      .post('/v1/admin/users/target-uuid/roles')
+      .send({ roles: [Role.Creator] });
+
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe('UNAUTHORIZED');
+  });
+});
+
+describe('unhandled errors — 500 fallback', () => {
+  it('GET /me returns 500 when service throws unexpected error', async () => {
+    const { userRepo, assignRolesSvc, updateProfileSvc } = makeDefaultMocks();
+    const explodingSvc: Pick<GetOrCreateUserService, 'execute'> = {
+      execute: vi.fn().mockRejectedValue(new Error('DB connection lost')),
+    };
+    const app = buildTestApp(userRepo, explodingSvc, updateProfileSvc, assignRolesSvc);
+
+    const res = await request(app).get('/v1/me');
+
+    expect(res.status).toBe(500);
+    expect(res.body.error.code).toBe('INTERNAL_SERVER_ERROR');
+  });
+});
 
 describe('GET /v1/me', () => {
   it('creates user record on first call and returns profile without clerk_id', async () => {
@@ -187,9 +280,45 @@ describe('GET /v1/me/roles', () => {
     expect(res.body).toHaveProperty('roles');
     expect(Array.isArray(res.body.roles)).toBe(true);
   });
+
+  it('returns 404 when user is not found in repo', async () => {
+    const { getOrCreateSvc, updateProfileSvc, assignRolesSvc } = makeDefaultMocks();
+    const userRepo: UserRepository = {
+      findByClerkId: vi.fn().mockResolvedValue(null),
+      findById: vi.fn().mockResolvedValue(null),
+      upsert: vi.fn(),
+      updateProfile: vi.fn().mockResolvedValue(null),
+      updateRoles: vi.fn().mockResolvedValue(null),
+    };
+    const app = buildTestApp(userRepo, getOrCreateSvc, updateProfileSvc, assignRolesSvc);
+
+    const res = await request(app).get('/v1/me/roles');
+
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe('USER_NOT_FOUND');
+  });
 });
 
 describe('POST /v1/admin/users/:id/roles', () => {
+  it('returns 404 when actor user is not found in repo', async () => {
+    const { getOrCreateSvc, updateProfileSvc, assignRolesSvc } = makeDefaultMocks();
+    const userRepo: UserRepository = {
+      findByClerkId: vi.fn().mockResolvedValue(null),
+      findById: vi.fn().mockResolvedValue(null),
+      upsert: vi.fn(),
+      updateProfile: vi.fn().mockResolvedValue(null),
+      updateRoles: vi.fn().mockResolvedValue(null),
+    };
+    const app = buildTestApp(userRepo, getOrCreateSvc, updateProfileSvc, assignRolesSvc);
+
+    const res = await request(app)
+      .post('/v1/admin/users/target-uuid/roles')
+      .send({ roles: [Role.Creator] });
+
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe('USER_NOT_FOUND');
+  });
+
   it('returns 403 when actor is a non-administrator (Backer)', async () => {
     const backerUser = makeUser({ roles: [Role.Backer] });
     const { userRepo, getOrCreateSvc, updateProfileSvc } = makeDefaultMocks();

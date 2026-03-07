@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const patchMeSchema = z.object({
   display_name: z.string().max(255).nullable().optional(),
-  bio: z.string().nullable().optional(),
+  bio: z.string().max(2000).nullable().optional(),
   avatar_url: z.string().url().max(500).nullable().optional(),
 });
 
