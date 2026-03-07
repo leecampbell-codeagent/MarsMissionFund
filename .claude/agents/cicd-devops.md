@@ -32,9 +32,9 @@ Maintain the CI/CD pipeline configuration:
 
 **Primary workflows:**
 
-**Template:** See `.github/workflows/.ci.template.yml` for the full CI workflow (lint, unit/integration tests with PostgreSQL service, E2E with Playwright, security audit, build).
+**Template:** See `.claude/context/examples/workflows/ci.template.yml` for the full CI workflow (lint, unit/integration tests with PostgreSQL service, E2E with Playwright, security audit, build).
 
-**Template:** See `.github/workflows/.deploy-main.template.yml` for the deploy workflow (AWS OIDC credentials, dbmate migrations, S3/CloudFront frontend deploy, backend deploy).
+**Template:** See `.claude/context/examples/workflows/deploy-main.template.yml` for the deploy workflow (AWS OIDC credentials, dbmate migrations, S3/CloudFront frontend deploy, backend deploy).
 
 ### 2. Branch Protection
 
