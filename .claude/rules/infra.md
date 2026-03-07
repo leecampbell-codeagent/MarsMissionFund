@@ -26,7 +26,7 @@
 - Run locally: `dbmate up` (via docker-compose service or direct binary)
 - Run in CI/CD: `dbmate up` as a step before application deployment
 - Append-only — never modify existing migrations
-- `-- migrate:up` section wrapped in `BEGIN; ... COMMIT;`
+- Do NOT wrap migrations in `BEGIN; ... COMMIT;` — dbmate wraps each migration in a transaction automatically
 - `CREATE TABLE IF NOT EXISTS` where possible
 - Monetary columns: `BIGINT` (integer cents) — never FLOAT/DOUBLE/REAL/NUMERIC for money
 - All tables: `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`, `updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`

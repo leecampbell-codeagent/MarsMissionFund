@@ -46,8 +46,6 @@ Implement every data model change from the feature spec. The Backend Engineer ma
 -- Description: [What this migration does]
 -- Author: infra-engineer-agent
 
-BEGIN;
-
 -- ============================================================
 -- New tables
 -- ============================================================
@@ -99,16 +97,12 @@ CREATE TRIGGER update_[table]_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
-COMMIT;
-
 -- migrate:down
-BEGIN;
 DROP TABLE IF EXISTS [table_name];
-COMMIT;
 ```
 
 **Migration rules:**
-- Always wrap in `BEGIN; ... COMMIT;` for transactional safety
+- Do NOT wrap in `BEGIN; ... COMMIT;` — dbmate handles transactions automatically
 - `CREATE TABLE IF NOT EXISTS` — idempotent where possible
 - All monetary columns: `BIGINT` (integer cents) — never FLOAT/DOUBLE/REAL/NUMERIC for money
 - Percentage columns: `NUMERIC(5,2)` where needed
@@ -127,7 +121,7 @@ COMMIT;
 ```markdown
 - [ ] Timestamp naming format (YYYYMMDDHHMMSS) — no duplicate timestamps
 - [ ] Has both `-- migrate:up` and `-- migrate:down` sections
-- [ ] Wrapped in BEGIN/COMMIT inside the up section
+- [ ] NOT wrapped in BEGIN/COMMIT (dbmate handles transactions)
 - [ ] All NUMERIC columns have correct precision
 - [ ] All tenant tables have user_id with FK
 - [ ] All tables have created_at and updated_at

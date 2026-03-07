@@ -409,8 +409,6 @@ Migrations are managed by **dbmate**. Files live in `db/migrations/` at the proj
 **Template:**
 ```sql
 -- migrate:up
-BEGIN;
-
 CREATE TABLE IF NOT EXISTS campaigns (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     creator_id UUID NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
@@ -433,17 +431,13 @@ CREATE TRIGGER update_campaigns_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
-COMMIT;
-
 -- migrate:down
-BEGIN;
 DROP TABLE IF EXISTS campaigns;
-COMMIT;
 ```
 
 **Migration rules:**
 - Append-only — NEVER modify existing migration files
-- Wrapped in `BEGIN; ... COMMIT;` for transactional safety
+- Do NOT wrap in `BEGIN; ... COMMIT;` — dbmate handles transactions automatically
 - Monetary columns: `BIGINT` for cents — never FLOAT/DOUBLE/REAL
 - All tables: `created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`, `updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`
 - Date columns: `TIMESTAMPTZ` — never TIMESTAMP without timezone
