@@ -4,6 +4,17 @@
 
 ## Pending
 
+### MANUAL-003: Merge PR for feat-001
+**Feature:** feat-001
+**Branch:** `ralph/feat-001-monorepo-scaffold` → `main`
+**Action:** The agent token lacks `createPullRequest` permission. Create and merge the PR manually:
+```bash
+gh pr create --head ralph/feat-001-monorepo-scaffold --base main \
+  --title "feat-001: Monorepo Scaffold — Backend and Frontend Packages" \
+  --body "Monorepo scaffold: Express backend, React frontend, hex arch, CSS token system. All quality gates pass."
+```
+Or use the GitHub UI to open a PR from `ralph/feat-001-monorepo-scaffold` → `main`.
+
 ### MANUAL-001: Configure environment variables
 **Feature:** feat-001
 **Action:** Copy `.env.example` to `.env` and fill in the following values:
